@@ -28,7 +28,7 @@ see https://github.com/dietmarwo/fcmaes-java/blob/master/CTOC11.adoc[fcmaes for 
 
 === Usage
 
-See the F8 example https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/examples/F8.java[F8.java]. 
+See the F8 example https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/examples/F8.java[F8.java]. 
 Many other examples can be found in the test cases 
 https://github.com/dietmarwo/fcmaes-java/blob/master/src/test/java/fcmaes/core/OptimizerTest.java[OptimizerTest.java].
 

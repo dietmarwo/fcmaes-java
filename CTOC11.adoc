@@ -34,7 +34,7 @@ idea:
 * Speed up the integration using the given ODEs.
 * Instead of an approximation we directly applied the ODEs to compute the final trajectory of the
 satellites. Quite similar to the F8 example here 
-https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/examples/F8.java[F8.java] . 
+https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/examples/F8.java[F8.java] . 
 https://github.com/dietmarwo/fcmaes-java/blob/master/cppsrc/ascent.cpp[ascent.cpp] shows how the
 ODEs both for the F8 example and for CTOC11 are implemented based on the https://github.com/AnyarInc/Ascent[Ascent] library. 
 By executing the F8 example you can see how fast the Ascent based integration is. You may compare with the F8 results 
