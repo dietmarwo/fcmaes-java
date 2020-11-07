@@ -1,0 +1,92 @@
+:encoding: utf-8
+:imagesdir: img
+:cpp: C++
+
+== CTOC11
+
+https://github.com/dietmarwo/fcmaes-java/blob/master/README.adoc[fcmaes-java] 
+was created for our participation at the 11th China Trajectory Optimization Competition 
+https://ctoc11.skyeststudio.com/[CTOC11].
+No functionality was added to the Python optimization library https://github.com/dietmarwo/fast-cma-es[fcmaes] 
+but a JVM based implementation has advantages required by the competition:
+
+* Fast objective function execution.
+* Thread based parallelization works better on Windows than Python process based parallelization used by fcmaes. 
+* A space flight related utility implementation was available in Java. 
+
+The CTOC11 problem https://ctoc11.skyeststudio.com/uploadfiles/CTOC11problemdescription.pdf 
+involves the the computation of the trajectory of two different satellites to observe multiple
+fixed and moving targets over a period of 240 days. The time interval between two adjacent impulses of each 
+satellite is required to be no less than 0.5 days. This means, if viewed as an optimization problem, 
+CTOC11 has up to 480 * 3 + 3 decision variables, three for the initial orbit (inclination, true anomaly and the
+argument of the periapsis) and three for each impulse. Too much for a single optimization, so we optimized the
+impulses successively. One of four available relay satellites had to be visited after
+at most 30 target observations to transfer the data. We successively determined the impulses for each segment
+between two relay visits and restricted us to two or three impulses for each segment. This means we have only 
+six or nine decision variables for each optimization. 
+
+== How to get a fast solution for CTOC11
+
+The usual approach to this kind of problems is to use an approximation which is faster to compute, but
+it is tricky to preserve the observations when transforming finally into the real model. We tried a different
+idea:
+
+* Speed up the integration using the given ODEs.
+* Instead of an approximation we directly applied the ODEs to compute the final trajectory of the
+satellites. Quite similar to the F8 example here 
+https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/examples/F8.java[F8.java] . 
+https://github.com/dietmarwo/fcmaes-java/blob/master/cppsrc/ascent.cpp[ascent.cpp] shows how the
+ODEs both for the F8 example and for CTOC11 are implemented based on the https://github.com/AnyarInc/Ascent[Ascent] library. 
+By executing the F8 example you can see how fast the Ascent based integration is. You may compare with the F8 results 
+given in http://www.midaco-solver.com/data/pub/The_Oracle_Penalty_Method.pdf[Oracle Penalty].
+
+This simple approach is useful for prototyping, when you want to estimate what is possible. You get a result 
+very fast, for CTOC11 almost 80% of the optimum using only about 20% of the effort. 
+
+== How to apply fcmaes-java for CTOC11
+
+The 240 days flight time for both satellites are divided in three different tasks with different targets and goals. 
+You need four different objective functions, one for the start and one for each task. Each objective function
+propagates a satellite between two relay visits. One of the satellites has an optical sensor, the other an
+infrared one. Since the optical satellite requires daylight it is more constrained. We chose to compute the
+optical satellite first, so that the infrared can focus on the targets the optical didn't reach. 
+
+Dependent on the task we defined a number of objectives and used the weighted sum approach to map these objectives
+to a single one. Objectives are:
+
+* Fuel consumption.
+* Number of visited targets.
+* The preliminary score for the specific task.
+* The time used.
+* The minimal distance to the nearest relay for the flight path.
+* Average height of the satellite.
+
+No explicit "planning" of the relay visits, just a related objective. Minimization of this objective "steered" the
+satellite to the next relay. To speed up the computation of this objective, we stored the possible positions of the
+four relays in a big TreeMap. A similar table based approach was used to speed up the computation of the distance
+to the nearest target. 
+
+The optimization was performed using one of the following three algorithms, 
+see https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/core/Optimizers.java[Optimizers.java] 
+all implemented in C++ using the Eigen library:
+
+* DE - a differential evolution variant by Dietmar Wolz https://github.com/dietmarwo/fcmaes-java/blob/master/cppsrc/deoptimizer.cpp[deoptimizer.cpp]
+* GCLDE - a differential evolution variant by Mingcheng Zuo https://github.com/dietmarwo/fcmaes-java/blob/master/cppsrc/gcldeoptimizer.cpp[gcldeoptimizer.cpp]
+* DANL - dual annealing without local optimization derived from the Scipy Python library code https://github.com/dietmarwo/fcmaes-java/blob/master/cppsrc/daoptimizer.cpp[daoptimizer.cpp]
+
+We executed 320 optimization runs, 32 in parallel on a 16 core / 32 thread processor node. 
+[source,java]
+----
+        Task1Fit fit = new Task1Fit(numberImpulses, maxTime, minTimeToNextDV, maxDV);
+        Utils.startTiming();
+        Optimizer opt = new GCLDE();
+        Result res = fit.minimizeN(320, opt, fit.lower(), fit.upper(), null, null, 20000, 31, 0);
+        System.out.println(Utils.measuredMillis() + " ms");
+----
+
+Multiple processor nodes can compute several of these 320 optimization runs at the same time. After they finish, the best
+partial solutions are chosen for extension and distributed on the available nodes. Then the optimization process is
+started again. This process repeats until a task is finished. Then the objective function for the next task is used for optimization. 
+
+We used only six 16 core processor nodes for about 30 hours to compute a solution for all three tasks. The process should scale well if more
+processing resources are available. 
