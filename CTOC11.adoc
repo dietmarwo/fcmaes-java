@@ -7,29 +7,30 @@
 https://github.com/dietmarwo/fcmaes-java/blob/master/README.adoc[fcmaes-java] 
 was created for our participation at the 11th China Trajectory Optimization Competition 
 https://ctoc11.skyeststudio.com/[CTOC11].
-No functionality was added to the Python optimization library https://github.com/dietmarwo/fast-cma-es[fcmaes] 
-but a JVM based implementation has advantages required by the competition:
+No functionality was added to the Python optimization library https://github.com/dietmarwo/fast-cma-es[fcmaes].
+But a JVM based implementation has advantages required by the competition:
 
 * Fast objective function execution.
 * Thread based parallelization works better on Windows than Python process based parallelization used by fcmaes. 
 * A space flight related utility implementation was available in Java. 
 
 The CTOC11 problem https://ctoc11.skyeststudio.com/uploadfiles/CTOC11problemdescription.pdf 
-involves the the computation of the trajectory of two different satellites to observe multiple
-fixed and moving targets over a period of 240 days. The time interval between two adjacent impulses of each 
+involves the the computation of the trajectory of two different satellites. 
+These satellites have to observe multiple fixed and moving targets over a period of 240 days. 
+The time interval between two adjacent impulses of each 
 satellite is required to be no less than 0.5 days. This means, if viewed as an optimization problem, 
-CTOC11 has up to 480 * 3 + 3 decision variables, three for the initial orbit (inclination, true anomaly and the
-argument of the periapsis) and three for each impulse. Too much for a single optimization, so we optimized the
-impulses successively. One of four available relay satellites had to be visited after
+CTOC11 has up to 480 * 3 + 3 decision variables: Three for the initial orbit (inclination, true anomaly and the
+argument of the periapsis) and three for each impulse. This is too much for a single optimization, 
+so we optimized the impulses successively. One of four available relay satellites had to be visited after
 at most 30 target observations to transfer the data. We successively determined the impulses for each segment
 between two relay visits and restricted us to two or three impulses for each segment. This means we have only 
 six or nine decision variables for each optimization. 
 
 == How to get a fast solution for CTOC11
 
-The usual approach to this kind of problems is to use an approximation which is faster to compute, but
-it is tricky to preserve the observations when transforming finally into the real model. We tried a different
-idea:
+The usual approach to this kind of problems is to use an approximation which is faster to compute. 
+But it is tricky to preserve the observations when transforming finally into the real model. 
+We tried a different idea:
 
 * Speed up the integration using the given ODEs.
 * Instead of an approximation we directly applied the ODEs to compute the final trajectory of the
@@ -41,12 +42,13 @@ By executing the F8 example you can see how fast the Ascent based integration is
 given in http://www.midaco-solver.com/data/pub/The_Oracle_Penalty_Method.pdf[Oracle Penalty].
 
 This simple approach is useful for prototyping, when you want to estimate what is possible. You get a result 
-very fast, for CTOC11 almost 80% of the optimum using only about 20% of the effort. 
+very fast, for CTOC11 a reasonable solution using only about 20% of the effort. Later we will investigate the 
+winning solution and analyze if the approach can be extended to reach results near the optimum.  
 
 == How to apply fcmaes-java for CTOC11
 
 The 240 days flight time for both satellites are divided in three different tasks with different targets and goals. 
-You need four different objective functions, one for the start and one for each task. Each objective function
+You need four different objective functions: One for the start and one for each task. Each objective function
 propagates a satellite between two relay visits. One of the satellites has an optical sensor, the other an
 infrared one. Since the optical satellite requires daylight it is more constrained. We chose to compute the
 optical satellite first, so that the infrared can focus on the targets the optical didn't reach. 
