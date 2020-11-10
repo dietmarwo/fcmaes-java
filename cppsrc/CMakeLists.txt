@@ -22,7 +22,7 @@ endif()
 
 PROJECT(fcmaeslib)
 
-add_library(fcmaeslib SHARED acmaesoptimizer.cpp hawksoptimizer.cpp deoptimizer.cpp daoptimizer.cpp gcldeoptimizer.cpp lcldeoptimizer.cpp ldeoptimizer.cpp ascent.cpp)
+add_library(fcmaeslib SHARED acmaesoptimizer.cpp hawksoptimizer.cpp deoptimizer.cpp de2optimizer.cpp daoptimizer.cpp gcldeoptimizer.cpp cldeoptimizer.cpp lcldeoptimizer.cpp ldeoptimizer.cpp ascent.cpp)
 
 set(CMAKE_INSTALL_LIBDIR /home/xxx/python/fcmaes-java/src/main/resources/natives)
 

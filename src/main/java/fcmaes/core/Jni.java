@@ -37,11 +37,17 @@ public class Jni {
 	public static native int optimizeDE(Fitness func, double[] lower, double[] upper, double[] guess, 
 			  int maxEvals, double stopfitness, int popsize, double keep, double F, double CR, long seed, int runid);
 
+	public static native int optimizeDE2(Fitness func, double[] lower, double[] upper, double[] guess, 
+			  int maxEvals, double stopfitness, int popsize, double keep, double K1, double K2, long seed, int runid);
+
 	public static native int optimizeLDE(Fitness func, double[] lower, double[] upper, double[] guess, double[] sigma, 
 		    int maxEvals, double stopfitness, int popsize, double keep, double F, double CR, long seed, int runid);
 
 	public static native int optimizeGCLDE(Fitness func, double[] lower, double[] upper, double[] guess, 
 			  int maxEvals, double stopfitness, int popsize, double pbest, double F0, double CR0, long seed, int runid);
+
+	public static native int optimizeCLDE(Fitness func, double[] lower, double[] upper, double[] guess, 
+			  int maxEvals, double stopfitness, int popsize, double pbest, double K1, double K2, long seed, int runid);
 
 	public static native int optimizeLCLDE(Fitness func, double[] lower, double[] upper, double[] guess, double[] sigma, 
 			  int maxEvals, double stopfitness, int popsize, double pbest, double F0, double CR0, long seed, int runid);

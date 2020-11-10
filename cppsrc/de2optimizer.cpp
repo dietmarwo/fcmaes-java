@@ -26,7 +26,7 @@ typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> mat;
 
 typedef double (*callback_type)(int, double[]);
 
-namespace differential_evolution {
+namespace differential_evolution2 {
 
 static uniform_real_distribution<> distr_01 = std::uniform_real_distribution<>(
 		0, 1);
@@ -97,6 +97,10 @@ public:
 			scale = (upper - lower);
 	}
 
+	vec norm(vec &X){
+		return (X - lower).array() / scale.array();
+	}
+
 	double eval(const vec &X) {
 		int n = X.size();
 		double parg[n];
@@ -141,21 +145,22 @@ public:
 		return evaluationCounter;
 	}
 
-private:
-	CallJava *func;
 	vec lower;
 	vec upper;
+
+private:
+	CallJava *func;
 	long evaluationCounter;
 	vec scale;
 };
 
-class DeOptimizer {
+class De2Optimizer {
 
 public:
 
-	DeOptimizer(long runid_, Fittness *fitfun_, int dim_, int seed_,
+	De2Optimizer(long runid_, Fittness *fitfun_, int dim_, int seed_,
 			int popsize_, int maxEvaluations_, double keep_,
-			double stopfitness_, double F_, double CR_) {
+			double stopfitness_, double K1_, double K2_) {
 		// runid used to identify a specific run
 		runid = runid_;
 		// fitness function to minimize
@@ -170,8 +175,10 @@ public:
 		keep = keep_ > 0 ? keep_ : 30;
 		// Limit for fitness value.
 		stopfitness = stopfitness_;
-		F = F_ > 0 ? F_ : 0.5;
-		CR = CR_ > 0 ? CR_ : 0.9;
+		F = 0.5;
+		CR = 0.9;
+		K1 = K1_;
+		K2 = K2_;
 		// Number of iterations already performed.
 		iterations = 0;
 		bestY = DBL_MAX;
@@ -182,7 +189,7 @@ public:
 		init();
 	}
 
-	~DeOptimizer() {
+	~De2Optimizer() {
 		delete rs;
 	}
 
@@ -208,9 +215,29 @@ public:
 			double CRu = iterations % 2 == 0 ? 0.5*CR : CR;
 			double Fu = iterations % 2 == 0 ? 0.5*F : F;
 
+		    mat local_upper(dim, popsize);
+		    mat local_lower(dim, popsize);
+		    double bound_info[popsize];
+			for (int p = 0; p < popsize; p++) {
+				vec X = popX.col(p);
+				local_upper.col(p) = fitfun->upper.cwiseMin(X);
+			    local_lower.col(p) = fitfun->lower.cwiseMax(X);
+			    vec norm = fitfun->norm(X);
+			    double avnorm = norm.sum() / popsize;
+			    bound_info[p] = 0;
+			    for (int j = 0; j < dim; j++)
+			    	bound_info[p] += abs(norm[j] - avnorm);
+			    bound_info[p] /= popsize;
+			}
+
+			double evals = fitfun->getEvaluations()/maxEvaluations;
+
 			for (int p = 0; p < popsize; p++) {
 				vec xi = popX.col(p);
 				vec xb = popX.col(bestI);
+
+				vec ub = local_upper.col(p);
+				vec lb = local_lower.col(p);
 
 				int r1, r2;
 				do {
@@ -225,8 +252,12 @@ public:
 
 				for (int j = 0; j < dim; j++) {
 					if (j == jr || rnd01() < CRu) {
-						ui[j] = xb[j] + Fu * (popX(j, r1) - popX(j, r2));
-					} if (!fitfun->feasible(j, ui[j]))
+						if (bound_info[j] > 0.1 && evals < K1 && rnd01() > K2)
+							ui[j] = ub[j] + lb[j] - popX(j, r1);
+						else
+							ui[j] = xb[j] + Fu * (popX(j, r1) - popX(j, r2));
+					}
+					if (!fitfun->feasible(j, ui[j]))
 						ui[j] = fitfun->uniformXi(j, *rs);
 				}
 				double eu = fitfun->eval(ui);
@@ -307,6 +338,8 @@ private:
 	int stop;
 	double F;
 	double CR;
+	double K1;
+	double K2;
 	pcg64 *rs;
 	mat popX;
 	vec popY;
@@ -315,16 +348,16 @@ private:
 
 }
 
-using namespace differential_evolution;
+using namespace differential_evolution2;
 
 /*
  * Class:     fcmaes_core_Jni
- * Method:    optimizeDE
+ * Method:    optimizeDE2
  * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIDDDJI)I
  */
-JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeDE
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeDE2
   (JNIEnv* env, jclass cls, jobject func, jdoubleArray jlower, jdoubleArray jupper, jdoubleArray jinit, 
-  jint maxEvals, jdouble stopfitness, jint popsize, jdouble keep, jdouble F, jdouble CR, jlong seed, jint runid) {
+  jint maxEvals, jdouble stopfitness, jint popsize, jdouble keep, jdouble K1, jdouble K2, jlong seed, jint runid) {
 
  	double* init = env->GetDoubleArrayElements(jinit, JNI_FALSE);
 	double* lower = env->GetDoubleArrayElements(jlower, JNI_FALSE);
@@ -345,8 +378,8 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeDE
     CallJava callJava(func, env);
  	Fittness fitfun(&callJava, lower_limit, upper_limit);
 
-	DeOptimizer opt(runid, &fitfun, dim, seed, popsize, maxEvals, keep,
-			stopfitness, F, CR);
+	De2Optimizer opt(runid, &fitfun, dim, seed, popsize, maxEvals, keep,
+			stopfitness, K1, K2);
 
 	try {
 		opt.doOptimize();

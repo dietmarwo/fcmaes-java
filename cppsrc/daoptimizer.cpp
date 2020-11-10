@@ -5,7 +5,7 @@
 
 // Eigen based implementation of dual annealing 
 // derived from https://github.com/scipy/scipy/blob/master/scipy/optimize/_dual_annealing.py
-// Implementation only differs regarding boundary handling - this implementattion 
+// Implementation only differs regarding boundary handling - this implementation
 // uses boundary-normalized X values. Local search is fixed to LBFGS-B, see
 // https://github.com/yixuan/LBFGSpp/tree/master/include 
 // requires https://github.com/imneme/pcg-cpp

@@ -7,11 +7,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeACMA
- * Signature: (Lutils/Fitness;[D[D[D[DIIDIIDJI)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIIDIIDJI)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeACMA
   (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint, jdouble, jint, jint, jdouble, jlong, jint);
@@ -19,7 +18,7 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeACMA
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeHawks
- * Signature: (Lutils/Fitness;[D[D[DIDIJI)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIJI)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeHawks
   (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jlong, jint);
@@ -27,15 +26,23 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeHawks
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeDE
- * Signature: (Lutils/Fitness;[D[D[DIDIDDDJI)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIDDDJI)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeDE
   (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
 
 /*
  * Class:     fcmaes_core_Jni
+ * Method:    optimizeDE2
+ * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIDDDJI)I
+ */
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeDE2
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
  * Method:    optimizeLDE
- * Signature: (Lutils/Fitness;[D[D[D[DIDIDDDJI)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIDDDJI)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeLDE
   (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
@@ -43,15 +50,23 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeLDE
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeGCLDE
- * Signature: (Lutils/Fitness;[D[D[DIDIDDDJI)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIDDDJI)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeGCLDE
   (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
 
 /*
  * Class:     fcmaes_core_Jni
+ * Method:    optimizeCLDE
+ * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIDDDJI)I
+ */
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeCLDE
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
  * Method:    optimizeLCLDE
- * Signature: (Lutils/Fitness;[D[D[D[DIDIDDDJI)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIDDDJI)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeLCLDE
   (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
@@ -59,7 +74,7 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeLCLDE
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeDA
- * Signature: (Lutils/Fitness;[D[D[DIIJI)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[DIIJI)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeDA
   (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint, jlong, jint);
@@ -103,7 +118,6 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_integratePVCtoc11
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_integratePVCtoc11R
   (JNIEnv *, jclass, jdoubleArray, jdouble, jdouble, jboolean);
-
 
 #ifdef __cplusplus
 }
