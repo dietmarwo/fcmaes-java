@@ -81,13 +81,13 @@ static ivec sort_index(const vec &x) {
 	});
 }
 
-// wrapper around the fittness function, scales according to boundaries
+// wrapper around the Fitness function, scales according to boundaries
 
-class Fittness {
+class Fitness {
 
 public:
 
-	Fittness(CallJava *pfunc, const vec &lower_limit,
+	Fitness(CallJava *pfunc, const vec &lower_limit,
 			const vec &upper_limit) {
 		func = pfunc;
 		lower = lower_limit;
@@ -158,7 +158,7 @@ class De2Optimizer {
 
 public:
 
-	De2Optimizer(long runid_, Fittness *fitfun_, int dim_, int seed_,
+	De2Optimizer(long runid_, Fitness *fitfun_, int dim_, int seed_,
 			int popsize_, int maxEvaluations_, double keep_,
 			double stopfitness_, double K1_, double K2_) {
 		// runid used to identify a specific run
@@ -325,7 +325,7 @@ public:
 
 private:
 	long runid;
-	Fittness *fitfun;
+	Fitness *fitfun;
 	int popsize; // population size
 	int dim;
 	int maxEvaluations;
@@ -376,7 +376,7 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeDE2
 		upper_limit.resize(0);
 	}
     CallJava callJava(func, env);
- 	Fittness fitfun(&callJava, lower_limit, upper_limit);
+ 	Fitness fitfun(&callJava, lower_limit, upper_limit);
 
 	De2Optimizer opt(runid, &fitfun, dim, seed, popsize, maxEvals, keep,
 			stopfitness, K1, K2);

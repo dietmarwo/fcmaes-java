@@ -53,13 +53,13 @@ static Eigen::MatrixXd normalVec(int dim, pcg64 &rs) {
 	});
 }
 
-// wrapper around the fittness function, scales according to boundaries
+// wrapper around the Fitness function, scales according to boundaries
 
-class Fittness {
+class Fitness {
 
 public:
 
-	Fittness(CallJava *pfunc, const vec &lower_limit,
+	Fitness(CallJava *pfunc, const vec &lower_limit,
 			const vec &upper_limit) {
 		func = pfunc;
 		lower = lower_limit;
@@ -126,7 +126,7 @@ class HHOptimizer {
 
 public:
 
-	HHOptimizer(long runid_, Fittness *fitfun_, int dim_, int seed_,
+	HHOptimizer(long runid_, Fitness *fitfun_, int dim_, int seed_,
 			int popsize_, int maxEvaluations_, double stopfitness_) {
 		// runid used to identify a specific run
 		runid = runid_;
@@ -335,7 +335,7 @@ public:
 
 private:
 	long runid;
-	Fittness *fitfun;
+	Fitness *fitfun;
 	int popsize; // population size
 	int dim;
 	int maxEvaluations;
@@ -382,7 +382,7 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeHawks
 		upper_limit.resize(0);
 	}
     CallJava callJava(func, env);
- 	Fittness fitfun(&callJava, lower_limit, upper_limit);
+ 	Fitness fitfun(&callJava, lower_limit, upper_limit);
 
 	HHOptimizer opt(runid, &fitfun, dim, seed, popsize, maxEvals, stopfitness);
 

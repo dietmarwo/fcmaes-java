@@ -284,5 +284,13 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
 		public int compareTo(Fitness o) {
 			return Double.compare(_bestY, o._bestY);
 		}
+		
+		void updateBest(Fitness fit) {
+			_evals += fit._evals;
+			if (fit._bestY < _bestY) {
+				_bestY = fit._bestY;
+				_bestX = fit._bestX;
+			}
+		}
 
 	}

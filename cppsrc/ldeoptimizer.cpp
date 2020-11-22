@@ -83,13 +83,13 @@ struct IndexVal {
 	double val;
 };
 
-// wrapper around the fittness function, scales according to boundaries
+// wrapper around the Fitness function, scales according to boundaries
 
-class Fittness {
+class Fitness {
 
 public:
 
-	Fittness(CallJava *func_, int dim_, const vec &lower_limit,
+	Fitness(CallJava *func_, int dim_, const vec &lower_limit,
 			const vec &upper_limit, const vec &guess_, const vec &sigma_, pcg64 &rs_) {
 		func = func_;
 		dim = dim_;
@@ -203,7 +203,7 @@ class LDeOptimizer {
 
 public:
 
-	LDeOptimizer(long runid_, Fittness *fitfun_, int dim_, pcg64* rs_,
+	LDeOptimizer(long runid_, Fitness *fitfun_, int dim_, pcg64* rs_,
 			int popsize_, int maxEvaluations_, double keep_,
 			double stopfitness_, double F_, double CR_) {
 		// runid used to identify a specific run
@@ -351,7 +351,7 @@ public:
 
 private:
 	long runid;
-	Fittness *fitfun;
+	Fitness *fitfun;
 	int popsize; // population size
 	int dim;
 	int maxEvaluations;
@@ -407,7 +407,7 @@ JNIEXPORT jint JNICALL Java_utils_Jni_optimizeLDE
 	}
     pcg64* rs = new pcg64(seed);
     CallJava callJava(func, env);
- 	Fittness fitfun(&callJava, dim, lower_limit, upper_limit, guess, inputSigma, *rs);
+ 	Fitness fitfun(&callJava, dim, lower_limit, upper_limit, guess, inputSigma, *rs);
     LDeOptimizer opt(runid, &fitfun, dim, rs, popsize, maxEvals, keep,
 			stopfitness, F, CR);
 	try {

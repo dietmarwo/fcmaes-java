@@ -559,11 +559,13 @@ public class Optimizers {
 					return;
 				if (limit != 0) {
 					Fitness f = fit.create();
-					double[] sdev = Utils.array(lower.length, Utils.rnd(0.05, 0.1));
-					evals += opt.minimize(f, lower, upper, sdev, guess != null ? guess : Utils.rnd(lower, upper),
+					evals += opt.minimize(f, lower, upper, sigma, guess != null ? guess : Utils.rnd(lower, upper),
 							maxEvals, stopVal, popsize).evals;
 					if (f._bestY < limit)
 						stat.add(f._bestY);
+//	                if (i % 100 == 99)
+//	                	System.out.println(Utils.r(Utils.measuredMillis()) + " " + i + " " + stat);
+					fit.updateBest(f);
 				} else {
 					evals += opt.minimize(fit, lower, upper, sigma, guess != null ? guess : Utils.rnd(lower, upper),
 							maxEvals, stopVal, popsize).evals;
@@ -571,4 +573,5 @@ public class Optimizers {
 			}
 		}
 	}
+	
 }

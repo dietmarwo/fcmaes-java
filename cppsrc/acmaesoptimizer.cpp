@@ -82,13 +82,13 @@ static Eigen::MatrixXd normal(int dx, int dy, pcg64 &rs) {
 	});
 }
 
-// wrapper around the fittness function, scales according to boundaries
+// wrapper around the Fitness function, scales according to boundaries
 
-class Fittness {
+class Fitness {
 
 public:
 
-	Fittness(CallJava *func_par_, const vec &lower_limit,
+	Fitness(CallJava *func_par_, const vec &lower_limit,
 			const vec &upper_limit) {
 		func_par = func_par_;
 		lower = lower_limit;
@@ -154,7 +154,7 @@ class AcmaesOptimizer {
 
 public:
 
-	AcmaesOptimizer(long runid_, Fittness *fitfun_, int popsize_, int mu_,
+	AcmaesOptimizer(long runid_, Fitness *fitfun_, int popsize_, int mu_,
 			const vec &guess_, const vec &inputSigma_, int maxIterations_,
 			int maxEvaluations_, double accuracy_, double stopfitness_,
 			is_terminate_type isTerminate_, long seed) {
@@ -497,7 +497,7 @@ public:
 
 private:
 	long runid;
-	Fittness *fitfun;
+	Fitness *fitfun;
 	vec guess;
 	double accuracy;
 	is_terminate_type isTerminate;
@@ -574,7 +574,7 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeACMA
 		upper_limit.resize(0);
 	}
     CallJava callJava(func, env);
- 	Fittness fitfun(&callJava, lower_limit, upper_limit);
+ 	Fitness fitfun(&callJava, lower_limit, upper_limit);
 	AcmaesOptimizer opt(runid, &fitfun, popsize, mu, guess, inputSigma, maxIter,
 			maxEvals, accuracy, stopValue, NULL, seed);
 	try {

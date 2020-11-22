@@ -78,13 +78,13 @@ static ivec sort_index(const vec &x) {
 	});
 }
 
-// wrapper around the fittness function, scales according to boundaries
+// wrapper around the Fitness function, scales according to boundaries
 
-class Fittness {
+class Fitness {
 
 public:
 
-	Fittness(CallJava *func_par_, int dim_, const vec &lower_limit,
+	Fitness(CallJava *func_par_, int dim_, const vec &lower_limit,
 			const vec &upper_limit, const vec &guess_, const vec &sigma_, pcg64 &rs_) {
 		func_par = func_par_;
 		dim = dim_;
@@ -197,7 +197,7 @@ class LclDeOptimizer {
 
 public:
 
-	LclDeOptimizer(long runid_, Fittness *fitfun_, int dim_, pcg64* rs_,
+	LclDeOptimizer(long runid_, Fitness *fitfun_, int dim_, pcg64* rs_,
 			int popsize_, int maxEvaluations_, double pbest_,
 			double stopfitness_, double F0_, double CR0_) {
 		// runid used to identify a specific run
@@ -357,7 +357,7 @@ public:
 
 private:
 	long runid;
-	Fittness *fitfun;
+	Fitness *fitfun;
 	int popsize; // population size
 	int dim;
 	int maxEvaluations;
@@ -412,7 +412,7 @@ JNIEXPORT jint JNICALL Java_utils_Jni_optimizeLCLDE
 	}
     pcg64* rs = new pcg64(seed);
     CallJava callJava(func, env);
- 	Fittness fitfun(&callJava, dim, lower_limit, upper_limit, guess, inputSigma, *rs);
+ 	Fitness fitfun(&callJava, dim, lower_limit, upper_limit, guess, inputSigma, *rs);
 	LclDeOptimizer opt(runid, &fitfun, dim, rs, popsize,
 			maxEvals, pbest,
 			stopfitness, F0, CR0);
