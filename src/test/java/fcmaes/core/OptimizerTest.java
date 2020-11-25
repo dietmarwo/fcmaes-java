@@ -17,8 +17,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import fcmaes.core.CoordRetry.Optimize;
+import fcmaes.core.Optimizers.Bite;
 import fcmaes.core.Optimizers.CLDE;
 import fcmaes.core.Optimizers.CMA;
+import fcmaes.core.Optimizers.CSMA;
 import fcmaes.core.Optimizers.DA;
 import fcmaes.core.Optimizers.DE;
 import fcmaes.core.Optimizers.DE2;
@@ -177,20 +179,47 @@ public class OptimizerTest {
 				100000, -Double.MAX_VALUE, POPSIZE, 1e-6, 1e-12, expected);
 	}
 
-// 	Works on Linux but currently not on Windows
-//	@Test
-//	@Retry(3)
-//	public void testRosenDAParallel() {
-//		double[] guess = point(DIM, 1);
-//		double[] sigma = point(DIM, 0.3);
-//		double[] lower = point(DIM, -1);
-//		double[] upper = point(DIM, 2);
-//		Result expected = new Result(0, 0.0, point(DIM, 1.0));
-//		Optimizer opt = new DA();
-//
-//		doTestParallel(8, new Rosen(DIM), opt, lower, upper, sigma, guess,
-//				100000, -Double.MAX_VALUE, POPSIZE, 1e-6, 1e-12, expected);
-//	}
+	@Test
+	@Retry(3)
+	public void testRosenBite() {
+		double[] guess = point(DIM, 1);
+		double[] sigma = point(DIM, 0.3);
+		double[] lower = point(DIM, -1);
+		double[] upper = point(DIM, 2);
+		Result expected = new Result(0, 0.0, point(DIM, 1.0));
+		Optimizer opt = new Bite();
+
+		doTest(new Rosen(DIM), opt, lower, upper, sigma, guess,
+				100000, -Double.MAX_VALUE, POPSIZE, 1e-6, 1e-12, expected);
+	}
+
+	@Test
+	@Retry(3)
+	public void testRosenCSMA() {
+		double[] guess = point(DIM, 1);
+		double[] sigma = point(DIM, 0.3);
+		double[] lower = point(DIM, -1);
+		double[] upper = point(DIM, 2);
+		Result expected = new Result(0, 0.0, point(DIM, 1.0));
+		Optimizer opt = new CSMA();
+
+		doTest(new Rosen(DIM), opt, lower, upper, sigma, guess,
+				100000, -Double.MAX_VALUE, POPSIZE, 1e-6, 1e-12, expected);
+	}
+
+	@Test
+	@Retry(3)
+	public void testRosenDAParallel() {
+		double[] guess = point(DIM, 1);
+		double[] sigma = point(DIM, 0.3);
+		double[] lower = point(DIM, -1);
+		double[] upper = point(DIM, 2);
+		Result expected = new Result(0, 0.0, point(DIM, 1.0));
+		Optimizer opt = new DA();
+
+		doTestParallel(8, new Rosen(DIM), opt, lower, upper, sigma, guess,
+				100000, -Double.MAX_VALUE, POPSIZE, 1e-6, 1e-12, expected);
+	}
 
 	@Test
 	@Retry(3)

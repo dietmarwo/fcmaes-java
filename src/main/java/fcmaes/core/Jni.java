@@ -28,6 +28,12 @@ public class Jni {
 		}
 	}
 		
+	public static native int optimizeBite(Fitness func, double[] lower, double[] upper, double[] guess, 
+			  int maxEvals, double stopfitness, int M, long seed, int runid);
+
+	public static native int optimizeCsma(Fitness func, double[] lower, double[] upper, double[] sigma, double[] guess, 
+			  int maxEvals, double stopfitness, int popsize, long seed, int runid);
+		
 	public static native int optimizeACMA(Fitness func, double[] lower, double[] upper, double[] sigma, double[] guess, 
 			  int maxIter, int maxEvals, double stopValue, int popsize, int mu, double accuracy, long seed, int runid);
 

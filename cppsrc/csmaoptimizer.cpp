@@ -3,13 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory.
 
-// Eigen based implementation of differential evolution using on the DE/best/1 strategy.
-// Uses two deviations from the standard DE algorithm:
-// a) temporal locality introduced in 
-// https://www.researchgate.net/publication/309179699_Differential_evolution_for_protein_folding_optimization_based_on_a_three-dimensional_AB_off-lattice_model
-// b) reinitialization of individuals based on their age. 
-// requires https://github.com/imneme/pcg-cpp
-
 #include <Eigen/Core>
 #include <iostream>
 #include <float.h>
@@ -56,48 +49,16 @@ public:
 		return res;
 	}
 
-	double evalVec(const vec &X) {
-		int n = X.size();
-		double parg[n];
-		for (int i = 0; i < n; i++)
-			parg[i] = X(i);
-		double res = func->evalJava1(n, parg);
-		evaluationCounter++;
-		return res;
-	}
-
-
-	void values(const mat &popX, int popsize, vec &ys) {
-		for (int p = 0; p < popsize; p++)
-			ys[p] = evalVec(popX.col(p));
-	}
-
-	vec getClosestFeasible(const vec &X) const {
-		if (lower.size() > 0) {
-			return X.cwiseMin(upper).cwiseMax(lower);
-		}
-		return X;
-	}
-
-	bool feasible(int i, double x) {
-		return x >= lower[i] && x <= upper[i];
-	}
-
-	bool feasible(const vec &x) {
-		return (x.array() >= lower.array()).all()
-				&& (x.array() <= upper.array()).all();
-	}
-
 	int getEvaluations() {
 		return evaluationCounter;
 	}
 
-    void getMinValues( double* const p) const {
+	void getMinValues( double* const p) const {
 		for (int i = 0; i < lower.size(); i++)
 			p[i] = lower[i];
 	}
 
-    void getMaxValues( double* const p) const {
+	void getMaxValues( double* const p) const {
 		for (int i = 0; i < upper.size(); i++)
 			p[i] = upper[i];
 	}
@@ -114,8 +75,8 @@ class CsmaOptimizer : public CSMAESOpt {
 
 public:
 
-	CsmaOptimizer(long runid_, Fitness *fitfun_, int dim_, int seed_,
-			int popsize_, int maxEvaluations_, double stopfitness_) {
+	CsmaOptimizer(long runid_, Fitness *fitfun_, int dim_, double* init_, double* sdev_,
+			int seed_, int popsize_, int maxEvaluations_, double stopfitness_) {
 		// runid used to identify a specific run
 		runid = runid_;
 		// fitness function to minimize
@@ -123,7 +84,7 @@ public:
 		// Number of objective variables/problem dimension
 		dim = dim_;
 		// Population size
-		popsize = popsize_ > 0 ? popsize_ : 15 * dim;
+		popsize = popsize_;
 		// maximal number of evaluations allowed.
 		maxEvaluations = maxEvaluations_ > 0 ? maxEvaluations_ : 50000;
 		// Number of iterations already performed.
@@ -131,12 +92,14 @@ public:
 		stopfitness = stopfitness_;
 		//std::random_device rd;
 		rs = new pcg64(seed_);
+		// stop criteria
+		stop = 0;
 
 		iterations = 0;
 		bestY = DBL_MAX;
         rnd.init(seed_);
-        updateDims( dim_ );
-        init( rnd );
+        updateDims( dim_,  popsize);
+        init( rnd, init_, sdev_ );
 	}
 
 	~CsmaOptimizer() {
@@ -171,14 +134,20 @@ public:
 		return iterations;
 	}
 
+	double getStop() {
+		return stop;
+	}
+
 	void doOptimize() {
 
 		// -------------------- Generation Loop --------------------------------
 		for (iterations = 1; fitfun->getEvaluations() < maxEvaluations;
 				iterations++) {
             optimize( rnd );
-            if( getBestCost() < stopfitness )
+            if ( getBestCost() < stopfitness ) {
+                stop = 1;
 		        break;
+            }
         }
     }
 
@@ -191,6 +160,7 @@ private:
 	double stopfitness;
 	int iterations;
 	double bestY;
+	int stop;
 	vec bestX;
 	pcg64 *rs;
     CBiteRnd rnd;
@@ -201,17 +171,18 @@ private:
 using namespace csmaopt;
 
 /*
- * Class:     utils_Jni
+ * Class:     fcmaes_core_Jni
  * Method:    optimizeCsma
- * Signature: (Lutils/Fitness;[D[D[DIDIJI)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIJI)I
  */
-JNIEXPORT jint JNICALL Java_utils_Jni_optimizeCsma
-  (JNIEnv* env, jclass cls, jobject func, jdoubleArray jlower, jdoubleArray jupper, jdoubleArray jinit, 
-  jint maxEvals, jdouble stopfitness, jint popsize, jlong seed, jint runid) {
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeCsma
+  (JNIEnv* env, jclass cls, jobject func, jdoubleArray jlower, jdoubleArray jupper, jdoubleArray jsdev,
+		  jdoubleArray jinit, jint maxEvals, jdouble stopfitness, jint popsize, jlong seed, jint runid) {
 
  	double* init = env->GetDoubleArrayElements(jinit, JNI_FALSE);
 	double* lower = env->GetDoubleArrayElements(jlower, JNI_FALSE);
 	double* upper = env->GetDoubleArrayElements(jupper, JNI_FALSE);
+	double* sdev = env->GetDoubleArrayElements(jsdev, JNI_FALSE);
 	int dim = env->GetArrayLength(jinit);
     vec lower_limit(dim), upper_limit(dim);
 	bool useLimit = false;
@@ -228,7 +199,7 @@ JNIEXPORT jint JNICALL Java_utils_Jni_optimizeCsma
     CallJava callJava(func, env);
  	Fitness fitfun(&callJava, lower_limit, upper_limit);
 
-	CsmaOptimizer opt(runid, &fitfun, dim, seed, popsize, maxEvals, stopfitness);
+	CsmaOptimizer opt(runid, &fitfun, dim, init, sdev, seed, popsize, maxEvals, stopfitness);
 
 	try {
 		opt.doOptimize();
@@ -250,5 +221,4 @@ JNIEXPORT jint JNICALL Java_utils_Jni_optimizeCsma
 	}
 	return 0;
   }
-
 

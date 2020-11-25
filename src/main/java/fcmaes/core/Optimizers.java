@@ -121,6 +121,7 @@ public class Optimizers {
 	 * https://www.researchgate.net/publication/309179699_Differential_evolution_for_protein_folding_optimization_based_on_a_three-dimensional_AB_off-lattice_model
 	 * b) reinitialization of individuals based on their age. requires
 	 * https://github.com/imneme/pcg-cpp
+     * Doesn't use the sigma (initial stepsize) and guess argument. 
 	 */
 
 	public static class DE extends Optimizer {
@@ -146,6 +147,7 @@ public class Optimizers {
 	
 	/**
      * An experimental new Differential Evolution algorithm derived from DE
+     * Doesn't use the sigma (initial stepsize) and guess argument. 
      */
 	
 	public static class DE2 extends Optimizer {
@@ -178,6 +180,7 @@ public class Optimizers {
 	 * case learning-based differential evolution algorithm for global optimization
 	 * of interplanetary trajectory design, Mingcheng Zuo, Guangming Dai, Lei Peng,
 	 * Maocai Wang, Zhengquan Liu", https://doi.org/10.1016/j.asoc.2020.106451
+     * Doesn't use the sigma (initial stepsize) and guess argument. 
 	 */
 
 	public static class GCLDE extends Optimizer {
@@ -203,6 +206,7 @@ public class Optimizers {
 
 	/**
      * An experimental new Differential Evolution algorithm derived from GCLDE
+     * Doesn't use the sigma (initial stepsize) and guess argument. 
      */
 	
 	public static class CLDE extends Optimizer {
@@ -363,6 +367,59 @@ public class Optimizers {
 				popsize = (int) (dim * 8.5 + 150);
 			int evals = Jni.optimizeLCLDE(fit, lower, upper, guess, sigma, maxEvals, stopVal, popsize, 0.7, 0, 0,
 					Utils.rnd().nextLong(), 0);
+			return new Result(fit, evals);
+		}
+	}
+	
+	/**
+	 * Java Mapping of the BITEOPT optimizer, see https://github.com/avaneev/biteopt
+	 * Doesn't use the sigma (initial stepsize) argument. 
+	 * 	 
+	 * derived from
+	 * https://github.com/avaneev/biteopt/blob/master/biteopt.h
+	 */
+
+	public static class Bite extends Optimizer {
+
+		int M = 1;
+		
+		public Bite() {
+			super();
+		}
+
+		public Bite(int M) {
+			super();
+			this.M = M;
+		}
+
+		@Override
+		public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
+				int maxEvals, double stopVal, int popsize) {
+			int evals = Jni.optimizeBite(fit, lower, upper, guess, maxEvals, stopVal, M, Utils.rnd().nextLong(), 0);
+			return new Result(fit, evals);
+		}
+	}
+	
+	/**
+	 * Java Mapping of the CSMA optimizer, see https://github.com/avaneev/biteopt
+	 * Similar to CMA-ES, but mainly focuses on sigma adaptation.	
+	 * 
+	 * Changed to optionally use sigma (initial stepsize), guess, and popsize arguments.
+	 *  
+	 * derived from
+	 * https://github.com/avaneev/biteopt/blob/master/smaesopt.h
+	 */
+	
+	public static class CSMA extends Optimizer {
+
+		public CSMA() {
+			super();
+		}
+
+		@Override
+		public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
+				int maxEvals, double stopVal, int popsize) {
+			int evals = Jni.optimizeCsma(fit, lower, upper, sigma, guess, maxEvals, stopVal, popsize, Utils.rnd().nextLong(), 0);
 			return new Result(fit, evals);
 		}
 	}

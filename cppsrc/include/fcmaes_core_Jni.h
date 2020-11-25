@@ -7,6 +7,23 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    optimizeBite
+ * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIJI)I
+ */
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeBite
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jlong, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    optimizeCsma
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIJI)I
+ */
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeCsma
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jlong, jint);
+
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeACMA
