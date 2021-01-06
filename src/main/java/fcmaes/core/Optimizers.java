@@ -440,10 +440,9 @@ public class Optimizers {
 		@Override
 		public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
 				int maxEvals, double stopVal, int popsize) {
-			int dim = guess != null ? guess.length : lower.length;
 			if (popsize <= 0)
 				popsize = 31;
-			int evals = Jni.optimizeDE(fit, lower, upper, guess, maxEvals / 2, stopVal, dim * 15, 200, 0.5, 0.9,
+			int evals = Jni.optimizeDE(fit, lower, upper, guess, maxEvals / 2, stopVal, popsize, 200, 0.5, 0.9,
 					Utils.rnd().nextLong(), 0);
 			evals += Jni.optimizeACMA(fit, lower, upper, sigma, fit._bestX, 1000000, maxEvals / 2, stopVal, popsize,
 					popsize / 2, 1, Utils.rnd().nextLong(), 0);
@@ -467,10 +466,9 @@ public class Optimizers {
 		@Override
 		public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
 				int maxEvals, double stopVal, int popsize) {
-			int dim = guess != null ? guess.length : lower.length;
 			if (popsize <= 0)
 				popsize = 31;
-			int evals = Jni.optimizeLDE(fit, lower, upper, guess, sigma, maxEvals / 2, stopVal, dim * 15, 200, 0.5, 0.9,
+			int evals = Jni.optimizeLDE(fit, lower, upper, guess, sigma, maxEvals / 2, stopVal, popsize, 200, 0.5, 0.9,
 					Utils.rnd().nextLong(), 0);
 			evals += Jni.optimizeACMA(fit, lower, upper, sigma, fit._bestX, 1000000, maxEvals / 2, stopVal, popsize,
 					popsize / 2, 1, Utils.rnd().nextLong(), 0);
@@ -499,7 +497,7 @@ public class Optimizers {
 				popsize = 31;
 			int evals = 0;
 			if (Utils.rnd().nextBoolean())
-				evals += Jni.optimizeDE(fit, lower, upper, guess, maxEvals, stopVal, dim * 15, 200, 0.5, 0.9,
+				evals += Jni.optimizeDE(fit, lower, upper, guess, maxEvals, stopVal, popsize, 200, 0.5, 0.9,
 						Utils.rnd().nextLong(), 0);
 			else
 				evals += Jni.optimizeGCLDE(fit, lower, upper, guess, maxEvals, stopVal, (int) (dim * 8.5 + 150), 0.7, 0,
@@ -529,7 +527,7 @@ public class Optimizers {
 				popsize = 31;
 			int evals = 0;
 			if (Utils.rnd().nextBoolean())
-				evals += Jni.optimizeDE(fit, lower, upper, guess, maxEvals / 2, stopVal, dim * 15, 200, 0.5, 0.9,
+				evals += Jni.optimizeDE(fit, lower, upper, guess, maxEvals / 2, stopVal, popsize, 200, 0.5, 0.9,
 						Utils.rnd().nextLong(), 0);
 			else
 				evals += Jni.optimizeGCLDE(fit, lower, upper, guess, maxEvals / 2, stopVal, (int) (dim * 8.5 + 150),
@@ -561,7 +559,7 @@ public class Optimizers {
 				popsize = 31;
 			int evals = 0;
 			if (Utils.rnd().nextBoolean())
-				evals += Jni.optimizeLDE(fit, lower, upper, guess, sigma, maxEvals / 2, stopVal, dim * 15, 200, 0.5,
+				evals += Jni.optimizeLDE(fit, lower, upper, guess, sigma, maxEvals / 2, stopVal, popsize, 200, 0.5,
 						0.9, Utils.rnd().nextLong(), 0);
 			else
 				evals += Jni.optimizeLCLDE(fit, lower, upper, guess, sigma, maxEvals / 2, stopVal,
