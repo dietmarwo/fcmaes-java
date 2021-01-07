@@ -60,7 +60,7 @@ For comparison: http://www.midaco-solver.com/data/pub/PDPTA20_Messenger.pdf[MXHC
 Hokudai Supercomputer using Intel Xeon Gold 6148 CPU’s with a clock rate of 2.7 GHz Messenger Full can be solved 
 in about 1 hour using the MXHCP algorithm. 
 
-79 runs of the coordinated parallel retry was performed on a single AMD 5950x CPU 
+79 runs of the coordinated parallel retry were performed on a single AMD 5950x CPU 
 using the DE->CMA sequence as optimization algorithm: 
 
 image::DECMA6.png[]
