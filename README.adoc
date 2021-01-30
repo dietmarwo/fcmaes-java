@@ -34,10 +34,10 @@ of the corresponding objective functions using different programming languages.
 
 The challenge is now to solve these problems on a modern 16+ core CPU faster than the  
 given https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/examples[examples].
-A problem is considered "solved" if you find a solution not worse more than 0.1% compared to the
+A problem is considered "solved" if you find a solution not worse more than 0.5% compared to the
 best solution known. If an optimizer needs multiple retries, take the average amount of time
 for all retries until the problem is solved. You may use any tool / programming language. The
-solution times given in the example comments are for Linux / AMD 3950x CPU. Windows slightly
+solution times given in the example comments are for Linux / AMD 3950x CPU. Windows is slightly
 slower, an AMD 5950x CPU is about 10-15% faster. 
  
 === Compilation
