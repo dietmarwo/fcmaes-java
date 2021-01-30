@@ -29,9 +29,6 @@ public:
         jobject jores = env->CallObjectMethod(func, mid, jarg);
         jdoubleArray jres = reinterpret_cast<jdoubleArray>(jores);
         double* res = env->GetDoubleArrayElements(jres, JNI_FALSE);
-//        jsize rsize = env->GetArrayLength(jres);
-//        for (int r = 0; r < rsize; r++)		
-//            result[r] = res[r];
         for (int r = 0; r < popsize; r++)		
             result[r] = res[r];
         env->ReleaseDoubleArrayElements(jarg, args, 0);
