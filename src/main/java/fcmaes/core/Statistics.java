@@ -6,7 +6,7 @@
 package fcmaes.core;
 
 /**
- * Statistics utility class. 
+ * Statistics utility class.
  */
 
 public class Statistics {
@@ -16,13 +16,13 @@ public class Statistics {
     private int i;
     private double max = Double.NEGATIVE_INFINITY;
     private double min = Double.POSITIVE_INFINITY;
-    
+
     public void clear() {
-    	ai = qi = i = 0;
+        ai = qi = i = 0;
         max = Double.NEGATIVE_INFINITY;
         min = Double.POSITIVE_INFINITY;
     }
-    
+
     public double getAi() {
         return ai;
     }
@@ -44,10 +44,10 @@ public class Statistics {
     }
 
     public synchronized void add(double value) {
-    	if (max < value)
-    		max = value;
-    	if (min > value)
-    		min = value;
+        if (max < value)
+            max = value;
+        if (min > value)
+            min = value;
         i++;
         if (i == 1)
             ai = value;
@@ -77,7 +77,7 @@ public class Statistics {
         else
             return standardDev() / Math.sqrt(i);
     }
-            
+
     class Correlation {
         Statistics x;
         Statistics y;
@@ -104,18 +104,18 @@ public class Statistics {
                 return 0;
         }
     }
-     
-	public double norm(double d) {
-		double sdev = standardDev();
-		if (sdev == 0)
-			return 0;
-		else
-			return (d - ai) / sdev;
-	}
-	
-    public String toString() {
-        return "n=" + i + " m=" + Utils.r(ai) + " sd=" + Utils.r(standardDev())
-            	+ " l=" + Utils.r(min) + " u=" + Utils.r(max);
+
+    public double norm(double d) {
+        double sdev = standardDev();
+        if (sdev == 0)
+            return 0;
+        else
+            return (d - ai) / sdev;
     }
-	    
+
+    public String toString() {
+        return "n=" + i + " m=" + Utils.r(ai) + " sd=" + Utils.r(standardDev()) + " l=" + Utils.r(min) + " u="
+                + Utils.r(max);
+    }
+
 }

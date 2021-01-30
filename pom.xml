@@ -7,7 +7,7 @@
 
 	<groupId>com.github.dietmarwo</groupId>
 	<artifactId>fcmaes-java</artifactId>
-	<version>0.1.2</version>
+	<version>1.0</version>
 	<packaging>jar</packaging>
 
 	<name>fcmaes-java</name>

@@ -7,38 +7,45 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/*
- * Class:     fcmaes_core_Jni
- * Method:    optimizeBite
- * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIJI)I
- */
-JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeBite
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jlong, jint);
-
-/*
- * Class:     fcmaes_core_Jni
- * Method:    optimizeCsma
- * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIJI)I
- */
-JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeCsma
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jlong, jint);
-
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeACMA
- * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIIDIIDJI)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIIDIIDJIII)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeACMA
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint, jdouble, jint, jint, jdouble, jlong, jint);
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint, jdouble, jint, jint, jdouble, jlong, jint, jint, jint);
 
 /*
  * Class:     fcmaes_core_Jni
- * Method:    optimizeHawks
- * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIJI)I
+ * Method:    initCmaes
+ * Signature: ([D[D[D[DIIDJIII)J
  */
-JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeHawks
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jlong, jint);
+JNIEXPORT jlong JNICALL Java_fcmaes_core_Jni_initCmaes
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint, jdouble, jlong, jint, jint, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    destroyCmaes
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_fcmaes_core_Jni_destroyCmaes
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    askCmaes
+ * Signature: (J)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_askCmaes
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    tellCmaes
+ * Signature: (J[DD)I
+ */
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_tellCmaes
+  (JNIEnv *, jclass, jlong, jdoubleArray, jdouble);
 
 /*
  * Class:     fcmaes_core_Jni
@@ -50,51 +57,35 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeDE
 
 /*
  * Class:     fcmaes_core_Jni
- * Method:    optimizeDE2
- * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIDDDJI)I
+ * Method:    initDE
+ * Signature: ([D[D[DIDDDJI)J
  */
-JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeDE2
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
+JNIEXPORT jlong JNICALL Java_fcmaes_core_Jni_initDE
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jdouble, jdouble, jlong, jint);
 
 /*
  * Class:     fcmaes_core_Jni
- * Method:    optimizeLDE
- * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIDDDJI)I
+ * Method:    destroyDE
+ * Signature: (J)V
  */
-JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeLDE
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
+JNIEXPORT void JNICALL Java_fcmaes_core_Jni_destroyDE
+  (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     fcmaes_core_Jni
- * Method:    optimizeGCLDE
- * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIDDDJI)I
+ * Method:    askDE
+ * Signature: (J)[D
  */
-JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeGCLDE
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
+JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_askDE
+  (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     fcmaes_core_Jni
- * Method:    optimizeCLDE
- * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIDDDJI)I
+ * Method:    tellDE
+ * Signature: (J[DDI)I
  */
-JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeCLDE
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
-
-/*
- * Class:     fcmaes_core_Jni
- * Method:    optimizeLCLDE
- * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIDDDJI)I
- */
-JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeLCLDE
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
-
-/*
- * Class:     fcmaes_core_Jni
- * Method:    optimizeDA
- * Signature: (Lfcmaes/core/Fitness;[D[D[DIIJI)I
- */
-JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeDA
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint, jlong, jint);
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_tellDE
+  (JNIEnv *, jclass, jlong, jdoubleArray, jdouble, jint);
 
 /*
  * Class:     fcmaes_core_Jni
@@ -135,6 +126,190 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_integratePVCtoc11
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_integratePVCtoc11R
   (JNIEnv *, jclass, jdoubleArray, jdouble, jdouble, jboolean);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    optimizeHawks
+ * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIJI)I
+ */
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeHawks
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jlong, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    optimizeLDE
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIDDDJI)I
+ */
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeLDE
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    optimizeGCLDE
+ * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIDDDJI)I
+ */
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeGCLDE
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    optimizeLCLDE
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIDDDJI)I
+ */
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeLCLDE
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    optimizeDA
+ * Signature: (Lfcmaes/core/Fitness;[D[D[DIIJI)I
+ */
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeDA
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint, jlong, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    optimizeCLDE
+ * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIDDDJI)I
+ */
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeCLDE
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    optimizeBite
+ * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIJI)I
+ */
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeBite
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jlong, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    optimizeCsma
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIJI)I
+ */
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeCsma
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jlong, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    lambertProblem
+ * Signature: (DDDDDDDZID)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_lambertProblem
+  (JNIEnv *, jclass, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jboolean, jint, jdouble);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    powSwingByInvC
+ * Signature: (DDD)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_powSwingByInvC
+  (JNIEnv *, jclass, jdouble, jdouble, jdouble);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    planetEplC
+ * Signature: (ID[D[D)V
+ */
+JNIEXPORT void JNICALL Java_fcmaes_core_Jni_planetEplC
+  (JNIEnv *, jclass, jint, jdouble, jdoubleArray, jdoubleArray);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    propagateTAYC
+ * Signature: ([D[DD[DDDDDD[D[D)D
+ */
+JNIEXPORT jdouble JNICALL Java_fcmaes_core_Jni_propagateTAYC
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdouble, jdoubleArray, jdouble, jdouble, jdouble, jdouble, jdouble, jdoubleArray, jdoubleArray);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    propagateTAYJ2C
+ * Signature: ([D[DD[DDDDDDD[D[D)D
+ */
+JNIEXPORT jdouble JNICALL Java_fcmaes_core_Jni_propagateTAYJ2C
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdouble, jdoubleArray, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdoubleArray, jdoubleArray);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    propagateTAYDISTC
+ * Signature: ([D[DD[D[DDDDDD[D[D)D
+ */
+JNIEXPORT jdouble JNICALL Java_fcmaes_core_Jni_propagateTAYDISTC
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdouble, jdoubleArray, jdoubleArray, jdouble, jdouble, jdouble, jdouble, jdouble, jdoubleArray, jdoubleArray);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    propagateTAYmultiC
+ * Signature: ([D[D[DI[DDDDDD[D[D)D
+ */
+JNIEXPORT jdouble JNICALL Java_fcmaes_core_Jni_propagateTAYmultiC
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdoubleArray, jdouble, jdouble, jdouble, jdouble, jdouble, jdoubleArray, jdoubleArray);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    propagateULAGmultiC
+ * Signature: ([D[D[DI[DD[D[D)V
+ */
+JNIEXPORT void JNICALL Java_fcmaes_core_Jni_propagateULAGmultiC
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdoubleArray, jdouble, jdoubleArray, jdoubleArray);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    iC2parC
+ * Signature: ([D[DD[D)V
+ */
+JNIEXPORT void JNICALL Java_fcmaes_core_Jni_iC2parC
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdouble, jdoubleArray);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    par2IC
+ * Signature: ([DD[D[D)V
+ */
+JNIEXPORT void JNICALL Java_fcmaes_core_Jni_par2IC
+  (JNIEnv *, jclass, jdoubleArray, jdouble, jdoubleArray, jdoubleArray);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    closest_distance
+ * Signature: ([D[D[D[D[DD)V
+ */
+JNIEXPORT void JNICALL Java_fcmaes_core_Jni_closest_1distance
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdouble);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    lambert_find_N
+ * Signature: (DDDI)I
+ */
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_lambert_1find_1N
+  (JNIEnv *, jclass, jdouble, jdouble, jdouble, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    propagate_lagrangian
+ * Signature: ([D[DDD)V
+ */
+JNIEXPORT void JNICALL Java_fcmaes_core_Jni_propagate_1lagrangian
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdouble, jdouble);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    propagate_lagrangian_u
+ * Signature: ([D[DDD)V
+ */
+JNIEXPORT void JNICALL Java_fcmaes_core_Jni_propagate_1lagrangian_1u
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdouble, jdouble);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    three_impulses_approx
+ * Signature: (DDDDDDDDD)D
+ */
+JNIEXPORT jdouble JNICALL Java_fcmaes_core_Jni_three_1impulses_1approx
+  (JNIEnv *, jclass, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble);
 
 #ifdef __cplusplus
 }

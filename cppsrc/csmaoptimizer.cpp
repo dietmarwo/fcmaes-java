@@ -3,6 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory.
 
+// Eigen based implementation of differential evolution using on the DE/best/1 strategy.
+// Uses two deviations from the standard DE algorithm:
+// a) temporal locality introduced in 
+// https://www.researchgate.net/publication/309179699_Differential_evolution_for_protein_folding_optimization_based_on_a_three-dimensional_AB_off-lattice_model
+// b) reinitialization of individuals based on their age. 
+// requires https://github.com/imneme/pcg-cpp
+
 #include <Eigen/Core>
 #include <iostream>
 #include <float.h>
@@ -22,147 +29,146 @@ typedef double (*callback_type)(int, double[]);
 
 namespace csmaopt {
 
-
 // wrapper around the Fitness function, scales according to boundaries
 
 class Fitness {
 
 public:
 
-	Fitness(CallJava *pfunc, const vec &lower_limit,
-			const vec &upper_limit) {
-		func = pfunc;
-		lower = lower_limit;
-		upper = upper_limit;
-		evaluationCounter = 0;
-		if (lower.size() > 0) // bounds defined
-			scale = (upper - lower);
-	}
+    Fitness(CallJava *pfunc, const vec &lower_limit, const vec &upper_limit) {
+        func = pfunc;
+        lower = lower_limit;
+        upper = upper_limit;
+        evaluationCounter = 0;
+        if (lower.size() > 0) // bounds defined
+            scale = (upper - lower);
+    }
 
-	double eval(const double* const p) {
-		int n = lower.size();
-		double parg[n];
-		for (int i = 0; i < n; i++)
-			parg[i] = p[i];
-		double res = func->evalJava1(n, parg);
-		evaluationCounter++;
-		return res;
-	}
+    double eval(const double *const p) {
+        int n = lower.size();
+        double parg[n];
+        for (int i = 0; i < n; i++)
+            parg[i] = p[i];
+        double res = func->evalJava1(n, parg);
+        evaluationCounter++;
+        return res;
+    }
 
-	int getEvaluations() {
-		return evaluationCounter;
-	}
+    int getEvaluations() {
+        return evaluationCounter;
+    }
 
-	void getMinValues( double* const p) const {
-		for (int i = 0; i < lower.size(); i++)
-			p[i] = lower[i];
-	}
+    void getMinValues(double *const p) const {
+        for (int i = 0; i < lower.size(); i++)
+            p[i] = lower[i];
+    }
 
-	void getMaxValues( double* const p) const {
-		for (int i = 0; i < upper.size(); i++)
-			p[i] = upper[i];
-	}
+    void getMaxValues(double *const p) const {
+        for (int i = 0; i < upper.size(); i++)
+            p[i] = upper[i];
+    }
 
 private:
-	CallJava *func;
-	vec lower;
-	vec upper;
-	long evaluationCounter;
-	vec scale;
+    CallJava *func;
+    vec lower;
+    vec upper;
+    long evaluationCounter;
+    vec scale;
 };
 
-class CsmaOptimizer : public CSMAESOpt {
+class CsmaOptimizer: public CSMAESOpt {
 
 public:
 
-	CsmaOptimizer(long runid_, Fitness *fitfun_, int dim_, double* init_, double* sdev_,
-			int seed_, int popsize_, int maxEvaluations_, double stopfitness_) {
-		// runid used to identify a specific run
-		runid = runid_;
-		// fitness function to minimize
-		fitfun = fitfun_;
-		// Number of objective variables/problem dimension
-		dim = dim_;
-		// Population size
-		popsize = popsize_;
-		// maximal number of evaluations allowed.
-		maxEvaluations = maxEvaluations_ > 0 ? maxEvaluations_ : 50000;
-		// Number of iterations already performed.
-		// Limit for fitness value.
-		stopfitness = stopfitness_;
-		//std::random_device rd;
-		rs = new pcg64(seed_);
-		// stop criteria
-		stop = 0;
+    CsmaOptimizer(long runid_, Fitness *fitfun_, int dim_, double *init_,
+            double *sdev_, int seed_, int popsize_, int maxEvaluations_,
+            double stopfitness_) {
+        // runid used to identify a specific run
+        runid = runid_;
+        // fitness function to minimize
+        fitfun = fitfun_;
+        // Number of objective variables/problem dimension
+        dim = dim_;
+        // Population size
+        popsize = popsize_;
+        // maximal number of evaluations allowed.
+        maxEvaluations = maxEvaluations_ > 0 ? maxEvaluations_ : 50000;
+        // Number of iterations already performed.
+        // Limit for fitness value.
+        stopfitness = stopfitness_;
+        //std::random_device rd;
+        rs = new pcg64(seed_);
+        // stop criteria
+        stop = 0;
 
-		iterations = 0;
-		bestY = DBL_MAX;
+        iterations = 0;
+        bestY = DBL_MAX;
         rnd.init(seed_);
-        updateDims( dim_,  popsize);
-        init( rnd, init_, sdev_ );
-	}
+        updateDims(dim_, popsize);
+        init(rnd, init_, sdev_);
+    }
 
-	~CsmaOptimizer() {
-		delete rs;
-	}
+    ~CsmaOptimizer() {
+        delete rs;
+    }
 
-	virtual void getMinValues( double* const p ) const {
+    virtual void getMinValues(double *const p) const {
         fitfun->getMinValues(p);
-	}
+    }
 
-	virtual void getMaxValues( double* const p ) const {
+    virtual void getMaxValues(double *const p) const {
         fitfun->getMaxValues(p);
-	}
+    }
 
-	virtual double optcost( const double* const p ) {
+    virtual double optcost(const double *const p) {
         return fitfun->eval(p);
     }
 
-	vec getBestX() {
+    vec getBestX() {
         vec bestX = vec(dim);
-        const double* bx = getBestParams();
+        const double *bx = getBestParams();
         for (int i = 0; i < dim; i++)
             bestX[i] = bx[i];
-		return bestX;
-	}
+        return bestX;
+    }
 
-	double getBestValue() {
-		return getBestCost();
-	}
+    double getBestValue() {
+        return getBestCost();
+    }
 
-	double getIterations() {
-		return iterations;
-	}
+    double getIterations() {
+        return iterations;
+    }
 
-	double getStop() {
-		return stop;
-	}
+    double getStop() {
+        return stop;
+    }
 
-	void doOptimize() {
+    void doOptimize() {
 
-		// -------------------- Generation Loop --------------------------------
-		for (iterations = 1; fitfun->getEvaluations() < maxEvaluations;
-				iterations++) {
-            optimize( rnd );
-            if ( getBestCost() < stopfitness ) {
+        // -------------------- Generation Loop --------------------------------
+        for (iterations = 1; fitfun->getEvaluations() < maxEvaluations;
+                iterations++) {
+            optimize(rnd);
+            if (getBestCost() < stopfitness) {
                 stop = 1;
-		        break;
+                break;
             }
         }
     }
 
 private:
-	long runid;
-	Fitness *fitfun;
-	int popsize; // population size
-	int dim;
-	int maxEvaluations;
-	double stopfitness;
-	int iterations;
-	double bestY;
-	int stop;
-	vec bestX;
-	pcg64 *rs;
+    long runid;
+    Fitness *fitfun;
+    int popsize; // population size
+    int dim;
+    int maxEvaluations;
+    double stopfitness;
+    int iterations;
+    double bestY;
+    int stop;
+    vec bestX;
+    pcg64 *rs;
     CBiteRnd rnd;
 };
 
@@ -175,50 +181,52 @@ using namespace csmaopt;
  * Method:    optimizeCsma
  * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIJI)I
  */
-JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeCsma
-  (JNIEnv* env, jclass cls, jobject func, jdoubleArray jlower, jdoubleArray jupper, jdoubleArray jsdev,
-		  jdoubleArray jinit, jint maxEvals, jdouble stopfitness, jint popsize, jlong seed, jint runid) {
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeCsma(JNIEnv *env,
+        jclass cls, jobject func, jdoubleArray jlower, jdoubleArray jupper,
+        jdoubleArray jsdev, jdoubleArray jinit, jint maxEvals,
+        jdouble stopfitness, jint popsize, jlong seed, jint runid) {
 
- 	double* init = env->GetDoubleArrayElements(jinit, JNI_FALSE);
-	double* lower = env->GetDoubleArrayElements(jlower, JNI_FALSE);
-	double* upper = env->GetDoubleArrayElements(jupper, JNI_FALSE);
-	double* sdev = env->GetDoubleArrayElements(jsdev, JNI_FALSE);
-	int dim = env->GetArrayLength(jinit);
+    double *init = env->GetDoubleArrayElements(jinit, JNI_FALSE);
+    double *lower = env->GetDoubleArrayElements(jlower, JNI_FALSE);
+    double *upper = env->GetDoubleArrayElements(jupper, JNI_FALSE);
+    double *sdev = env->GetDoubleArrayElements(jsdev, JNI_FALSE);
+    int dim = env->GetArrayLength(jinit);
     vec lower_limit(dim), upper_limit(dim);
-	bool useLimit = false;
-	for (int i = 0; i < dim; i++) {
-		lower_limit[i] = lower[i];
-		upper_limit[i] = upper[i];
-		useLimit |= (lower[i] != 0);
-		useLimit |= (upper[i] != 0);
-	}
-	if (useLimit == false) {
-		lower_limit.resize(0);
-		upper_limit.resize(0);
-	}
+    bool useLimit = false;
+    for (int i = 0; i < dim; i++) {
+        lower_limit[i] = lower[i];
+        upper_limit[i] = upper[i];
+        useLimit |= (lower[i] != 0);
+        useLimit |= (upper[i] != 0);
+    }
+    if (useLimit == false) {
+        lower_limit.resize(0);
+        upper_limit.resize(0);
+    }
     CallJava callJava(func, env);
- 	Fitness fitfun(&callJava, lower_limit, upper_limit);
+    Fitness fitfun(&callJava, lower_limit, upper_limit);
 
-	CsmaOptimizer opt(runid, &fitfun, dim, init, sdev, seed, popsize, maxEvals, stopfitness);
+    CsmaOptimizer opt(runid, &fitfun, dim, init, sdev, seed, popsize, maxEvals,
+            stopfitness);
 
-	try {
-		opt.doOptimize();
-		vec bestX = opt.getBestX();
-		double bestY = opt.getBestValue();
+    try {
+        opt.doOptimize();
+        vec bestX = opt.getBestX();
+        double bestY = opt.getBestValue();
 
-		for (int i = 0; i < dim; i++)
-			init[i] = bestX[i];
+        for (int i = 0; i < dim; i++)
+            init[i] = bestX[i];
 
-		env->SetDoubleArrayRegion (jinit, 0, dim, (jdouble*)init);
-		env->ReleaseDoubleArrayElements(jinit, init, 0);
-		env->ReleaseDoubleArrayElements(jupper, upper, 0);
-		env->ReleaseDoubleArrayElements(jlower, lower, 0);
-		return fitfun.getEvaluations();
-		
-	} catch (std::exception& e) {
-		cout << e.what() << endl;
-		return fitfun.getEvaluations();
-	}
-	return 0;
-  }
+        env->SetDoubleArrayRegion(jinit, 0, dim, (jdouble*) init);
+        env->ReleaseDoubleArrayElements(jinit, init, 0);
+        env->ReleaseDoubleArrayElements(jupper, upper, 0);
+        env->ReleaseDoubleArrayElements(jlower, lower, 0);
+        return fitfun.getEvaluations();
+
+    } catch (std::exception &e) {
+        cout << e.what() << endl;
+        return fitfun.getEvaluations();
+    }
+    return 0;
+}
 

@@ -18,9 +18,27 @@ see https://github.com/dietmarwo/fcmaes-java/blob/master/CTOC11.adoc[fcmaes for 
 - Parallel coordinated retry of sequences and random choices of optimization algorithms. 
 - Parallel function evaluation.
 - New DE (differential evolution) variant optimized for usage with parallel coordinated retry.
+- Ask / Tell interface for CMA-ES and DE. 
 - GCL-DE (differential evolution) variant from Mingcheng Zuo.
 - Fast C++ implementations of CMA-ES, differential evolution, dual annealing and the Harris hawks algorithm.
 - Supports Linux and Windows
+
+=== Optimization Challenge
+
+fcmaes-java provides very fast parallel
+https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/examples[example solvers] for the 
+real world space flight design problems https://www.esa.int/gsp/ACT/projects/gtop[GTOP] and for 
+the https://mintoc.de/index.php/F-8_aircraft[F-8_aircraft] problem based on differential equations. 
+In http://www.midaco-solver.com/index.php/about/benchmarks/gtopx[GTOPX] you can find implementations 
+of the corresponding objective functions using different programming languages.
+
+The challenge is now to solve these problems on a modern 16+ core CPU faster than the  
+given https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/examples[examples].
+A problem is considered "solved" if you find a solution not worse more than 0.1% compared to the
+best solution known. If an optimizer needs multiple retries, take the average amount of time
+for all retries until the problem is solved. You may use any tool / programming language. The
+solution times given in the example comments are for Linux / AMD 3950x CPU. Windows slightly
+slower, an AMD 5950x CPU is about 10-15% faster. 
  
 === Compilation
  
@@ -28,9 +46,8 @@ see https://github.com/dietmarwo/fcmaes-java/blob/master/CTOC11.adoc[fcmaes for 
 
 === Usage
 
-See the F8 example https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/examples/F8.java[F8.java]. 
-Many other examples can be found in the test cases 
-https://github.com/dietmarwo/fcmaes-java/blob/master/src/test/java/fcmaes/core/OptimizerTest.java[OptimizerTest.java].
+See the https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/examples[examples] and 
+https://github.com/dietmarwo/fcmaes-java/blob/master/src/test/java/fcmaes/core/OptimizerTest.java[tests] . 
 
 === Dependencies
 
@@ -49,7 +66,7 @@ Compile time (binaries for Linux and Windows are included):
 
 On a single 16 core AMD 5950x CPU using the parallel coordinated retry mechanism 
 solves ESAs 26-dimensional https://www.esa.int/gsp/ACT/projects/gtop/messenger_full/[Messenger full] problem
-in about 40 minutes on average. The Messenger full benchmark models a
+in about 35 minutes on average. The Messenger full benchmark models a
 multi-gravity assist interplanetary space mission from Earth to Mercury. In 2009 the first good solution (6.9 km/s)
 was submitted. It took more than five years to reach 1.959 km/s and three more years until 2017 to find the optimum 1.958 km/s. 
 The picture below shows the progress of the whole science community since 2009:
@@ -60,15 +77,15 @@ For comparison: http://www.midaco-solver.com/data/pub/PDPTA20_Messenger.pdf[MXHC
 Hokudai Supercomputer using Intel Xeon Gold 6148 CPU’s with a clock rate of 2.7 GHz Messenger Full can be solved 
 in about 1 hour using the MXHCP algorithm. 
 
-79 runs of the coordinated parallel retry were performed on a single AMD 5950x CPU 
+50 runs of the coordinated parallel retry were performed on a single AMD 5950x CPU 
 using the DE->CMA sequence as optimization algorithm: 
 
-image::DECMA6.png[]
+image::DE-CMA_AMD_5950x.png[]
 
-41 of the 79 runs reached a good result below 2 km/s:
+24 of the 50 runs reached a good result below 2 km/s:
 
-image::DECMA2.png[]  
+image::DE-CMA_AMD_5950x.2.png[]  
 
-This is the best result for a single CPU reported so far, even faster than the old result for a 1000 core cluster referenced above. 
-About 1.4*10^6 function evaluations per second were performed which shows excellent scaling of the algorithm utilizing all
+This is the best result for a single CPU reported so far.
+About 1.7*10^6 function evaluations per second were performed which shows excellent scaling of the algorithm utilizing all
 16 cores / 32 threads.   

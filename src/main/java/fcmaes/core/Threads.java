@@ -13,15 +13,20 @@ public class Threads {
 
     Thread[] threads;
 
-    public Threads(Runnable runnable, int numThreads) {
-        int n = numThreads;
+    public Threads(Runnable runnable, int numWorkers) {
+        int n = numWorkers;
         threads = new Thread[n];
         for (int i = 0; i < n; i++)
             threads[i] = new Thread(runnable);
     }
-    
+
+    public static int numWorkers() {
+//      return Math.min(16, Runtime.getRuntime().availableProcessors());
+        return Math.min(32, Runtime.getRuntime().availableProcessors());
+    }
+
     public Threads(Runnable runnable) {
-        int n = Runtime.getRuntime().availableProcessors();
+        int n = numWorkers();
         threads = new Thread[n];
         for (int i = 0; i < n; i++)
             threads[i] = new Thread(runnable);
