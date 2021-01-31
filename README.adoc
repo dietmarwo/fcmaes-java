@@ -8,7 +8,8 @@ fcmaes-java provides fast {cpp}/Eigen based implementations of its gradient free
 It supports parallel optimization and parallel function evaluation. A new coordinated parallel retry mechanism 
 can be viewed as a meta algorithm operating on a population of user defined optimization runs. 
 fcmaes-java provides the same functionality as its Python variant https://github.com/dietmarwo/fast-cma-es[fcmaes].
-It was used by the team Jena & Wuhan for the 11th China Trajectory Optimization Competition https://ctoc11.skyeststudio.com/[CTOC11] 
+It was used by the team Jena & Wuhan for the 
+https://github.com/dietmarwo/fcmaes-java/blob/master/img/CTOC11problemdescription.pdf[11th China Trajectory Optimization Competition]
 see https://github.com/dietmarwo/fcmaes-java/blob/master/CTOC11.adoc[fcmaes for CTOC11].
 
 === Features

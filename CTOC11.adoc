@@ -6,7 +6,7 @@
 
 https://github.com/dietmarwo/fcmaes-java/blob/master/README.adoc[fcmaes-java] 
 was created for our participation at the 11th China Trajectory Optimization Competition 
-https://ctoc11.skyeststudio.com/[CTOC11].
+https://github.com/dietmarwo/fcmaes-java/blob/master/img/CTOC11problemdescription.pdf[CTOC11].
 No functionality was added to the Python optimization library https://github.com/dietmarwo/fast-cma-es[fcmaes].
 But a JVM based implementation has advantages required by the competition:
 
@@ -14,7 +14,7 @@ But a JVM based implementation has advantages required by the competition:
 * Thread based parallelization works better on Windows than Python process based parallelization used by fcmaes. 
 * A space flight related utility implementation was available in Java. 
 
-The CTOC11 problem https://ctoc11.skyeststudio.com/uploadfiles/CTOC11problemdescription.pdf 
+The CTOC11 https://github.com/dietmarwo/fcmaes-java/blob/master/img/CTOC11problemdescription.pdf[problem]
 involves the the computation of the trajectory of two different satellites. 
 These satellites have to observe multiple fixed and moving targets over a period of 240 days. 
 The time interval between two adjacent impulses of each 
