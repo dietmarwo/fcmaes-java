@@ -1,19 +1,8 @@
 package fcmaes.core;
 
 import java.io.IOException;
-import java.util.Arrays;
-
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
 
 import com.nativeutils.NativeUtils;
-
-import fcmaes.core.Optimizers.Bite;
-import fcmaes.core.Optimizers.CMA;
-import fcmaes.core.Optimizers.CMAAT;
-import fcmaes.core.Optimizers.CSMA;
-import fcmaes.core.Optimizers.DEAT;
-import fcmaes.core.Optimizers.Optimizer;
-import fcmaes.core.Optimizers.Result;
 
 public class Jni {
 

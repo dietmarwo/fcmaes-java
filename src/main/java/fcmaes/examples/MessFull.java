@@ -1,28 +1,30 @@
 package fcmaes.examples;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import fcmaes.core.CoordRetry;
 import fcmaes.core.Fitness;
+import fcmaes.core.Log;
 import fcmaes.core.Optimizers.DECMA;
 import fcmaes.core.Optimizers.Optimizer;
 import fcmaes.core.Optimizers.Result;
 import fcmaes.core.Utils;
 
-public class MessFull extends Fitness {
+public class MessFull extends GtopProblem {
 
     /*
      * This example is taken from https://www.esa.int/gsp/ACT/projects/gtop/
      * See also http://www.midaco-solver.com/index.php/about/benchmarks/gtopx
      * where you find implementations in different programming languages. 
      * 
-     * "coord()" solves the problem often in less than 1300 seconds
-     * on a modern 16-core CPU (< 1000 sec using an AMD 5950x).
+     * "coord(new DECMA(), runs))" solves the problem on average in about 2000 seconds 
+     * on a modern 16-core CPU (AMD 5950x). A value of 2.0 is reached in about 1000 seconds.
      * Can you provide a faster parallel algorithm in any language?
      * 
-     * The Messenger Full problem ist the hardest of the GTOP problems, 
+     * The Messenger Full problem is the hardest of the GTOP problems, 
      * the only one beside Tandem which isn't solved in every coord() run. Sometimes
-     * the algorithm is stuck at a local minimum around 2.4. 
+     * coordinated retry is stuck at a local minimum around 2.4. 
      * The algorithm described in http://www.midaco-solver.com/data/pub/PDPTA20_Messenger.pdf
      * hasn't this problem, but requires a 1000 CPU node cluster. 
      */
@@ -56,27 +58,19 @@ public class MessFull extends Fitness {
         }
     }
 
-    static Result optimize() {
-        Optimizer opt = new DECMA();
-        MessFull fit = new MessFull();
-        double[] sdev = Utils.array(fit._dim, 0.07);
-        return fit.minimizeN(10000, opt, fit.lower(), fit.upper(), null, sdev, 10000, 31, 100.0);
-    }
- 
-    static Result coord() {
-        for (int i = 0; i < 10000000; i++) {
-            Utils.startTiming();
-            CoordRetry.optimize(50000, new MessFull(), new DECMA(), null, 12.0, 1500, true);
-        }
-        return CoordRetry.optimize(50000, new MessFull(), new DECMA(), null, 12.0, 1500, true);
+    double limitVal() {
+        return 12.0;
     }
 
-    public static void main(String[] args) throws NumberFormatException, IOException {
+    double stopVal() {
+        return stopValFac()*1.9579;
+    }
+
+    public static void main(String[] args) throws FileNotFoundException {
+        Log.setLog();
         Utils.startTiming();
-//      Result res = optimize();
-        Result res = coord();
-        System.out.println(
-                "best = " + res.y + ", time = " + 0.001 * Utils.measuredMillis() + " sec, evals = " + res.evals);
+        Optimizer opt = new DECMA();
+        new MessFull().test(100, opt, 50000);
     }
 
 }

@@ -36,20 +36,27 @@ public class CoordRetry {
      * @param opt        Optimizer used.
      * @param guess      Starting point.
      * @param limitVal   Maximum value for an optimization result to be stored.
+     * @param stopVal    Optimization stops when stopVal is reached.
      * @param startEvals Initial maximum number of evaluations. Will increase
      *                   incrementally.
      * @param log        Flag indicating if the results are to be logged.
      */
     public static Result optimize(int runs, Fitness fit, Optimizer opt, double[] guess, double limitVal,
-            int startEvals, boolean log) {
+            double stopVal, int startEvals, boolean log) {
         Fitness[] store = new Fitness[500];
-        Optimize retry = new Optimize(runs, fit, guess, store, limitVal, startEvals, 0, 0, opt, 0, log);
+        Optimize retry = new Optimize(runs, fit, guess, store, limitVal, stopVal, 
+                startEvals, 0, 0, opt, 0, log);
         Threads threads = new Threads(retry);
         threads.start();
         threads.join();
         retry.sort();
-        retry.dump(runs);
+        retry.dump(retry._next.get());
         return retry.getResult();
+    }
+
+    public static Result optimize(int runs, Fitness fit, Optimizer opt, double[] guess, double limitVal,
+            int startEvals, boolean log) {
+        return optimize(runs, fit, opt, guess, limitVal, Double.NEGATIVE_INFINITY, startEvals, log);
     }
 
     public static class Optimize implements Runnable {
@@ -71,6 +78,7 @@ public class CoordRetry {
         Optimizer _opt;
         int _popsize;
         double _limitVal;
+        double _stopVal;
         double _bestY = Double.POSITIVE_INFINITY;
         double[] _bestX;
         boolean _log;
@@ -83,6 +91,7 @@ public class CoordRetry {
          * @param guess         Starting point.
          * @param store         Store for optimization results used for crossover.
          * @param limitVal      Maximum value for an optimization result to be stored.
+         * @param stopVal       Optimization stops when stopVal is reached.
          * @param startEvals    Initial maximum number of evaluations. Will increase
          *                      incrementally.
          * @param maxEvalFac    Maximal evaluation number factor relative to startEval.
@@ -91,9 +100,11 @@ public class CoordRetry {
          * @param popsize       Population size used for offspring.
          * @param log           Flag indicating if the results are to be logged.
          */
-        public Optimize(int runs, Fitness fit0, double[] guess, Fitness[] store, double limitVal, int startEvals,
+        public Optimize(int runs, Fitness fit0, double[] guess, Fitness[] store, double limitVal, 
+                double stopVal, int startEvals,
                 int maxEvalFac, int checkInterval, Optimizer opt, int popsize, boolean log) {
             _limitVal = limitVal;
+            _stopVal = stopVal;
             _maxEvals = startEvals > 0 ? startEvals : 1500;
             _maxEvalFac = maxEvalFac > 0 ? maxEvalFac : 50.0;
             _checkInterval = checkInterval > 0 ? checkInterval : 100;
@@ -132,13 +143,16 @@ public class CoordRetry {
         @Override
         public void run() {
             int i;
-            while ((i = _next.getAndIncrement()) < _numRetries) {
+            while ((i = _next.getAndIncrement()) < _numRetries && statY.getMin() >= _stopVal) {
                 if (crossover(i))
                     continue;
                 Fitness fit = _fit0.create();
                 double[] sdev = Utils.array(_fit0._dim, Utils.rnd(0.05, 0.1));
-                fit.minimize(_opt, _fit0.lower(), _fit0.upper(), _guess, sdev, evalNum(), _popsize);
+                fit.minimize(_opt, _fit0.lower(), _fit0.upper(), _guess, sdev, evalNum(), _stopVal, _popsize);
                 addResult(i, fit, _limitVal);
+                if (statY.getMin() < _stopVal) {
+                    int k = 0;
+                }                
             }
         }
 
@@ -205,7 +219,7 @@ public class CoordRetry {
             double[] upper = Utils.minimum(_fit0.upper(), Utils.plus(x0, delta_bound));
             double[] guess = Utils.fitting(x1, lower, upper);
             double[] sdev = Utils.fitting(Utils.sprod(Utils.quot(deltax, _delta), diffFac), 0.001, 0.5);
-            fit.minimize(_opt, lower, upper, guess, sdev, evalNum(), _popsize);
+            fit.minimize(_opt, lower, upper, guess, sdev, evalNum(), _stopVal, _popsize);
             addResult(countRuns, fit, fit1._bestY);
             return true;
         }

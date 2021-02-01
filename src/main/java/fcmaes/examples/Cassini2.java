@@ -1,23 +1,25 @@
 package fcmaes.examples;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import fcmaes.core.CoordRetry;
 import fcmaes.core.Fitness;
+import fcmaes.core.Log;
 import fcmaes.core.Optimizers.DECMA;
 import fcmaes.core.Optimizers.Optimizer;
 import fcmaes.core.Optimizers.Result;
 import fcmaes.core.Utils;
 
-public class Cassini2 extends Fitness {
+public class Cassini2 extends GtopProblem {
 
     /*
      * This example is taken from https://www.esa.int/gsp/ACT/projects/gtop/
      * See also http://www.midaco-solver.com/index.php/about/benchmarks/gtopx
      * where you find implementations in different programming languages. 
      * 
-     * "coord()" solves the problem in less than 70 seconds
-     * on a modern 16-core CPU. 
+     * "coord(new DECMA(), runs))" solves the problem on average in about 20 seconds 
+     * on a modern 16-core CPU (AMD 5950x).
      * Can you provide a faster parallel algorithm in any language?
      */
 
@@ -50,22 +52,18 @@ public class Cassini2 extends Fitness {
         }
     }
 
-    static Result optimize() {
-        Optimizer opt = new DECMA();
-        Cassini2 fit = new Cassini2();
-        double[] sdev = Utils.array(fit._dim, 0.07);
-        return fit.minimizeN(10000, opt, fit.lower(), fit.upper(), null, sdev, 50000, 31, 100.0);
+    double limitVal() {
+        return 20.0;
+    }
+ 
+    double stopVal() {
+        return stopValFac()*8.3830;
     }
 
-    static Result coord() {
-        return CoordRetry.optimize(3000, new Cassini2(), new DECMA(), null, 20.0, 1500, true);
-    }
-
-    public static void main(String[] args) throws NumberFormatException, IOException {
+    public static void main(String[] args) throws FileNotFoundException {
+        Log.setLog();
         Utils.startTiming();
-//      Result res = optimize();
-        Result res = coord();
-        System.out.println(
-                "best = " + res.y + ", time = " + 0.001 * Utils.measuredMillis() + " sec, evals = " + res.evals);
+        Optimizer opt = new DECMA();
+        new Cassini2().test(100, opt, 6000);
     }
 }

@@ -17,6 +17,8 @@ package fcmaes.core;
 
 import java.util.Arrays;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+
 import fcmaes.core.Optimizers.Result;
 
 public class De {
@@ -47,14 +49,14 @@ public class De {
     /**
      * Ask for argument vector.
      * 
-     * @param p      	Set to position of argument.     
+     * @param pos      	Set to position of argument.     
      * @return  		Argument vector for evaluation.
      */
 
-    public double[] ask(int[] p) {
+    public double[] ask(MutableInt pos) {
         double[] asked = Jni.askDE(nativeDe);
         int dim = asked.length - 1;
-        p[0] = (int) asked[dim];
+        pos.setValue((int) asked[dim]);
         return Arrays.copyOfRange(asked, 0, dim);
     }
 
@@ -117,10 +119,10 @@ public class De {
         for (; evals < maxEvals && stop == 0; evals += workers) {
             double[][] xs = new double[workers][dim];
             int[] pos = new int[workers];
-            int[] cp = new int[1];
+            MutableInt cp = new MutableInt();
             for (int p = 0; p < workers; p++) {
                 xs[p] = opt.ask(cp);
-                pos[p] = cp[0];
+                pos[p] = cp.intValue();
             }
             double[] ys = evaluator.eval(xs);
             for (int p = 0; p < workers && stop == 0; p++)

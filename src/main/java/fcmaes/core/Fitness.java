@@ -169,15 +169,16 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
      * @param guess    Starting point.
      * @param sigma    Individual input sigma.
      * @param maxEvals Maximum number of evaluations.
+     * @param stopVal  Optimization stops when stopVal is reached.
      * @param popsize  Population size used for offspring.
      * @return Result Minimized function value / optimized point.
      */
 
     public Result minimize(Optimizer opt, double[] lower, double[] upper, double[] guess, double[] sigma, int maxEvals,
-            int popsize) {
+            double stopVal, int popsize) {
         if (guess == null)
             guess = Utils.rnd(lower, upper);
-        return opt.minimize(this, lower, upper, sigma, guess, maxEvals, Double.NEGATIVE_INFINITY, popsize);
+        return opt.minimize(this, lower, upper, sigma, guess, maxEvals, stopVal, popsize);
     }
 
     /**
@@ -190,13 +191,14 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
      * @param guess    Starting point.
      * @param sigma    Individual input sigma.
      * @param maxEvals Maximum number of evaluations.
+     * @param stopVal  Optimization stops when stopVal is reached.
      * @param popsize  Population size used for offspring.
      */
 
     public void minimizeSer(int runs, Optimizer opt, double[] lower, double[] upper, double[] guess, double[] sigma,
-            int maxEvals, int popsize) {
-        for (int i = 0; i < runs; i++) {
-            minimize(opt, lower, upper, guess, sigma, maxEvals, popsize);
+            int maxEvals, double stopVal, int popsize) {
+        for (int i = 0; i < runs && _bestY > stopVal; i++) {
+            minimize(opt, lower, upper, guess, sigma, maxEvals, stopVal, popsize);
         }
     }
 
@@ -210,13 +212,14 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
      * @param guess    Starting point.
      * @param sigma    Individual input sigma.
      * @param maxEvals Maximum number of evaluations.
+     * @param stopVal  Optimization stops when stopVal is reached.
      * @param popsize  Population size used for offspring.
      * @return Result Minimized function value / optimized point.
      */
 
     public Result minimizeN(int runs, Optimizer opt, double[] lower, double[] upper, double[] guess, double[] sigma,
-            int maxEvals, int popsize, double limit) {
-        return opt.minimizeN(runs, this, lower, upper, sigma, guess, maxEvals, Double.NEGATIVE_INFINITY, popsize,
+            int maxEvals, double stopVal, int popsize, double limit) {
+        return opt.minimizeN(runs, this, lower, upper, sigma, guess, maxEvals, stopVal, popsize,
                 limit);
     }
 

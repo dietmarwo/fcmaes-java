@@ -7,6 +7,8 @@ package fcmaes.core;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+
 public class Optimizers {
 
     public static class Result {
@@ -259,11 +261,11 @@ public class Optimizers {
             De de = new De(lower, upper, guess, popsize, 200, 0.5, 0.9, Utils.rnd().nextLong(), 0);
             int evals = 0;
             int stop = 0;
-            int[] p = new int[1];
+            MutableInt pos = new MutableInt();
             for (; evals < maxEvals && stop == 0; evals++) {
-                double[] x = de.ask(p);
+                double[] x = de.ask(pos);
                 double y = fit.value(x);
-                stop = de.tell(x, y, p[0]);
+                stop = de.tell(x, y, pos.intValue());
             }
             return new Result(fit, evals);
         }
@@ -589,7 +591,7 @@ public class Optimizers {
         public void run() {
             for (;;) {
                 int i = count.getAndIncrement();
-                if (i >= runs)
+                if (i >= runs || (stat != null && stat.getMin() <= stopVal))
                     return;
                 if (limit != 0) {
                     Fitness f = fit.create();

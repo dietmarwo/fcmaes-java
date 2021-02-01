@@ -1,28 +1,35 @@
 package fcmaes.examples;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import fcmaes.core.CoordRetry;
 import fcmaes.core.Fitness;
+import fcmaes.core.Log;
 import fcmaes.core.Optimizers.DECMA;
 import fcmaes.core.Optimizers.DEGCLDECMA;
 import fcmaes.core.Optimizers.Optimizer;
 import fcmaes.core.Optimizers.Result;
 import fcmaes.core.Utils;
 
-public class Tandem extends Fitness {
+public class Tandem extends GtopProblem {
 
     /*
      * This example is taken from https://www.esa.int/gsp/ACT/projects/gtop/
      * See also http://www.midaco-solver.com/index.php/about/benchmarks/gtopx
      * where you find implementations in different programming languages. 
      * 
-     * "coord()" solves the problem often in less than 400 seconds
-     * on a modern 16-core CPU. 
+     * "coord(new DECMA(), runs))" solves the problem on average in about 400 seconds 
+     * on a modern 16-core CPU (AMD 5950x).
      * Can you provide a faster parallel algorithm in any language?
      * 
      * Note that Tandem is a problem were DEGCLDECMA() could be 
      * stronger than DECMA() (but slightly slower) for coordinated retry. 
+     * 
+     * Note that according to https://www.esa.int/gsp/ACT/projects/gtop/tandem_con
+     * it took nearly 5 years until Paul Musegaas from TU Delft in 2013 found the 
+     * best solution for the constraint EVEES variant of this problem used here. 
+     * The best solution found before (from Dario Izzo) scored 1.7% lower.  
      */
 
     @Override
@@ -54,25 +61,21 @@ public class Tandem extends Fitness {
             return 1E10;
         }
     }
-
-    static Result optimize() {
-        Optimizer opt = new DECMA();
-        Tandem fit = new Tandem();
-        double[] sdev = Utils.array(fit._dim, 0.07);
-        return fit.minimizeN(10000, opt, fit.lower(), fit.upper(), null, sdev, 10000, 31, 100.0);
-    }
-
-    static Result coord() {
-//        return CoordRetry.optimize(20000, new Tandem(), new DEGCLDECMA(), null, -300.0, 1500, true);
-        return CoordRetry.optimize(20000, new Tandem(), new DECMA(), null, -300.0, 1500, true);
+ 
+    double limitVal() {
+        return -300.0;
     }
  
-    public static void main(String[] args) throws NumberFormatException, IOException {
+    double stopVal() {
+        return -1500.46 / stopValFac();
+    }
+
+    public static void main(String[] args) throws FileNotFoundException {
+        Log.setLog();
         Utils.startTiming();
-//      Result res = optimize();
-        Result res = coord();
-        System.out.println(
-                "best = " + res.y + ", time = " + 0.001 * Utils.measuredMillis() + " sec, evals = " + res.evals);
+        Optimizer opt = new DECMA();
+//        Optimizer opt = new DEGCLDECMA();
+        new Tandem().test(100, opt, 20000);
     }
 
 }

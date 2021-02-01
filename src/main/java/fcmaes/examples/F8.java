@@ -5,6 +5,8 @@
 
 package fcmaes.examples;
 
+import java.io.FileNotFoundException;
+
 import org.hipparchus.ode.ODEIntegrator;
 import org.hipparchus.ode.ODEState;
 import org.hipparchus.ode.OrdinaryDifferentialEquation;
@@ -12,6 +14,7 @@ import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
 
 import fcmaes.core.Fitness;
 import fcmaes.core.Jni;
+import fcmaes.core.Log;
 import fcmaes.core.Optimizers.DECMA;
 import fcmaes.core.Optimizers.Optimizer;
 import fcmaes.core.Optimizers.Result;
@@ -138,10 +141,9 @@ public class F8 extends Fitness {
         return new F8(_dim);
     }
 
-    public static void main(String[] args) {
-
+    public static void main(String[] args) throws FileNotFoundException {
+        Log.setLog();
         Utils.startTiming();
-
         int dim = 6;
         double[] lower = Utils.array(dim, 0);
         double[] upper = Utils.array(dim, 2);
