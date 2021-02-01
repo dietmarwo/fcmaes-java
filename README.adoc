@@ -50,7 +50,9 @@ slower, an AMD 3950x CPU is about 10-15% slower.
 |Gtoc1 |100 |-1581950 |-1574079.60199 |100% |15.05s |14.73s
 |Messenger |100 |8.6299 |8.67305 |100% |10.75s |9.16s
 |Rosetta |100 |1.3433 |1.35002 |100% |14.36s |5.58s
-|Tandem |100 |-1500.46 |-1492.99502 |46% |401.64s |429.54s
+|Tandem |100 |-1500.46 |-1492.99502 |62% |329.7s |255.38s
+|Messenger Full |100 |1.9579 |1.96769 |39% |2244.1s |2150.84s
+|Messenger Full |100 |1.9579 |2.0 |59% |1249.94s |996.06s
 |=========================================================
 
 Note that 'stopVal' is the value determining success and
@@ -69,7 +71,7 @@ was applied for all problems, using the same parameters both for the optimizatio
 |Gtoc1 |100 |-1581950 |-1581949 |99% |33.29s |30.89s
 |Messenger |100 |8.6299 |8.62995 |98% |32.35s |21.77s
 |Rosetta |100 |1.3433 |1.34335 |51% |99.42s |90.21s
-|Tandem |100 |-1500.46 |-1500 |38% |494.56s |467.39s
+|Tandem |100 |-1500.46 |-1500 |57% |374.74s |293.89s
 |=========================================================
  
 === Compilation
@@ -109,12 +111,12 @@ For comparison: http://www.midaco-solver.com/data/pub/PDPTA20_Messenger.pdf[MXHC
 Hokudai Supercomputer using Intel Xeon Gold 6148 CPU’s with a clock rate of 2.7 GHz Messenger Full can be solved 
 in about 1 hour using the MXHCP algorithm. 
 
-50 runs of the coordinated parallel retry were performed on a single AMD 5950x CPU 
+102 runs of the coordinated parallel retry were performed on a single AMD 5950x CPU 
 using the DE->CMA sequence as optimization algorithm: 
 
 image::DE-CMA_AMD_5950x.png[]
 
-24 of the 50 runs reached a good result below 2 km/s:
+60 of the 102 runs reached a good result below 2 km/s:
 
 image::DE-CMA_AMD_5950x.2.png[]  
 

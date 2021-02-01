@@ -411,7 +411,6 @@ public:
         vec arz1 = normalVec(dim, *rs);
         vec delta = (BD * arz1) * sigma;
         vec arx1 = fitfun->getClosestFeasible(xmean + delta);
-//        cout <<endl<< BD <<endl;
         return fitfun->decode(arx1);
     }
 
@@ -427,16 +426,11 @@ public:
         told++;
 
         if (told >= popsize) {
-
-//        	 cout <<endl<< arx <<endl;
-//           	 cout <<endl<< fitness <<endl;
-
             xmean = fitfun->getClosestFeasible(xmean);
             try {
                 arz = (BD.inverse()
                         * ((arx - xmean.replicate(1, popsize)) / sigma));
             } catch (std::exception &e) {
-//                cout << e.what() << endl;
                 arz = normal(dim, popsize, *rs);
             }
             updateCMA();

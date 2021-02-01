@@ -18,8 +18,8 @@ public class MessFull extends GtopProblem {
      * See also http://www.midaco-solver.com/index.php/about/benchmarks/gtopx
      * where you find implementations in different programming languages. 
      * 
-     * "coord(new DECMA(), runs))" solves the problem on average in about 2000 seconds 
-     * on a modern 16-core CPU (AMD 5950x). A value of 2.0 is reached in about 1000 seconds.
+     * "coord(new DECMA(), runs))" solves the problem on average in about 2250 seconds 
+     * on a modern 16-core CPU (AMD 5950x). A value of 2.0 is reached in about 1250 seconds.
      * Can you provide a faster parallel algorithm in any language?
      * 
      * The Messenger Full problem is the hardest of the GTOP problems, 

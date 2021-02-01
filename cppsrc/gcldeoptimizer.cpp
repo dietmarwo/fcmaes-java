@@ -151,7 +151,6 @@ private:
     vec upper;
     long evaluationCounter;
     vec scale;
-    vec invScale;
 };
 
 class GclDeOptimizer {

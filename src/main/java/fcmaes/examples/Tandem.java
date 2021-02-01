@@ -19,7 +19,7 @@ public class Tandem extends GtopProblem {
      * See also http://www.midaco-solver.com/index.php/about/benchmarks/gtopx
      * where you find implementations in different programming languages. 
      * 
-     * "coord(new DECMA(), runs))" solves the problem on average in about 400 seconds 
+     * "coord(new DECMA(), runs))" solves the problem on average in about 330 seconds 
      * on a modern 16-core CPU (AMD 5950x).
      * Can you provide a faster parallel algorithm in any language?
      * 
