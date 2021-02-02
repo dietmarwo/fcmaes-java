@@ -20,7 +20,7 @@ public class MessFull extends GtopProblem {
      * 
      * "coord(new DECMA(), runs))" solves the problem on average in about 2250 seconds 
      * on a modern 16-core CPU (AMD 5950x). A value of 2.0 is reached in about 1250 seconds.
-     * Can you provide a faster parallel algorithm in any language?
+     * Can you provide a faster parallel algorithm?
      * 
      * The Messenger Full problem is the hardest of the GTOP problems, 
      * the only one beside Tandem which isn't solved in every coord() run. Sometimes

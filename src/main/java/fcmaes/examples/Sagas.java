@@ -18,9 +18,9 @@ public class Sagas extends GtopProblem {
      * See also http://www.midaco-solver.com/index.php/about/benchmarks/gtopx
      * where you find implementations in different programming languages. 
      * 
-     * "coord(new DECMA(), runs))" solves the problem on average in about 15 seconds 
+     * "coord(new DECMA(), runs))" solves the problem on average in about 2.5 seconds 
      * on a modern 16-core CPU (AMD 5950x).
-     * Can you provide a faster parallel algorithm in any language?
+     * Can you provide a faster parallel algorithm?
      */
 
     @Override
@@ -55,14 +55,14 @@ public class Sagas extends GtopProblem {
     }
 
     double stopVal() {
-        return 18.1877 * stopValFac();
+        return 18.188 * stopValFac();
     }
 
     public static void main(String[] args) throws FileNotFoundException {
         Log.setLog();
         Utils.startTiming();
         Optimizer opt = new DECMA();
-        new Sagas().test(100, opt, 2000);
+        new Sagas().test(100, opt, 4000);
     }
 
 }

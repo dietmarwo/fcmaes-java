@@ -21,7 +21,7 @@ public class Tandem extends GtopProblem {
      * 
      * "coord(new DECMA(), runs))" solves the problem on average in about 330 seconds 
      * on a modern 16-core CPU (AMD 5950x).
-     * Can you provide a faster parallel algorithm in any language?
+     * Can you provide a faster parallel algorithm?
      * 
      * Note that Tandem is a problem were DEGCLDECMA() could be 
      * stronger than DECMA() (but slightly slower) for coordinated retry. 

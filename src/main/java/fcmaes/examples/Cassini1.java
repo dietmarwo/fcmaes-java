@@ -20,7 +20,7 @@ public class Cassini1 extends GtopProblem {
      * 
      * "coord(new DECMA(), runs))" solves the problem on average in about 1.6 seconds 
      * on a modern 16-core CPU (AMD 5950x).
-     * Can you provide a faster parallel algorithm in any language?
+     * Can you provide a faster parallel algorithm?
      */
 
     double[] _rpBest;

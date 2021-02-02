@@ -9,6 +9,10 @@ import fcmaes.core.Utils;
 
 public class TestGtop {
     
+    /*
+     * Generates the log files used to produce the tables in the README. 
+     */
+	
     public static void main(String[] args) throws FileNotFoundException {
         Log.setLog();
         Utils.startTiming();
@@ -19,7 +23,7 @@ public class TestGtop {
         new Cassini2().test(numRuns, opt, 6000);
         new Messenger().test(numRuns, opt, 8000);
         new Rosetta().test(numRuns, opt, 4000);
-        new Sagas().test(numRuns, opt, 2000);
+        new Sagas().test(numRuns, opt, 4000);
         new Tandem().test(numRuns, opt, 20000);
         new MessFull().test(numRuns, opt, 50000);
     }
