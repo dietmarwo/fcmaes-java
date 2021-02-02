@@ -38,8 +38,7 @@ given https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/
 A problem is considered "solved" if you find a solution not worse more than 0.5% compared to the
 best solution known. If an optimizer needs multiple retries, take the average amount of time
 for all retries until the problem is solved. You may use any tool / programming language. The
-solution times given in the tables below are for Linux / AMD 5950x CPU. Windows is slightly
-slower, an AMD 3950x CPU is about 10-15% slower. 
+solution times given in the tables below are for Linux / AMD 5950x CPU.
 
 .GTOP coordinated retry results for stopVal = 1.005*absolute_best
 [width="80%",cols="2,^2,^2,^2,^2,^2,^2",options="header"]
@@ -60,8 +59,11 @@ Note that 'stopVal' is the value determining success and
 mean time' includes the time for failed runs.
 Execute 
 https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/examples/TestGtop.java[TestGtop.java]
-to reproduce these results - you have to evaluate the logs. The same optimization algorithm
-was applied for all problems, using the same parameters both for the optimization algorithm and the coordinated retry.
+The same optimization algorithm
+was applied for all problems, using the same parameters both for the 
+optimization algorithm and the coordinated retry. In theory it should be possible to 
+design a superior algorithm specifically optimized for a given task. 
+
 
 .GTOP coordinated retry results for reaching the absolute best value
 [width="80%",cols="2,^2,^2,^2,^2,^2,^2",options="header"]
