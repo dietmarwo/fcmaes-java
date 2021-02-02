@@ -41,7 +41,7 @@ for all retries until the problem is solved. The
 solution times given in the tables below are for Linux / AMD 5950x CPU.
 
 .GTOP coordinated retry results for stopVal = 1.005*absolute_best
-[width="80%",cols="2,^2,^2,^2,^2,^2,^2",options="header"]
+[width="80%",cols="3,^2,^2,^2,^2,^2,^2",options="header"]
 |=========================================================
 |problem |runs | absolute best |stopVal |success rate |mean time|sdev time
 |Cassini1 |100 |4.9307 |4.95535 |100% |1.57s |3.16s
@@ -50,7 +50,7 @@ solution times given in the tables below are for Linux / AMD 5950x CPU.
 |Messenger |100 |8.6299 |8.67305 |100% |10.75s |9.16s
 |Rosetta |100 |1.3433 |1.35002 |100% |14.36s |5.58s
 |Sagas |100 |18.188 |18.27894 |100% |2.4s |1.77s
-|Tandem |100 |-1500.46 |-1493.0 |62% |329.7s |255.38s
+|Tandem EVEES Constrained |100 |-1500.46 |-1493.0 |62% |329.7s |255.38s
 |Messenger Full |100 |1.9579 |1.96769 |39% |2244.1s |2150.84s
 |Messenger Full |100 |1.9579 |2.0 |59% |1249.94s |996.06s
 |=========================================================
