@@ -37,7 +37,7 @@ The challenge is now to solve these problems on a modern 16+ core CPU faster tha
 given https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/examples[examples].
 A problem is considered "solved" if you find a solution not worse more than 0.5% compared to the
 best solution known. If an optimizer needs multiple retries, take the average amount of time
-for all retries until the problem is solved. You may use any tool / programming language. The
+for all retries until the problem is solved. The
 solution times given in the tables below are for Linux / AMD 5950x CPU.
 
 .GTOP coordinated retry results for stopVal = 1.005*absolute_best
