@@ -12,7 +12,7 @@ public class Jni {
 
     public static native double cassini1_C(double[] x, double[] rp);
 
-    public static native double sagas_C(double[] x, double DVtot, double DVonboard);
+    public static native double sagas_C(double[] x);
 
     public static native double rosetta_C(double[] x);
 
@@ -46,8 +46,8 @@ public class Jni {
         return cassini1_C(x, rp);
     }
 
-    public static double sagas(double[] x, double DVtot, double DVonboard) {
-        return sagas_C(x, DVtot, DVonboard);
+    public static double sagas(double[] x) {
+        return sagas_C(x);
     }
 
     public static double rosetta(double[] x) {

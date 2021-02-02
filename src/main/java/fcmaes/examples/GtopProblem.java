@@ -35,12 +35,12 @@ public class GtopProblem extends Fitness {
         return CoordRetry.optimize(num, this, opt, null, limitVal(), stopVal(), 1500, true);
     }
     
-    void test(int retries, Optimizer opt, int num) {
+    void test(int runs, Optimizer opt, int maxRetries) {
         System.out.println("Testing coordinated retry " + opt.getClass().getName().split("\\$")[1] + " " + 
                 this.getClass().getName().split("\\.")[2] + " stopVal = " + Utils.r(stopVal()));
-        for (int i = 0; i < retries; i++) {
+        for (int i = 0; i < runs; i++) {
             Utils.startTiming();
-            Result res = coord(opt, num);
+            Result res = coord(opt, maxRetries);
             System.out.println(i + ": " + 
                     "best = " + res.y + ", time = " + 0.001 * Utils.measuredMillis() + 
                     " sec, evals = " + res.evals);        }

@@ -42,10 +42,10 @@ JNIEXPORT jdouble JNICALL Java_fcmaes_examples_Jni_cassini1_1C
 /*
  * Class:     fcmaes_examples_Jni
  * Method:    sagas_C
- * Signature: ([DDD)D
+ * Signature: ([D)D
  */
 JNIEXPORT jdouble JNICALL Java_fcmaes_examples_Jni_sagas_1C
-  (JNIEnv *, jclass, jdoubleArray, jdouble, jdouble);
+  (JNIEnv *, jclass, jdoubleArray);
 
 /*
  * Class:     fcmaes_examples_Jni
