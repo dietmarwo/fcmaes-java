@@ -65,7 +65,7 @@ Note that 'stopVal' is the value determining success and
 'mean time' includes the time for failed runs.
 Execute 
 https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/examples/TestGtop.java[TestGtop.java]
-The same optimization algorithm
+to reproduce these results. The same optimization algorithm
 was applied for all problems, using the same parameters both for the 
 optimization algorithm and the coordinated retry. In theory it should be possible to 
 design a superior algorithm specifically optimized for a given task. 
