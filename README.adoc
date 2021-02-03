@@ -26,19 +26,25 @@ see https://github.com/dietmarwo/fcmaes-java/blob/master/CTOC11.adoc[fcmaes for 
 
 === Optimization Challenge
 
-fcmaes-java provides very fast parallel
+In the literature optimization algorithms are often compared by the average result they achieve using a 
+specific number of function evaluations. But in the real world faced with real optimization problems we are
+usually interested in a different metric: How long does it take to compute a reasonable solution, say
+not worse than 0.5% above the absolute optimum, with the given hardware. For an optimization library
+this means: How long does it take to compute a reasonable solution if I choose the best algorithm(s) of
+the library, optimally configured and optimally parallelized on the given hardware.
+
+fcmaes-java provides fast parallel
 https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/examples[example solvers] for the 
 real world space flight design problems https://www.esa.int/gsp/ACT/projects/gtop[GTOP] and for 
 the https://mintoc.de/index.php/F-8_aircraft[F-8_aircraft] problem based on differential equations. 
-In http://www.midaco-solver.com/index.php/about/benchmarks/gtopx[GTOPX] you can find implementations 
+On http://www.midaco-solver.com/index.php/about/benchmarks/gtopx[GTOPX] you can find implementations 
 of the corresponding objective functions using different programming languages.
 
-The challenge is now to solve these problems on a modern 16+ core CPU faster than the  
+The challenge is now to solve these problems on a modern many-core CPU faster than the  
 given https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/examples[examples].
-A problem is considered "solved" if you find a solution not worse more than 0.5% compared to the
-best solution known. If an optimizer needs multiple retries, take the average amount of time
-for all retries until the problem is solved. The
-solution times given in the tables below are for Linux / AMD 5950x CPU.
+If an optimizer needs multiple retries, take the average amount of time
+for all retries until the problem is solved. The solution times given in the tables 
+below are for Linux / AMD 5950x CPU.
 
 .GTOP coordinated retry results for stopVal = 1.005*absolute_best
 [width="80%",cols="3,^2,^2,^2,^2,^2,^2",options="header"]
@@ -63,7 +69,6 @@ The same optimization algorithm
 was applied for all problems, using the same parameters both for the 
 optimization algorithm and the coordinated retry. In theory it should be possible to 
 design a superior algorithm specifically optimized for a given task. 
-
 
 .GTOP coordinated retry results for reaching the absolute best value
 [width="80%",cols="2,^2,^2,^2,^2,^2,^2",options="header"]
