@@ -62,7 +62,7 @@ below are for Linux / AMD 5950x CPU.
 |=========================================================
 
 Note that 'stopVal' is the value determining success and
-mean time' includes the time for failed runs.
+'mean time' includes the time for failed runs.
 Execute 
 https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/examples/TestGtop.java[TestGtop.java]
 The same optimization algorithm
