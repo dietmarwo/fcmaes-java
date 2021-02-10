@@ -5,24 +5,14 @@
 
 package fcmaes.core;
 
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import fcmaes.core.Optimizers.CMA;
 import fcmaes.core.Optimizers.Optimizer;
 import fcmaes.core.Optimizers.Result;
-import fcmaes.examples.Cassini1;
 
 public class CoordRetry {
-
-    TreeMap<Double, Fitness> _store;
-
-    public CoordRetry() {
-        _store = new TreeMap<Double, Fitness>();
-    }
 
     /**
      * Perform a coordinated parallel retry. To be used if the objective function is
