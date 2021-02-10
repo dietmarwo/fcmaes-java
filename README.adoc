@@ -31,7 +31,7 @@ specific number of function evaluations. But in the real world faced with real o
 usually interested in a different metric: How long does it take to compute a reasonable solution, say
 not worse than 0.5% above the absolute optimum, with the given hardware. For an optimization library
 this means: How long does it take to compute a reasonable solution if I choose the best algorithm(s) of
-the library, optimally configured and optimally parallelized on the given hardware.
+the library, optimally configured and optimally parallelized on the given hardware?
 
 fcmaes-java provides fast parallel
 https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/java/fcmaes/examples[example solvers] for the 
@@ -71,7 +71,7 @@ optimization algorithm and the coordinated retry. In theory it should be possibl
 design a superior algorithm specifically optimized for a given task. 
 
 .GTOP coordinated retry results for reaching the absolute best value
-[width="80%",cols="2,^2,^2,^2,^2,^2,^2",options="header"]
+[width="80%",cols="3,^2,^2,^2,^2,^2,^2",options="header"]
 |=========================================================
 |problem |runs |absolute best |stopVal |success rate |mean time|sdev time
 |Cassini1 |100 |4.9307 |4.93075 |100% |5.32s |6.9s
@@ -80,8 +80,27 @@ design a superior algorithm specifically optimized for a given task.
 |Messenger |100 |8.6299 |8.62995 |98% |32.35s |21.77s
 |Rosetta |100 |1.3433 |1.34335 |51% |99.42s |90.21s
 |Sagas |100 |18.188 |18.189 |100% |2.81s |2.25s
-|Tandem |100 |-1500.46 |-1500 |57% |374.74s |293.89s
+|Tandem EVEES Constrained|100 |-1500.46 |-1500 |57% |374.74s |293.89s
 |=========================================================
+
+One improvement idea is to replace the DE algorithm used by 
+https://esa.github.io/pagmo2/docs/cpp/algorithms/de1220.html[pg.de1220],
+the excellent differential evolution variant from pagmo2. 
+This improves the tandem result preserving the others:
+
+.GTOP coordinated retry results for stopVal = 1.005*absolute_best
+[width="80%",cols="3,^2,^2,^2,^2,^2,^2",options="header"]
+|=========================================================
+|Cassini1 |100 |4.9307 |4.95535 |100% |0.95s |1.05s
+|Cassini2 |100 |8.383 |8.42491 |100% |24.62s |12.0s
+|Gtoc1 |100 |-1581950 |-1574080 |100% |11.62s |8.94s
+|Messenger |100 |8.6299 |8.67305 |100% |9.37s |4.96s
+|Rosetta |100 |1.3433 |1.35002 |100% |15.34s |4.37s
+|Tandem EVEES Constrained |100 |-1500.46 |-1493.0 |91% |172.88s |124.33s
+|Messenger Full |100 |1.9579 |1.96769 |45% |2221.94s |1783.01s
+|Messenger Full |100 |1.9579 |2.0 |62% |1443.53s |1018.33s
+|=========================================================
+
  
 === Compilation
  
