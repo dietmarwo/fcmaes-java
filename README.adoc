@@ -91,6 +91,7 @@ This improves the tandem result preserving the others:
 .GTOP coordinated retry results for stopVal = 1.005*absolute_best
 [width="80%",cols="3,^2,^2,^2,^2,^2,^2",options="header"]
 |=========================================================
+|problem |runs |absolute best |stopVal |success rate |mean time|sdev time
 |Cassini1 |100 |4.9307 |4.95535 |100% |0.95s |1.05s
 |Cassini2 |100 |8.383 |8.42491 |100% |24.62s |12.0s
 |Gtoc1 |100 |-1581950 |-1574080 |100% |11.62s |8.94s
