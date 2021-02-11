@@ -140,9 +140,6 @@ public class CoordRetry {
                 double[] sdev = Utils.array(_fit0._dim, Utils.rnd(0.05, 0.1));
                 fit.minimize(_opt, _fit0.lower(), _fit0.upper(), _guess, sdev, evalNum(), _stopVal, _popsize);
                 addResult(i, fit, _limitVal);
-                if (statY.getMin() < _stopVal) {
-                    int k = 0;
-                }                
             }
         }
 
