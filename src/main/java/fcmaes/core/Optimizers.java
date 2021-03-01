@@ -507,7 +507,7 @@ public class Optimizers {
                 int maxEvals, double stopVal, int popsize) {
             if (popsize <= 0)
                 popsize = 31;
-            double deEvals = Utils.rnd(0.1, 0.3);
+            double deEvals = Utils.rnd(0.1, 0.5);
             double cmaEvals = 1.0 - deEvals;
             int evals = Jni.optimizeDE(fit, lower, upper, guess, (int) (deEvals * maxEvals), stopVal, popsize, 200, 0.5,
                     0.9, Utils.rnd().nextLong(), 0);
@@ -537,7 +537,7 @@ public class Optimizers {
             if (popsize <= 0)
                 popsize = 31;
             int evals = 0;
-            double deEvals = Utils.rnd(0.1, 0.3);
+            double deEvals = Utils.rnd(0.1, 0.5);
             double cmaEvals = 1.0 - deEvals;
             if (Utils.rnd().nextBoolean())
                 evals += Jni.optimizeDE(fit, lower, upper, guess, (int) (deEvals * maxEvals), stopVal, 
