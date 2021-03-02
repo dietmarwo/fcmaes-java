@@ -12,7 +12,14 @@ package fcmaes.core;
  * Note that new DE().minimize is faster because it involves less JNI overhead.
  * 
  * Note that minimize_parallel shouldn't be used for parallel optimization retry. 
- * In general parallel optimization retry scales better than parallel function evaluation. 
+ * In general parallel optimization retry scales better than parallel function evaluation.
+ *  
+ * The wrapped Eigen based implementation of differential evolution uses the DE/best/1 strategy.
+    Uses three deviations from the standard DE algorithm:
+    a) temporal locality introduced in 
+        https://www.researchgate.net/publication/309179699_Differential_evolution_for_protein_folding_optimization_based_on_a_three-dimensional_AB_off-lattice_model
+    b) reinitialization of individuals based on their age.
+    c) oscillating CR/F parameters."""
  */
 
 import java.util.Arrays;
