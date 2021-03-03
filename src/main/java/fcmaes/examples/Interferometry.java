@@ -13,6 +13,9 @@ import fcmaes.core.CoordRetry;
 import fcmaes.core.De;
 import fcmaes.core.Fitness;
 import fcmaes.core.Log;
+import fcmaes.core.Optimizers.CMA;
+import fcmaes.core.Optimizers.DE;
+import fcmaes.core.Optimizers.DECMA;
 import fcmaes.core.Optimizers.Optimizer;
 import fcmaes.core.Optimizers.Result;
 import fcmaes.core.Utils;
@@ -208,11 +211,11 @@ public class Interferometry extends Fitness {
     }
     
     static void checkGoodResult() {
-        double[] x = new double[]{-0.5525744962819084, -0.43883468127578895, -0.6785398184930235, -0.08114253160789063, 
-                -0.8411258059974988, -0.6056851931956526, -0.5663895555289944, 0.26568007012429795, -0.058986786386966486, 
-                -0.6311239695091586, -1.0, 0.9997028893794696, 0.9994590383759787, 0.9279325579572855, 0.981547346917406, 
-                0.9999999999995614, 0.9961605447057663, 0.9999999984827094, 0.9349754944331856, 0.676027417863097, 
-                0.9998915752821322, 1.0};
+        double[] x = new double[]{-0.04207567070575896, -0.12626252701191398, -0.5401832679041176, 0.06388017124828997, 
+                0.1570632365176983, -0.8471357162115598, -0.11259142034225719, -0.08546452239949272, -0.04200221510495139, 
+                -0.6617333706489703, -0.17903139773021548, 0.22614920127948726, 0.2366652945287067, 0.4478005711408385, 
+                0.06300561277443284, 0.425970136090571, -0.32632396425541416, 0.23565240320456504, 0.23239777670514036, 
+                0.076057597284884, 0.41334839654927047, 0.2314875896061321};
         Interferometry inter = new Interferometry("img/orion.jpg", 11, 512);
         double val = inter.eval(x);
         System.out.println("fval = " + val + " x = " + Arrays.toString(x));
@@ -233,13 +236,19 @@ public class Interferometry extends Fitness {
         
         // parallel retry Differential Evolution
 //        inter.retry(new DE(), 128);
-        
+
+        // parallel retry CMA-ES
+//      inter.retry(new CMA(), 128);
+
         // parallel retry DE->CMA sequence
 //        inter.retry(new DECMA(), 128);
         
         // smart retry Differential Evolution
 //        inter.smart(new DE(), 10000);
-        
+
+        // smart retry CMA-ES
+//      inter.smart(new CMA(), 10000);
+
         // smart retry DE->CMA sequence 
 //        inter.smart(new DECMA(), 10000);
     }    
