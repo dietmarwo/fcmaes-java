@@ -237,10 +237,10 @@ public class Interferometry extends Fitness {
         // parallel retry DE->CMA sequence
 //        inter.retry(new DECMA(), 128);
         
-        // parallel retry Differential Evolution
+        // smart retry Differential Evolution
 //        inter.smart(new DE(), 10000);
         
-        // parallel retry DE->CMA sequence 
+        // smart retry DE->CMA sequence 
 //        inter.smart(new DECMA(), 10000);
     }    
      
