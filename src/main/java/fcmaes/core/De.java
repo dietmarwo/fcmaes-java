@@ -117,6 +117,8 @@ public class De {
     public static Result minimize_parallel(Fitness fit, double[] lower, double[] upper, double[] guess, int maxEvals,
             double stopfitness, int popsize, double keep, double F, double CR, long seed, int runid, int workers) {
         int dim = fit._dim;
+        if (guess == null)
+            guess = Utils.rnd(lower, upper);
         De opt = new De(lower, upper, guess, popsize, keep, F, CR, Utils.rnd().nextLong(), 0);
         if (workers <= 0 || workers > Threads.numWorkers()) // set default and limit
             workers = Threads.numWorkers();

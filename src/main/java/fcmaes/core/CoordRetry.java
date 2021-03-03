@@ -125,7 +125,7 @@ public class CoordRetry {
                         System.out.println(iter + " " + _numStored + " " + Utils.r(_evalFac, 1) + " " + Utils.r(time)
                                 + " " + _countAll.get() + " " + Utils.r((_countAll.get() + 0.0) / time) + " "
                                 + Utils.r(best, 8) + " " + Utils.r(worst) + " " + statY.toString() + " " + storeVals()
-                                + " " + Arrays.toString(_store[0]._bestX));
+                                + " " + Arrays.toString(_bestX));
                     }
                 }
         }

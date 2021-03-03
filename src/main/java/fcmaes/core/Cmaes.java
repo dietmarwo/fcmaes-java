@@ -103,6 +103,10 @@ public class Cmaes {
             int maxEvals, double stopValue, int popsize, int mu, double accuracy, long seed, int runid,
             int normalize, int update_gap, int workers) {
         int dim = fit._dim;
+        if (guess == null)
+            guess = Utils.rnd(lower, upper);
+        if (sigma == null)
+            sigma = Utils.array(dim, 0.3);
         Cmaes opt = new Cmaes(lower, upper, sigma, guess, popsize, mu, accuracy, seed, runid, normalize, update_gap);
         if (workers <= 0 || workers > Threads.numWorkers()) // set default and limit
             workers = Threads.numWorkers();
