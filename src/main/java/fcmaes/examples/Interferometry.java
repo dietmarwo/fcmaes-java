@@ -16,6 +16,7 @@ import fcmaes.core.Log;
 import fcmaes.core.Optimizers.CMA;
 import fcmaes.core.Optimizers.DE;
 import fcmaes.core.Optimizers.DECMA;
+import fcmaes.core.Optimizers.Bite;
 import fcmaes.core.Optimizers.Optimizer;
 import fcmaes.core.Optimizers.Result;
 import fcmaes.core.Utils;
@@ -236,6 +237,9 @@ public class Interferometry extends Fitness {
         
         // parallel retry Differential Evolution
 //        inter.retry(new DE(), 128);
+
+        // parallel retry Bite
+//        inter.retry(new Bite(1), 64);
 
         // parallel retry CMA-ES
 //      inter.retry(new CMA(), 128);
