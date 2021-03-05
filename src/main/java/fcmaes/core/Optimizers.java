@@ -93,7 +93,7 @@ public class Optimizers {
 
     public static class Bite extends Optimizer {
 
-        int M = 1;
+        int M = 6;
 
         public Bite() {
             super();
