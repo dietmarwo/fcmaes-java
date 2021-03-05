@@ -260,7 +260,7 @@ public class Interferometry extends Fitness {
      
     public static void main(String[] args) throws FileNotFoundException {
         optimize("img/orion.jpg", 11, 512);
-#        checkGoodResult();
+//        checkGoodResult();
     }
 
 }
