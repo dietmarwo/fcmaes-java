@@ -107,7 +107,9 @@ public class Optimizers {
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
                 int maxEvals, double stopVal, int popsize) {
-            int evals = Jni.optimizeBite(fit, lower, upper, Utils.rnd(lower, upper), maxEvals, stopVal, M, Utils.rnd().nextLong(), 0);
+            if (guess == null)
+                guess = Utils.rnd(lower, upper);
+            int evals = Jni.optimizeBite(fit, lower, upper, guess, maxEvals, stopVal, M, Utils.rnd().nextLong(), 0);
             return new Result(fit, evals);
         }
     }
@@ -122,6 +124,8 @@ public class Optimizers {
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
                 int maxEvals, double stopVal, int popsize) {
             int dim = guess != null ? guess.length : lower.length;
+            if (guess == null)
+                guess = Utils.rnd(lower, upper);
             int evals = Jni.optimizeCsma(fit, lower, upper, sigma, guess, maxEvals, stopVal, popsize,
                     Utils.rnd().nextLong(), 0);
             return new Result(fit, evals);
@@ -147,6 +151,8 @@ public class Optimizers {
                 int maxEvals, double stopVal, int popsize) {
             if (popsize <= 0)
                 popsize = 31;
+            if (guess == null)
+                guess = Utils.rnd(lower, upper);
             int evals = Jni.optimizeACMA(fit, lower, upper, sigma, guess, 1000000, maxEvals, stopVal, popsize,
                     popsize / 2, 1.0, Utils.rnd().nextLong(), 0, 1, -1);
             return new Result(fit, evals);
@@ -204,6 +210,8 @@ public class Optimizers {
                 int maxEvals, double stopVal, int popsize) {
             if (popsize <= 0)
                 popsize = 31;
+            if (guess == null)
+                guess = Utils.rnd(lower, upper);
             return Cmaes.minimize_parallel(fit, lower, upper, sigma, guess, maxEvals, 0, popsize, 
                     popsize / 2, 1.0, Utils.rnd().nextLong(), 0, 1, -1, 0);
         }
@@ -231,7 +239,6 @@ public class Optimizers {
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
                 int maxEvals, double stopVal, int popsize) {
-            int dim = guess != null ? guess.length : lower.length;
             if (popsize <= 0)
                 popsize = 31;
             int evals = Jni.optimizeDE(fit, lower, upper, guess, maxEvals, stopVal, popsize, 200, 0.5, 0.9,
@@ -403,6 +410,8 @@ public class Optimizers {
             int dim = guess != null ? guess.length : lower.length;
             if (popsize <= 0)
                 popsize = dim * 15;
+            if (guess == null)
+                guess = Utils.rnd(lower, upper);
             int evals = Jni.optimizeDA(fit, lower, upper, guess, maxEvals, 0, Utils.rnd().nextLong(), 0);
             return new Result(fit, evals);
         }
