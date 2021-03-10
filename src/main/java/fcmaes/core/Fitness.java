@@ -178,7 +178,14 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
             double stopVal, int popsize) {
         if (guess == null)
             guess = Utils.rnd(lower, upper);
+        if (sigma == null)
+            sigma = Utils.array(_dim, 0.3);
         return opt.minimize(this, lower, upper, sigma, guess, maxEvals, stopVal, popsize);
+    }
+
+    public Result minimizeN(int runs, Optimizer opt, int maxEvals, double stopVal, int popsize, double limit) {
+        return opt.minimizeN(runs, this, lower(), upper(), Utils.array(_dim, 0.3), null, 
+                maxEvals, stopVal, popsize, limit);
     }
 
     /**
@@ -197,6 +204,8 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
 
     public void minimizeSer(int runs, Optimizer opt, double[] lower, double[] upper, double[] guess, double[] sigma,
             int maxEvals, double stopVal, int popsize) {
+        if (sigma == null)
+            sigma = Utils.array(_dim, 0.3);
         for (int i = 0; i < runs && _bestY > stopVal; i++) {
             minimize(opt, lower, upper, guess, sigma, maxEvals, stopVal, popsize);
         }
@@ -219,6 +228,8 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
 
     public Result minimizeN(int runs, Optimizer opt, double[] lower, double[] upper, double[] guess, double[] sigma,
             int maxEvals, double stopVal, int popsize, double limit) {
+        if (sigma == null)
+            sigma = Utils.array(_dim, 0.3);
         return opt.minimizeN(runs, this, lower, upper, sigma, guess, maxEvals, stopVal, popsize,
                 limit);
     }

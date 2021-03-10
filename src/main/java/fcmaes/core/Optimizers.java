@@ -123,7 +123,6 @@ public class Optimizers {
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
                 int maxEvals, double stopVal, int popsize) {
-            int dim = guess != null ? guess.length : lower.length;
             if (guess == null)
                 guess = Utils.rnd(lower, upper);
             int evals = Jni.optimizeCsma(fit, lower, upper, sigma, guess, maxEvals, stopVal, popsize,
