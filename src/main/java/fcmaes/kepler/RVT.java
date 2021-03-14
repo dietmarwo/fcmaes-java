@@ -6,6 +6,8 @@ import fcmaes.core.Jni;
 import fcmaes.core.Utils;
 
 /**
+ * Works not on Windows! Use the Linux subsystem for Windows there.
+ * 
  * Orbit represented by r (position), v (velocity), t (time) and mu.
  */
 

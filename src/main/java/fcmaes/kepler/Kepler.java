@@ -6,6 +6,8 @@ import fcmaes.core.Jni;
 import fcmaes.core.Utils;
 
 /**
+ * Works not on Windows! Use the Linux subsystem for Windows there.
+ *  
  * Orbit represented by keplarian parameters a, e, i, OM, om, ea.
  */
 

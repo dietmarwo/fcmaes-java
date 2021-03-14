@@ -8,6 +8,8 @@ import fcmaes.core.Jni;
 import fcmaes.core.Utils;
 
 /**
+ * Works not on Windows! Use the Linux subsystem for Windows there.
+ *  
  * Resonance Orbit at planet, selects the resonance alternative with lowest timing error _dt.
  */
 

@@ -25,6 +25,8 @@ import fcmaes.kepler.Resonance;
 public class Solo extends Fitness {
     
     /*
+     * Works not on Windows! Use the Linux subsystem for Windows there.
+     * 
      * This code is derived from https://github.com/esa/pykep/pull/127 
      * originally developed by Moritz v. Looz @mlooz . 
      * It was modified following suggestions from Waldemar Martens @MartensWaldemar_gitlab
