@@ -38,7 +38,7 @@ public class Solo extends Fitness {
      * good solutions fulfilling the requirements can be found.
      * See https://www.esa.int/Science_Exploration/Space_Science/Solar_Orbiter
      * 
-     * This Java code is about factor 3.3 faster than the equivalent Python code
+     * This Java code is about factor 3.6 faster than the equivalent Python code
      * https://github.com/dietmarwo/fast-cma-es/blob/master/examples/solar_orbiter_udp.py
      */
     
