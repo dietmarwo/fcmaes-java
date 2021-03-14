@@ -51,6 +51,10 @@ public class Solo extends Fitness {
         {{2,3}, {3,5}}
         };
     
+    static final int earth = 3;
+
+    static final int venus = 2;
+
     static final double maxLaunchDV = 5600;
     
     static final double safe_distance = 350000;
@@ -149,13 +153,13 @@ public class Solo extends Fitness {
         double[] data = new double[5];
         Jni.planetDataC(pli, time/Utils.DAY, data);
         double mu = data[2];
-        double rp = data[3] + safe_distance;
+        double rp = data[3] + safe_distance; // radius + safe_distance
         double[] vout = new double[3];
         Jni.fb_prop(Utils.array(vin), Utils.array(vpl), rp, beta, mu, vout);
-        Vector3D r = new RVT(2, time/Utils.DAY).r();
+        Vector3D r = new RVT(pli, time/Utils.DAY).r();
         r = rotate_vector(r);
         Vector3D v = rotate_vector(Utils.vector(vout));
-        RVT fin = rvt(2, time, v);
+        RVT fin = rvt(pli, time, v);
         fin.setR(r);
         return fin;
     }
@@ -182,35 +186,35 @@ public class Solo extends Fitness {
         List<RVT> outs = new ArrayList<RVT>(); // trajectory orbits
         RVT start = new RVT(3, t/Utils.DAY);
         Vector3D[] vout_in = new Vector3D[2];
-        double dvStart = mga(start, 3, 2, t, tof01, vout_in, outs); 
+        double dvStart = mga(start, earth, venus, t, tof01, vout_in, outs); 
         if (dvStart > maxLaunchDV)
             dvs[0] = Math.max(0, dvStart - maxLaunchDV);
         
         int[][] resos = new int[6][];
         
         t += tof01;
-        Resonance res1 = Resonance.resonance(2, t, vout_in[1], resos_[0], beta[0], safe_distance, outs);
+        Resonance res1 = Resonance.resonance(venus, t, vout_in[1], resos_[0], beta[0], safe_distance, outs);
         reso_penalty += res1._dt;
         resos[0] = res1._reso;
         
         t += res1.tof();
         RVT in = rvt(2, t, vout_in[1]);
-        dvs[1] = mga(in, 2, 3, t, tof23, vout_in, outs); 
+        dvs[1] = mga(in, venus, earth, t, tof23, vout_in, outs); 
  
         t += tof23;
         in = rvt(3, t, vout_in[1]);
-        dvs[2] = mga(in, 3, 2, t, tof34, vout_in, outs); 
+        dvs[2] = mga(in, earth, venus, t, tof34, vout_in, outs); 
         
         t += tof34;
         Resonance res = null;
         for (int r = 1; r < resos.length; r++) {
             Vector3D v_in = res != null ? res._vout : vout_in[1];
-            res = Resonance.resonance(2, t, v_in, resos_[r], beta[r], safe_distance, outs);
+            res = Resonance.resonance(venus, t, v_in, resos_[r], beta[r], safe_distance, outs);
             reso_penalty += res._dt;
             resos[r] = res._reso;
             t += res.tof();
         }
-        RVT fin = fb_prop_rotate(2, t, res._vout, beta[6]);
+        RVT fin = fb_prop_rotate(venus, t, res._vout, beta[6]);
         Kepler finKep = fin.kepler();
         
         // orbit should be as polar as possible, but we do not care about prograde/retrograde
@@ -248,14 +252,14 @@ public class Solo extends Fitness {
         double value = 100*Utils.sum(dvs) + reso_penalty + 100*(corrected_inclination) + 
                 5000*(final_perhelion-min_dist_sun) + 0.5*time_val + 50000 * distance_penalty;
         if (value < bestY_) {
+              bestY_ = value;
+             _resos = resos;
+             _outs = outs;
              System.err.println("" + Utils.r(Math.toDegrees(finKep.i())) +  " " + 
                      Utils.r(final_perhelion) + " " + Utils.r(min_sun_distance) + " " + 
                      Utils.r(max_sun_distance) + " " + Utils.r(Utils.sum(dvs)) + " " + 
                      Utils.r(reso_penalty) + " " + Utils.r(time_val) + " " + 
-                     Utils.r(resos) + " " + this);  
-             bestY_ = value;
-             _resos = resos;
-             _outs = outs;
+                     Utils.r(resos) + " " + Utils.r(value));  
         }
         return value;
     }
@@ -275,8 +279,7 @@ public class Solo extends Fitness {
     void check_good_solution() {
         double[] x = new double[] {7454.820505282011, 399.5883816298621, 161.3293044402143, 336.35353340379817, 0.16706526043179085, -2.926263900573538, 
                 2.1707384653871475, 3.068749728236526, 2.6458336313296913, 3.0472278514692377, 2.426804445518446};
-        Solo solo = new Solo();
-        solo.eval(x);        
+        eval(x);        
     }
 
     public static void main(String[] args) throws FileNotFoundException {
