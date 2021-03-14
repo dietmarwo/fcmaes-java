@@ -193,22 +193,6 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeCsma
 
 /*
  * Class:     fcmaes_core_Jni
- * Method:    lambertProblem
- * Signature: (DDDDDDDZID)[D
- */
-JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_lambertProblem
-  (JNIEnv *, jclass, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jboolean, jint, jdouble);
-
-/*
- * Class:     fcmaes_core_Jni
- * Method:    powSwingByInvC
- * Signature: (DDD)[D
- */
-JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_powSwingByInvC
-  (JNIEnv *, jclass, jdouble, jdouble, jdouble);
-
-/*
- * Class:     fcmaes_core_Jni
  * Method:    planetEplC
  * Signature: (ID[D[D)V
  */
@@ -217,43 +201,11 @@ JNIEXPORT void JNICALL Java_fcmaes_core_Jni_planetEplC
 
 /*
  * Class:     fcmaes_core_Jni
- * Method:    propagateTAYC
- * Signature: ([D[DD[DDDDDD[D[D)D
+ * Method:    planetDataC
+ * Signature: (ID[D)V
  */
-JNIEXPORT jdouble JNICALL Java_fcmaes_core_Jni_propagateTAYC
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdouble, jdoubleArray, jdouble, jdouble, jdouble, jdouble, jdouble, jdoubleArray, jdoubleArray);
-
-/*
- * Class:     fcmaes_core_Jni
- * Method:    propagateTAYJ2C
- * Signature: ([D[DD[DDDDDDD[D[D)D
- */
-JNIEXPORT jdouble JNICALL Java_fcmaes_core_Jni_propagateTAYJ2C
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdouble, jdoubleArray, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdoubleArray, jdoubleArray);
-
-/*
- * Class:     fcmaes_core_Jni
- * Method:    propagateTAYDISTC
- * Signature: ([D[DD[D[DDDDDD[D[D)D
- */
-JNIEXPORT jdouble JNICALL Java_fcmaes_core_Jni_propagateTAYDISTC
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdouble, jdoubleArray, jdoubleArray, jdouble, jdouble, jdouble, jdouble, jdouble, jdoubleArray, jdoubleArray);
-
-/*
- * Class:     fcmaes_core_Jni
- * Method:    propagateTAYmultiC
- * Signature: ([D[D[DI[DDDDDD[D[D)D
- */
-JNIEXPORT jdouble JNICALL Java_fcmaes_core_Jni_propagateTAYmultiC
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdoubleArray, jdouble, jdouble, jdouble, jdouble, jdouble, jdoubleArray, jdoubleArray);
-
-/*
- * Class:     fcmaes_core_Jni
- * Method:    propagateULAGmultiC
- * Signature: ([D[D[DI[DD[D[D)V
- */
-JNIEXPORT void JNICALL Java_fcmaes_core_Jni_propagateULAGmultiC
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdoubleArray, jdouble, jdoubleArray, jdoubleArray);
+JNIEXPORT void JNICALL Java_fcmaes_core_Jni_planetDataC
+  (JNIEnv *, jclass, jint, jdouble, jdoubleArray);
 
 /*
  * Class:     fcmaes_core_Jni
@@ -273,19 +225,19 @@ JNIEXPORT void JNICALL Java_fcmaes_core_Jni_par2IC
 
 /*
  * Class:     fcmaes_core_Jni
- * Method:    closest_distance
- * Signature: ([D[D[D[D[DD)V
+ * Method:    fb_prop
+ * Signature: ([D[DDDD[D)V
  */
-JNIEXPORT void JNICALL Java_fcmaes_core_Jni_closest_1distance
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdouble);
+JNIEXPORT void JNICALL Java_fcmaes_core_Jni_fb_1prop
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdouble, jdouble, jdouble, jdoubleArray);
 
 /*
  * Class:     fcmaes_core_Jni
- * Method:    lambert_find_N
- * Signature: (DDDI)I
+ * Method:    fb_vel
+ * Signature: ([D[DI)D
  */
-JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_lambert_1find_1N
-  (JNIEnv *, jclass, jdouble, jdouble, jdouble, jint);
+JNIEXPORT jdouble JNICALL Java_fcmaes_core_Jni_fb_1vel
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jint);
 
 /*
  * Class:     fcmaes_core_Jni
@@ -297,19 +249,27 @@ JNIEXPORT void JNICALL Java_fcmaes_core_Jni_propagate_1lagrangian
 
 /*
  * Class:     fcmaes_core_Jni
- * Method:    propagate_lagrangian_u
- * Signature: ([D[DDD)V
+ * Method:    propagateTAYC
+ * Signature: ([D[DD[DDDDDD[D[D)D
  */
-JNIEXPORT void JNICALL Java_fcmaes_core_Jni_propagate_1lagrangian_1u
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdouble, jdouble);
+JNIEXPORT jdouble JNICALL Java_fcmaes_core_Jni_propagateTAYC
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdouble, jdoubleArray, jdouble, jdouble, jdouble, jdouble, jdouble, jdoubleArray, jdoubleArray);
 
 /*
  * Class:     fcmaes_core_Jni
- * Method:    three_impulses_approx
- * Signature: (DDDDDDDDD)D
+ * Method:    propagateTAYJ2C
+ * Signature: ([D[DD[DDDDDDD[D[D)D
  */
-JNIEXPORT jdouble JNICALL Java_fcmaes_core_Jni_three_1impulses_1approx
-  (JNIEnv *, jclass, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble);
+JNIEXPORT jdouble JNICALL Java_fcmaes_core_Jni_propagateTAYJ2C
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdouble, jdoubleArray, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdoubleArray, jdoubleArray);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    lambertProblem
+ * Signature: (DDDDDDDZID)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_lambertProblem
+  (JNIEnv *, jclass, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jboolean, jint, jdouble);
 
 #ifdef __cplusplus
 }

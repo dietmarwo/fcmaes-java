@@ -17,6 +17,10 @@ import org.hipparchus.random.RandomGenerator;
 
 public class Utils {
 
+    public static final double DAY = 24 * 3600;
+    
+    public static final double YEAR = 365.25;
+    
     public static long _startTime = System.nanoTime();
 
     public static void startTiming() {
@@ -71,6 +75,13 @@ public class Utils {
         return rnds;
     }
 
+    public static boolean isNaN(double[] x) {
+        for (double d : x)
+            if (Double.isNaN(d) || Double.isInfinite(d)) 
+                return true;
+        return false;
+    }
+
     public static String r(Vector3D v) {
         return "(" + r(v.getX(), 3) + ", " + r(v.getY(), 3) + ", " + r(v.getZ(), 3) + ")";
     }
@@ -90,14 +101,30 @@ public class Utils {
         }
     }
 
-    static boolean isNaN(double[] point) {
-        boolean isNaN = false;
-        for (double d : point)
-            if (Double.isNaN(d) || Double.isInfinite(d)) {
-                isNaN = true;
-                break;
-            }
-        return isNaN;
+    public static String r(double[] v, int n) {
+        StringBuilder buf = new StringBuilder();
+        buf.append('[');
+        for (int i = 0; i < v.length; i++) {
+            buf.append(r(v[i], n));
+            if (i < v.length - 1)
+                buf.append(',');
+        }
+        buf.append(']');
+        return buf.toString();
+    }
+
+    public static String r(int[][] v) {
+        StringBuilder buf = new StringBuilder();
+        buf.append('[');
+        for (int i = 0; i < v.length; i++) {
+            buf.append(v[i][1]);
+            buf.append(':');
+            buf.append(v[i][0]);
+            if (i < v.length - 1)
+                buf.append(',');
+        }
+        buf.append(']');
+        return buf.toString();
     }
 
     public static Vector3D vector(double[] v) {

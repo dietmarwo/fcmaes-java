@@ -22,7 +22,7 @@ public class Optimizers {
          * @param X     Optimized point.
          */
 
-        Result(int evals, double y, double[] X) {
+        public Result(int evals, double y, double[] X) {
             this.evals = evals;
             this.y = y;
             this.X = X;
@@ -33,7 +33,7 @@ public class Optimizers {
          * @param evals number of function evaluations.
          */
 
-        Result(Fitness fit, int evals) {
+        public Result(Fitness fit, int evals) {
             this.evals = evals;
             this.y = fit._bestY;
             this.X = fit._bestX;
@@ -521,6 +521,69 @@ public class Optimizers {
                     0.9, Utils.rnd().nextLong(), 0);
             evals += Jni.optimizeACMA(fit, lower, upper, sigma, fit._bestX, 1000000, (int) (cmaEvals * maxEvals),
                     stopVal, popsize, popsize / 2, 1, Utils.rnd().nextLong(), 0, 1, -1);
+            return new Result(fit, evals);
+        }
+    }
+
+    /**
+     * Sequence of Bite and DE. Evaluations are randomly distributed.
+     */
+
+    public static class BiteDe extends Optimizer {
+
+        int M = 6;
+
+        public BiteDe() {
+            super();
+        }
+
+        public BiteDe(int M) {
+            super();
+            this.M = M;
+        }
+
+        @Override
+        public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
+                int maxEvals, double stopVal, int popsize) {
+            double deEvals = Utils.rnd(0.3, 0.7);
+            double biteEvals = 1.0 - deEvals;
+            if (guess == null)
+                guess = Utils.rnd(lower, upper);
+            int evals = Jni.optimizeBite(fit, lower, upper, guess, (int) (biteEvals * maxEvals), stopVal, M,
+                    Utils.rnd().nextLong(), 0);
+            evals += Jni.optimizeDE(fit, lower, upper, guess, (int) (deEvals * maxEvals), stopVal, popsize, 200, 0.5,
+                    0.9, Utils.rnd().nextLong(), 0);
+            return new Result(fit, evals);
+        }
+    }
+    
+    /**
+     * Sequence of DE and Bite. Evaluations are randomly distributed.
+     */
+
+    public static class DeBite extends Optimizer {
+
+        int M = 6;
+
+        public DeBite() {
+            super();
+        }
+
+        public DeBite(int M) {
+            super();
+            this.M = M;
+        }
+
+        @Override
+        public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
+                int maxEvals, double stopVal, int popsize) {
+            double deEvals = Utils.rnd(0.1, 0.5);
+            double biteEvals = 1.0 - deEvals;
+            if (guess == null)
+                guess = Utils.rnd(lower, upper);
+            int evals = Jni.optimizeDE(fit, lower, upper, guess, (int) (deEvals * maxEvals), stopVal, popsize, 200, 0.5,
+                     0.9, Utils.rnd().nextLong(), 0);
+            evals += Jni.optimizeBite(fit, lower, upper, guess, (int) (biteEvals * maxEvals), stopVal, M, Utils.rnd().nextLong(), 0);
             return new Result(fit, evals);
         }
     }

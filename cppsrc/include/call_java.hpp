@@ -49,6 +49,19 @@ public:
         return res;
    }
 
+   void printJava(std::string s) {
+    	int n = s.size();
+		jclass func_class = env->GetObjectClass(func);
+		jmethodID mid = env->GetMethodID(func_class, "print", "([B)V");
+		jbyteArray jarg = env->NewByteArray(n);
+		jbyte *args = env->GetByteArrayElements(jarg, JNI_FALSE);
+		for (int i = 0; i < n; i++)
+			args[i] = s[i];
+		env->SetByteArrayRegion(jarg, 0, n, (jbyte*) args);
+		env->CallVoidMethod(func, mid, jarg);
+		env->ReleaseByteArrayElements(jarg, args, 0);
+	}
+
 private:
    jobject func;
    JNIEnv* env;

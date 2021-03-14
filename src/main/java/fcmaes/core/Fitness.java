@@ -121,6 +121,17 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
     public double value(double x) {
         return value(new double[] { x });
     }
+ 
+    /**
+     * Print log message from C++
+     * 
+     * @param s output string.
+     */
+
+    public void print(byte[] s) {
+        System.out.println(new String(s));
+        System.out.flush();
+    }
 
     /**
      * Clone a fitness function. Used by the parallel coordinated retry. Overwrite
@@ -181,6 +192,15 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
         if (sigma == null)
             sigma = Utils.array(_dim, 0.3);
         return opt.minimize(this, lower, upper, sigma, guess, maxEvals, stopVal, popsize);
+    }
+
+    public Result minimize(Optimizer opt, double[] guess, double[] sigma, int maxEvals,
+            double stopVal, int popsize) {
+        if (guess == null)
+            guess = Utils.rnd(lower(), upper());
+        if (sigma == null)
+            sigma = Utils.array(_dim, 0.3);
+        return opt.minimize(this, lower(), upper(), sigma, guess, maxEvals, stopVal, popsize);
     }
 
     public Result minimizeN(int runs, Optimizer opt, int maxEvals, double stopVal, int popsize, double limit) {
