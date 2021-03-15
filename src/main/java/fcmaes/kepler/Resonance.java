@@ -28,7 +28,7 @@ public class Resonance {
     public double _beta;
     public double _rp;
     public double _period;
-    public int[] _reso;
+    public int _index;
     public double _dt;
      
     public Resonance(int pli, double time, Vector3D vin, int[][] resos, double safe_distance) {
@@ -62,13 +62,17 @@ public class Resonance {
         }
         _vout = Utils.vector(v_out);
         _beta = beta;
-        _reso = _resos[resoI];
+        _index = resoI;
         _dt = dt;
         return dt;
     }
 
+    public int[] selected() {
+        return _resos[_index];
+    }
+
     public double tof() {
-        return _period * _reso[1];
+        return _period * selected()[1];
     }
         
     public static Resonance resonance(int pli, double time, Vector3D vin, int[][] resos, 

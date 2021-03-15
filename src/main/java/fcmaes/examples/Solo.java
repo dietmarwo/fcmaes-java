@@ -1,22 +1,25 @@
 package fcmaes.examples;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.hipparchus.geometry.euclidean.threed.Rotation;
 import org.hipparchus.geometry.euclidean.threed.RotationConvention;
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 
-import fcmaes.core.CoordRetry;
 import fcmaes.core.Fitness;
 import fcmaes.core.Jni;
 import fcmaes.core.Log;
 import fcmaes.core.Optimizers.Bite;
-import fcmaes.core.Optimizers.DE;
-import fcmaes.core.Optimizers.DECMA;
-import fcmaes.core.Optimizers.DeBite;
 import fcmaes.core.Utils;
 import fcmaes.kepler.Kepler;
 import fcmaes.kepler.RVT;
@@ -51,6 +54,8 @@ public class Solo extends Fitness {
         {{4,3}, {3,2}, {5,3}}
         };
     
+    static String resoFile_ = "resos1.txt";
+
     static final int earth = 3;
 
     static final int venus = 2;
@@ -67,21 +72,28 @@ public class Solo extends Fitness {
 
     static final double max_mission_time = 11.6*Utils.YEAR;
 
+    static final double max_log_y_value = 9000;
+    
+    static final long log_interval_evals = 200000000;
+//    static final long log_interval_evals = 10000000;
+
     static final double AU = 1.49597870691e11; // m
     
-    int[][] _resos = new int[6][2];
-    
+    static final double  theta = Math.toRadians(7.25);
+   
     Vector3D _rotation_axis;
-    double _theta = Math.toRadians(7.25);
-    List<RVT> _outs; // trajectory orbit log 
-     
+    
+    int[][] _usedResos = null;
+    
+    List<Double> logData = null;
+    
     Solo() {
         super(11);
         init();
     }
 
     Vector3D rotate_vector(Vector3D v) {
-        Rotation rot = new Rotation(_rotation_axis, _theta, RotationConvention.VECTOR_OPERATOR);
+        Rotation rot = new Rotation(_rotation_axis, theta, RotationConvention.VECTOR_OPERATOR);
         return rot.applyTo(v);
     }
     
@@ -92,7 +104,6 @@ public class Solo extends Fitness {
         Jni.planetEplC(3, t_plane_crossing, r, v);
         _rotation_axis = Utils.vector(r).normalize();
     }
-
 
     public Solo create() {
         Solo solo = new Solo();
@@ -172,8 +183,48 @@ public class Solo extends Fitness {
         rvt.setV(vout);
         return rvt;
     }
+    
+    private static class Trajectory {
+        double y;
+        double[] x;
+        
+        Trajectory(double y, double[] x) {
+            this.y = y;
+            this.x = x;
+        }
+        
+        String resos() {
+            Solo solo = new Solo();
+            solo.logData = new ArrayList<Double>();
+            solo.eval(x);
+            return "" + y + " " + Utils.r(solo._usedResos) + " " + 
+                Arrays.toString(solo.logData.toArray()) + " " + Arrays.toString(x);
+        }
+    }
 
     static double bestY_ = 1E99;
+    static ConcurrentHashMap<Long,Trajectory> bestTrajectories_ = new ConcurrentHashMap<Long,Trajectory>();
+    static AtomicLong counter_ = new AtomicLong(0);
+    static List<RVT> outs_; // trajectory orbit log 
+    static int[][] bestResos_ = new int[6][2]; // used resonances
+    
+    void dumpTrajectories() {
+        TreeMap<Double,Trajectory> sorted = new TreeMap<Double,Trajectory>();
+        for (Trajectory tra: bestTrajectories_.values())
+            sorted.put(tra.y, tra);
+        StringBuffer buf = new StringBuffer();
+        buf.append("best = " + bestY_ + " evals = " + counter_.get() + " " + Utils.measuredSeconds() + " sec\n");
+        for (double y: sorted.keySet()) {
+            if (y < max_log_y_value) 
+                buf.append(sorted.get(y).resos() + "\n");
+        }
+        buf.append("\n");
+        try {
+            Files.write(Paths.get(resoFile_), buf.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            System.err.println("Cannot write to " + resoFile_ + ": " + e.getMessage());
+        }
+    }
                   
     @Override
     public double eval(double[] x) {
@@ -185,7 +236,6 @@ public class Solo extends Fitness {
         double tof23 = x[2]*Utils.DAY;
         double tof34 = x[3]*Utils.DAY;
         double[] beta = Arrays.copyOfRange(x, 4, 11);
-        
         List<RVT> outs = new ArrayList<RVT>(); // trajectory orbits
         RVT start = new RVT(3, t/Utils.DAY);
         Vector3D[] vout_in = new Vector3D[2];
@@ -198,7 +248,8 @@ public class Solo extends Fitness {
         Resonance res1 = Resonance.resonance(venus, t, vout_in[1], resos_[0], 
                 beta[0], safe_distance, outs, dvs);
         reso_penalty += res1._dt;
-        resos[0] = res1._reso;
+        resos[0] = res1.selected();
+        long hash = res1._index;
         
         t += res1.tof();
         RVT in = rvt(venus, t, res1._vout);
@@ -215,7 +266,8 @@ public class Solo extends Fitness {
             res = Resonance.resonance(venus, t, v_in, resos_[r], 
                     beta[r], safe_distance, outs, dvs);
             reso_penalty += res._dt;
-            resos[r] = res._reso;
+            resos[r] = res.selected();
+            hash = 31 * hash + res._index;
             t += res.tof();
         }
         RVT fin = fb_prop_rotate(venus, t, res._vout, beta[6]);
@@ -247,6 +299,15 @@ public class Solo extends Fitness {
         double distance_penalty = Math.max(0, min_dist_sun - min_sun_distance);  
         distance_penalty += Math.max(0, max_sun_distance - max_dist_sun);  
 
+        if (logData != null) {
+            logData.add(Math.toDegrees(finKep.i()));
+            logData.add(final_perhelion);
+            logData.add(min_sun_distance);
+            logData.add(max_sun_distance);
+            logData.add((t - t0)/Utils.DAY/Utils.YEAR);
+            logData.add(Utils.sum(dvs));
+        }
+        
         if (final_perhelion < min_dist_sun)
             final_perhelion += 10*(min_dist_sun - final_perhelion);
         double time_val = (t - t0)/Utils.DAY;
@@ -254,16 +315,25 @@ public class Solo extends Fitness {
             time_val += 10*(time_val - max_mission_time);
         
         double value = 100*Utils.sum(dvs) + reso_penalty + 100*(corrected_inclination) + 
-                5000*(final_perhelion-min_dist_sun) + 0.5*time_val + 50000 * distance_penalty;
-        if (value < bestY_) {
-              bestY_ = value;
-             _resos = resos;
-             _outs = outs;
-             System.err.println("" + Utils.r(Math.toDegrees(finKep.i())) +  " " + 
+                5000*(final_perhelion-min_dist_sun) + 0.5*time_val + 50000 * distance_penalty;        
+        _usedResos = resos;
+        
+        // store best trajectory for a given resonance sequence
+        if (!bestTrajectories_.containsKey(hash) || value < bestTrajectories_.get(hash).y)
+            bestTrajectories_.put(hash, new Trajectory(value, x));
+        
+        if (counter_.getAndIncrement() % log_interval_evals == log_interval_evals-1)
+            dumpTrajectories();
+        
+        if (value < bestY_ && value < max_log_y_value) {
+             bestY_ = value;
+             bestResos_ = resos;
+             outs_ = outs;
+             System.out.println("" + Utils.r(Math.toDegrees(finKep.i())) +  " " + 
                      Utils.r(final_perhelion) + " " + Utils.r(min_sun_distance) + " " + 
                      Utils.r(max_sun_distance) + " " + Utils.r(Utils.sum(dvs)) + " " + 
                      Utils.r(reso_penalty) + " " + Utils.r(time_val) + " " + 
-                     Utils.r(resos) + " " + Utils.r(value));  
+                     Utils.r(resos) + " " + Utils.r(value) + " " + Arrays.toString(x));  
         }
         return value;
     }
@@ -283,7 +353,9 @@ public class Solo extends Fitness {
     void check_good_solution() {
         double[] x = new double[] {7454.820505282011, 399.5883816298621, 161.3293044402143, 336.35353340379817, 0.16706526043179085, -2.926263900573538, 
                 2.1707384653871475, 3.068749728236526, 2.6458336313296913, 3.0472278514692377, 2.426804445518446};
-        eval(x);        
+        double y = eval(x);
+        Trajectory tra = new Trajectory(y, x);
+        System.out.println(tra.resos());
     }
 
     public static void main(String[] args) throws FileNotFoundException {
