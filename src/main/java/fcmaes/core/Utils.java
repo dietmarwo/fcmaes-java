@@ -6,6 +6,7 @@
 package fcmaes.core;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
@@ -117,9 +118,9 @@ public class Utils {
         StringBuilder buf = new StringBuilder();
         buf.append('[');
         for (int i = 0; i < v.length; i++) {
-            buf.append(v[i][1]);
-            buf.append(':');
             buf.append(v[i][0]);
+            buf.append(':');
+            buf.append(v[i][1]);
             if (i < v.length - 1)
                 buf.append(',');
         }
@@ -233,6 +234,13 @@ public class Utils {
     }
 
     public static double sum(double[] v) {
+        double sum = 0;
+        for (double vi : v)
+            sum += vi;
+        return sum;
+    }
+
+    public static double sum(List<Double> v) {
         double sum = 0;
         for (double vi : v)
             sum += vi;

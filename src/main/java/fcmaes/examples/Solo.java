@@ -43,17 +43,19 @@ public class Solo extends Fitness {
      */
     
     static final int[][][] resos_ = new int[][][] {
-        {{1,1}, {4,5}, {3,4}},
-        {{1,1}, {4,5}, {3,4}},
-        {{4,5}, {3,4}, {2,3}, {3,5}},
-        {{3,4}, {2,3}, {3,5}},
-        {{3,4}, {2,3}, {3,5}},
-        {{2,3}, {3,5}}
+        {{1,1}, {5,4}, {4,3}},
+        {{1,1}, {5,4}, {4,3}},
+        {{1,1}, {5,4}, {4,3}},
+        {{4,3}, {3,2}, {5,3}},
+        {{4,3}, {3,2}, {5,3}},
+        {{4,3}, {3,2}, {5,3}}
         };
     
     static final int earth = 3;
 
     static final int venus = 2;
+    
+    static final int max_revolutions = 3;
 
     static final double maxLaunchDV = 5600;
     
@@ -137,15 +139,16 @@ public class Solo extends Fitness {
         return Jni.fb_vel(v_rel_in, v_rel_out, pli);
     }
  
-    static double mga(RVT in, int pli1, int pli2, double time, double tof, Vector3D[] vout_in, List<RVT> outs) {
+    static void mga(RVT in, int pli1, int pli2, double time, double tof, Vector3D[] vout_in, 
+            List<RVT> outs, List<Double> dvs) {
         RVT planet2 = new RVT(pli2, (time+tof)/Utils.DAY);
-        Vector3D[] lambert = in.bestLambert(planet2, pli1, false, 2);
+        Vector3D[] lambert = in.bestLambert(planet2, pli1, false, max_revolutions);
         vout_in[0] = lambert[0];
         vout_in[1] = lambert[1];
         RVT out = new RVT(in);
         out.setV(lambert[0]);
         outs.add(out);
-        return ga_dv(pli1, time, in.v(), lambert[0]);
+        dvs.add(ga_dv(pli1, time, in.v(), lambert[0]));
     }
 
     RVT fb_prop_rotate(int pli, double time, Vector3D vin, double beta) {
@@ -174,7 +177,7 @@ public class Solo extends Fitness {
                   
     @Override
     public double eval(double[] x) {
-        double[] dvs = new double[9];
+        List<Double> dvs = new ArrayList<Double>();
         double reso_penalty = 0;
         double t;
         double t0 = t = x[0]*Utils.DAY;
@@ -186,30 +189,31 @@ public class Solo extends Fitness {
         List<RVT> outs = new ArrayList<RVT>(); // trajectory orbits
         RVT start = new RVT(3, t/Utils.DAY);
         Vector3D[] vout_in = new Vector3D[2];
-        double dvStart = mga(start, earth, venus, t, tof01, vout_in, outs); 
-        if (dvStart > maxLaunchDV)
-            dvs[0] = Math.max(0, dvStart - maxLaunchDV);
-        
+        mga(start, earth, venus, t, tof01, vout_in, outs, dvs); 
+        double dvStart = dvs.get(0);
+        dvs.set(0, Math.max(0, dvStart - maxLaunchDV));
         int[][] resos = new int[6][];
         
         t += tof01;
-        Resonance res1 = Resonance.resonance(venus, t, vout_in[1], resos_[0], beta[0], safe_distance, outs);
+        Resonance res1 = Resonance.resonance(venus, t, vout_in[1], resos_[0], 
+                beta[0], safe_distance, outs, dvs);
         reso_penalty += res1._dt;
         resos[0] = res1._reso;
         
         t += res1.tof();
-        RVT in = rvt(2, t, vout_in[1]);
-        dvs[1] = mga(in, venus, earth, t, tof23, vout_in, outs); 
+        RVT in = rvt(venus, t, res1._vout);
+        mga(in, venus, earth, t, tof23, vout_in, outs, dvs); 
  
         t += tof23;
-        in = rvt(3, t, vout_in[1]);
-        dvs[2] = mga(in, earth, venus, t, tof34, vout_in, outs); 
+        in = rvt(earth, t, vout_in[1]);
+        mga(in, earth, venus, t, tof34, vout_in, outs, dvs); 
         
         t += tof34;
         Resonance res = null;
         for (int r = 1; r < resos.length; r++) {
             Vector3D v_in = res != null ? res._vout : vout_in[1];
-            res = Resonance.resonance(venus, t, v_in, resos_[r], beta[r], safe_distance, outs);
+            res = Resonance.resonance(venus, t, v_in, resos_[r], 
+                    beta[r], safe_distance, outs, dvs);
             reso_penalty += res._dt;
             resos[r] = res._reso;
             t += res.tof();
@@ -267,7 +271,7 @@ public class Solo extends Fitness {
     Solo optimize() {
         Utils.startTiming();
         Solo fit = create();
-        fit.minimizeN(12800000, new Bite(6), 100000, 0, 31, 1E99);
+        fit.minimizeN(12800000, new Bite(6), 120000, 0, 31, 1E99);
 //        CoordRetry.optimize(80000, this, new DE(), null, 1E99, 0, 2000, true);
 //        CoordRetry.optimize(80000, this, new DECMA(), null, 1E99, 0, 2000, true);
 //        CoordRetry.optimize(80000, this, new DeBite(), null, 1E99, 0, 2000, true);        

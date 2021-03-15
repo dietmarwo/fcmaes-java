@@ -53,7 +53,7 @@ public class Resonance {
         double dt = Double.MAX_VALUE;
         int resoI = 0;
         for (int i = 0; i < _resos.length; i++) {
-            double target_per = _period * _resos[i][0] / _resos[i][1];
+            double target_per = _period * _resos[i][1] / _resos[i][0];
             double diff = Math.abs(period - target_per);
             if (diff < dt) {
                 resoI = i;
@@ -68,13 +68,14 @@ public class Resonance {
     }
 
     public double tof() {
-        return _period * _reso[0];
+        return _period * _reso[1];
     }
         
     public static Resonance resonance(int pli, double time, Vector3D vin, int[][] resos, 
-            double beta, double safe_distance, List<RVT> outs) {
+            double beta, double safe_distance, List<RVT> outs, List<Double> dvs) {
         Resonance res = new Resonance(pli, time, vin, resos, safe_distance);
         res.select(beta, outs);
+        dvs.add(0.0);
         return res;
     }
 }
