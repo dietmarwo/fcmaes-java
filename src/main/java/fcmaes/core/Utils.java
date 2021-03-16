@@ -5,9 +5,17 @@
 
 package fcmaes.core;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.hipparchus.geometry.euclidean.threed.Vector3D;
 import org.hipparchus.random.RandomGenerator;
@@ -114,7 +122,7 @@ public class Utils {
         return buf.toString();
     }
 
-    public static String r(int[][] v) {
+    public static String r(int[][] v, String space) {
         StringBuilder buf = new StringBuilder();
         buf.append('[');
         for (int i = 0; i < v.length; i++) {
@@ -122,7 +130,7 @@ public class Utils {
             buf.append(':');
             buf.append(v[i][1]);
             if (i < v.length - 1)
-                buf.append(',');
+                buf.append(',' + space);
         }
         buf.append(']');
         return buf.toString();
@@ -254,4 +262,22 @@ public class Utils {
         return sum;
     }
 
+    public static List<String> readFiles(String dirName, String pattern) {
+        List<String> result = new ArrayList<String>();
+        File dir = new File(dirName);
+        File[] files = dir.listFiles((d, name) -> name.contains(pattern));
+        for (File file : files) {
+            if (!file.isDirectory()) {
+                try (Stream<String> lines = Files.lines(file.toPath())) {
+                    for (String line : (Iterable<String>) lines::iterator)
+                        result.add(line);
+                } catch (IOException e) {
+                    System.err.println("Cannot read " + 
+                            file.getAbsolutePath() + ": " + e.getMessage());
+                }
+            }
+        }
+        return result;
+    }
+    
 }
