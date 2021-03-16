@@ -49,17 +49,17 @@
 			<artifactId>hipparchus-optim</artifactId>
 			<version>1.7</version>
 		</dependency>
-        <dependency>
-            <groupId>com.github.wendykierp</groupId>
-            <artifactId>JTransforms</artifactId>
-            <version>3.1</version>
-            <classifier>with-dependencies</classifier>
-         </dependency>
-        <dependency>
-          <groupId>org.boofcv</groupId>
-          <artifactId>boofcv-core</artifactId>
-          <version>0.37</version>
-        </dependency>
+		<dependency>
+			<groupId>com.github.wendykierp</groupId>
+			<artifactId>JTransforms</artifactId>
+			<version>3.1</version>
+			<classifier>with-dependencies</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.boofcv</groupId>
+			<artifactId>boofcv-core</artifactId>
+			<version>0.37</version>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
