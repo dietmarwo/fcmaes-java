@@ -208,6 +208,11 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
                 maxEvals, stopVal, popsize, limit);
     }
 
+    public Result minimizeN(int runs, Optimizer opt, double[] guess, int maxEvals, double stopVal, int popsize, double limit) {
+        return opt.minimizeN(runs, this, lower(), upper(), Utils.array(_dim, 0.3), guess, 
+                maxEvals, stopVal, popsize, limit);
+    }
+
     /**
      * Perform a single threaded retry.
      * 

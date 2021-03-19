@@ -31,7 +31,7 @@ public class Resonance {
     public int _index;
     public double _dt;
      
-    public Resonance(int pli, double time, Vector3D vin, int[][] resos, double safe_distance) {
+    public Resonance(int pli, double time, Vector3D vin, int[][] resos, double distance) {
         double mjd2000 = time/Utils.DAY;
         _planet = new RVT(pli, mjd2000); 
         _data = new double[5];
@@ -39,7 +39,7 @@ public class Resonance {
         _vin = vin;
         _v_in = Utils.array(vin);
         _v_pla = _planet.varr();
-        _rp = _data[3] + safe_distance; // safe radius 
+        _rp = _data[3] + distance; // safe radius 
         _period = _data[0];
         _resos = resos;
     }
@@ -76,8 +76,8 @@ public class Resonance {
     }
         
     public static Resonance resonance(int pli, double time, Vector3D vin, int[][] resos, 
-            double beta, double safe_distance, List<RVT> outs, List<Double> dvs) {
-        Resonance res = new Resonance(pli, time, vin, resos, safe_distance);
+            double beta, double distance, List<RVT> outs, List<Double> dvs) {
+        Resonance res = new Resonance(pli, time, vin, resos, distance);
         res.select(beta, outs);
         dvs.add(0.0);
         return res;
