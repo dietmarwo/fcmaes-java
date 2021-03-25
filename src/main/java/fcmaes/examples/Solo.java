@@ -420,7 +420,7 @@ public class Solo extends Fitness {
     Solo optimize() {
         Utils.startTiming();
         Solo fit = create();
-        fit.minimizeN(12800000, new Bite(6), 120000, 0, 31, 1E99);
+        fit.minimizeN(12800000, new Bite(8), 120000, 0, 31, 1E99);
 //        CoordRetry.optimize(80000, this, new DE(), null, 1E99, 0, 2000, true);
 //        CoordRetry.optimize(80000, this, new DECMA(), null, 1E99, 0, 2000, true);
 //        CoordRetry.optimize(80000, this, new DeBite(), null, 1E99, 0, 2000, true);        
