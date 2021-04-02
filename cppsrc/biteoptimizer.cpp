@@ -81,7 +81,7 @@ class BiteOptimizer: public CBiteOptDeep {
 public:
 
     BiteOptimizer(long runid_, Fitness *fitfun_, int dim_, double *init_,
-            int seed_, int M_, int maxEvaluations_, double stopfitness_) {
+            int seed_, int M_, int stallLimit_, int maxEvaluations_, double stopfitness_) {
         // runid used to identify a specific run
         runid = runid_;
         // fitness function to minimize
@@ -90,13 +90,13 @@ public:
         dim = dim_;
         // Depth to use, 1 for plain CBiteOpt algorithm, >1 for CBiteOptDeep. Expected range is [1; 36].
         M = M_ > 0 ? M_ : 1;
+        // stop after stallLimit iters without progress
+        stallLimit = stallLimit_ > 0 ? stallLimit_ : 64;
         // maximal number of evaluations allowed.
         maxEvaluations = maxEvaluations_ > 0 ? maxEvaluations_ : 50000;
         // Number of iterations already performed.
         // Limit for fitness value.
         stopfitness = stopfitness_;
-        //std::random_device rd;
-        rs = new pcg64(seed_);
         // stop criteria
         stop = 0;
 
@@ -105,10 +105,6 @@ public:
         rnd.init(seed_);
         updateDims(dim_, M);
         init(rnd, init_);
-    }
-
-    ~BiteOptimizer() {
-        delete rs;
     }
 
     virtual void getMinValues(double *const p) const {
@@ -153,7 +149,7 @@ public:
                 stop = 1;
                 break;
             }
-            if (stallCount > 64*dim) {
+            if (stallCount > stallLimit*dim) {
                 stop = 2;
                 break;
             }
@@ -164,6 +160,7 @@ private:
     long runid;
     Fitness *fitfun;
     int M; // deepness
+    int stallLimit; // stop after stallLimit iters without progress 
     int dim;
     int maxEvaluations;
     double stopfitness;
@@ -171,7 +168,6 @@ private:
     double bestY;
     int stop;
     vec bestX;
-    pcg64 *rs;
     CBiteRnd rnd;
 };
 
@@ -182,12 +178,12 @@ using namespace biteopt;
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeBite
- * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIJI)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIIJI)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeBite(JNIEnv *env,
         jclass cls, jobject func, jdoubleArray jlower, jdoubleArray jupper,
         jdoubleArray jinit, jint maxEvals, jdouble stopfitness, jint M,
-        jlong seed, jint runid) {
+        jint stallLimit, jlong seed, jint runid) {
 
     double *init = env->GetDoubleArrayElements(jinit, JNI_FALSE);
     double *lower = env->GetDoubleArrayElements(jlower, JNI_FALSE);
@@ -208,7 +204,7 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeBite(JNIEnv *env,
     CallJava callJava(func, env);
     Fitness fitfun(&callJava, lower_limit, upper_limit);
 
-    BiteOptimizer opt(runid, &fitfun, dim, init, seed, M, maxEvals,
+    BiteOptimizer opt(runid, &fitfun, dim, init, seed, M, stallLimit, maxEvals,
             stopfitness);
 
     try {

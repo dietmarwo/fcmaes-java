@@ -42,9 +42,9 @@ public class Jni {
     static native int tellDE(long cmaes, double[] x, double y, int p);
 
     public static native int integrateF8(double[] y, double w, double dt, double step);
-
-    public static native int integratePVthrust(double[] tpv, double veff, double ux, double uy, double uz, double dt,
-            double step);
+	
+	public static native int integratePVthrust(double[] tpv, double veff, 
+		    double ux, double uy, double uz, double dt, double step);
 
     public static native int integratePVgtocX(double[] tpv, double dt, double step);
 
@@ -71,10 +71,10 @@ public class Jni {
             int maxEvals, double stopfitness, int popsize, double pbest, double K1, double K2, long seed, int runid);
 
     public static native int optimizeBite(Fitness func, double[] lower, double[] upper, double[] guess, int maxEvals,
-            double stopfitness, int M, long seed, int runid);
+            double stopfitness, int M, int stallLimit, long seed, int runid);
 
     public static native int optimizeCsma(Fitness func, double[] lower, double[] upper, double[] sigma, double[] guess,
-            int maxEvals, double stopfitness, int popsize, long seed, int runid);
+            int maxEvals, double stopfitness, int popsize, int stallLimit, long seed, int runid);
     
     public static native void planetEplC(int pli, double mjd2000, double[] r, double[] v);
 

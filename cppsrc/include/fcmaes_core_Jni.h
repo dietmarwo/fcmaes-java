@@ -178,18 +178,18 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeCLDE
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeBite
- * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIJI)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIIJI)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeBite
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jlong, jint);
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jint, jlong, jint);
 
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeCsma
- * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIJI)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIIJI)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeCsma
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jlong, jint);
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jint, jlong, jint);
 
 /*
  * Class:     fcmaes_core_Jni

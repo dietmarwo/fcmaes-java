@@ -81,8 +81,8 @@ class CsmaOptimizer: public CSMAESOpt {
 public:
 
     CsmaOptimizer(long runid_, Fitness *fitfun_, int dim_, double *init_,
-            double *sdev_, int seed_, int popsize_, int maxEvaluations_,
-            double stopfitness_) {
+            double *sdev_, int seed_, int popsize_, int stallLimit_, 
+            int maxEvaluations_, double stopfitness_) {
         // runid used to identify a specific run
         runid = runid_;
         // fitness function to minimize
@@ -91,13 +91,12 @@ public:
         dim = dim_;
         // Population size
         popsize = popsize_;
+        // stop after stallLimit iters without progress
+        stallLimit = stallLimit_ > 0 ? stallLimit_ : 64;
         // maximal number of evaluations allowed.
         maxEvaluations = maxEvaluations_ > 0 ? maxEvaluations_ : 50000;
-        // Number of iterations already performed.
         // Limit for fitness value.
         stopfitness = stopfitness_;
-        //std::random_device rd;
-        rs = new pcg64(seed_);
         // stop criteria
         stop = 0;
 
@@ -106,10 +105,6 @@ public:
         rnd.init(seed_);
         updateDims(dim_, popsize);
         init(rnd, init_, 1.0, sdev_);
-    }
-
-    ~CsmaOptimizer() {
-        delete rs;
     }
 
     virtual void getMinValues(double *const p) const {
@@ -154,7 +149,7 @@ public:
                 stop = 1;
                 break;
             }
-            if (stallCount > 64*dim) {
+            if (stallCount > stallLimit*dim) {
                 stop = 2;
                 break;
             }
@@ -165,6 +160,7 @@ private:
     long runid;
     Fitness *fitfun;
     int popsize; // population size
+    int stallLimit; // stop after stallLimit iters without progress 
     int dim;
     int maxEvaluations;
     double stopfitness;
@@ -172,7 +168,6 @@ private:
     double bestY;
     int stop;
     vec bestX;
-    pcg64 *rs;
     CBiteRnd rnd;
 };
 
@@ -183,12 +178,13 @@ using namespace csmaopt;
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeCsma
- * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIJI)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIIJI)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeCsma(JNIEnv *env,
         jclass cls, jobject func, jdoubleArray jlower, jdoubleArray jupper,
         jdoubleArray jsdev, jdoubleArray jinit, jint maxEvals,
-        jdouble stopfitness, jint popsize, jlong seed, jint runid) {
+        jdouble stopfitness, jint popsize, jint stallLimit,
+        jlong seed, jint runid) {
 
     double *init = env->GetDoubleArrayElements(jinit, JNI_FALSE);
     double *lower = env->GetDoubleArrayElements(jlower, JNI_FALSE);
@@ -210,8 +206,8 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeCsma(JNIEnv *env,
     CallJava callJava(func, env);
     Fitness fitfun(&callJava, lower_limit, upper_limit);
 
-    CsmaOptimizer opt(runid, &fitfun, dim, init, sdev, seed, popsize, maxEvals,
-            stopfitness);
+    CsmaOptimizer opt(runid, &fitfun, dim, init, sdev, seed, popsize, 
+            stallLimit, maxEvals, stopfitness);
 
     try {
         opt.doOptimize();
