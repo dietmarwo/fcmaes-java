@@ -168,6 +168,8 @@ public class Optimizers {
                 popsize = 31;
             if (guess == null)
                 guess = Utils.rnd(lower, upper);
+            if (sigma == null)
+                sigma = Utils.array(fit._dim, Utils.rnd(0.05, 0.1));
             int evals = Jni.optimizeACMA(fit, lower, upper, sigma, guess, 1000000, maxEvals, stopVal, popsize,
                     popsize / 2, 1.0, Utils.rnd().nextLong(), 0, 1, -1);
             return new Result(fit, evals);
@@ -531,6 +533,8 @@ public class Optimizers {
                 int maxEvals, double stopVal, int popsize) {
             if (popsize <= 0)
                 popsize = 31;
+            if (sigma == null)
+                sigma = Utils.array(fit._dim, Utils.rnd(0.05, 0.1));
             double deEvals = Utils.rnd(0.1, 0.5);
             double cmaEvals = 1.0 - deEvals;
             int evals = Jni.optimizeDE(fit, lower, upper, guess, (int) (deEvals * maxEvals), stopVal, popsize, 200, 0.5,
