@@ -1,0 +1,148 @@
+:encoding: utf-8
+:imagesdir: img
+:cpp: C++
+
+== Solar Orbiter
+
+In 2020 ESA created a pykep pull request defining a new optimization model for the Solar Orbiter mission
+https://github.com/esa/pykep/pull/127[(PR127)]. The original solar orbiter mission aimed at high inclination 
+relative to the solar equator and low perhelion to investigate the solar poles from a low distance
+https://issues.cosmos.esa.int/solarorbiterwiki/download/attachments/44993822/SOL-ESC-RP-05500%20-%20Issue%205r0%2C%20201681029%20-%20Solar%20Orbiter%20CReMA%20Issue%205%20Rev%200.pdf[(SolarOrbiter)] 
+The mission used mostly ballistic transfers. After some transfers between 
+Earth and Venus a number of Venus resonance transfers were used to reach these goals utilizing gravity assist
+maneuvers at the planets.  
+Originally a deterministic search algorithm was applied. Reformulation as an optimization problem
+can serve several purposes:
+
+- Avoid "bias". May be different planet sequences / resonances / flight heights at the gravity assists 
+lead to better solutions
+
+- Verification: Find out if the pruning of the deterministic search space was correct or if there are 
+good solutions missed there.  
+
+- Performance: May be optimization is faster than deterministic search?
+
+- Balance between multiple objectives and the constraints: With a optimization model it may be easier to experiment 
+with a different balancing between objectives and constraints.  
+
+In 2008 an optimization model for the Messenger mission was created which could "reproduce" the required 
+resonances. It took some years until 2021 an optimization algorithm was found reducing the solution time to
+about 15 minutes for a single modern multi-core processor https://github.com/dietmarwo/smart-retry[smart-retry]. 
+Inspired by the Messenger optimization model the initial pykep solar orbiter model tried to replicate this success 
+avoiding any "bias" regarding resonances and
+flight height. Unfortunately this time no algorithm was able to find good solutions. May be we just have
+to wait a few years as we did with the Messenger problem?
+
+How much "bias" is required for a solar orbiter optimization model to be "solved" by current state of the art 
+optimization algorithms? Candidates for adding bias are:
+
+- Fixed planet sequence
+- Fixed flight height over the planets at GA maneuvers - we always take the minimal height to maximize the delta velocity. 
+- Only a limited number of fixed resonances are considered. 
+
+Unfortunately with all these limitations we limit the explorative value the optimization model provides. 
+But as optimization algorithms evolve we may be able to loosen these constraints later. 
+
+Multiple implementations of this limited model were created: One in Python for pykep which can be configured as 
+multi-objective constrained problem to test corresponding optimization algorithms https://github.com/esa/pykep/pull/148[(PR148)]. 
+There is a configuration mapping all objective and constraints to a customized weighted sum to test single objective algorithms 
+supporting only boxed constraints. To speed up the evaluation of optimization algorithms a Java implementation
+was created which only supports the single objective / weighted sum option but was verified to be
+equivalent otherwise. So for single objective algorithms the results presented here for the Java implementation 
+are valid also for the pykep Python implementation. 
+Here https://gist.github.com/dietmarwo/5b6bbadbd696d36806177be2df3c6bb7[solo_mgar_test.py] is example code to test the Python
+version and to visualize optimization results listed here: https://github.com/dietmarwo/fast-cma-es/blob/master/examples/data/solo_results.txt[solo_results.txt]
+
+image::dist_sun.png[]
+
+image::solar_orbits.png[]
+
+=== The Experiment
+
+First we compare a few optimization algorithms using parallel retry / unconnected islands. Instead
+of the number of function evaluations we limit the overall optimization time to about 5 minutes. This
+way algorithms causing less overhead are allowed to perform more evaluations. The number of function evaluations 
+per retry was chosen carefully - by trial and error - 
+for each algorithm to produce the best possible result at the given time limit. The tested algorithms were
+
+- BiteOpt version 2021.20 https://github.com/avaneev/biteopt/blob/master/biteopt.h[biteopt.h]
+- DE1220 from pagmo, default mutation variants {2u ,3u ,7u ,10u ,13u ,14u ,15u ,16u} https://esa.github.io/pagmo2/docs/cpp/algorithms/de1220.html[de1220]
+- DE1220 from pagmo, "best/1/exp" mutation variant {1u} https://esa.github.io/pagmo2/docs/cpp/algorithms/de1220.html[de1220] equivalent to 
+  https://esa.github.io/pagmo2/docs/cpp/algorithms/sade.html[sade] with "best/1/exp"
+- PSO from pagmo, https://esa.github.io/pagmo2/docs/cpp/algorithms/pso.html[pso] using default parameters
+- GACO from pagmo,  https://esa.github.io/pagmo2/docs/cpp/algorithms/gaco.html[gaco] using default parameters
+- GCL-DE  https://github.com/dietmarwo/fast-cma-es/blob/master/_fcmaescpp/gcldeoptimizer.cpp[gcldeoptimizer.cpp] - https://doi.org/10.1016/j.asoc.2020.106451[DOI]  
+- fcmaes-DE variant https://github.com/dietmarwo/fast-cma-es/blob/master/_fcmaescpp/deoptimizer.cpp[deoptimizer.cpp]
+- CMA-ES (fcmaes-C++-implementation) https://github.com/dietmarwo/fast-cma-es/blob/master/_fcmaescpp/acmaesoptimizer.cpp[acmaesoptimizer.cpp]
+- A sequence fcmaes-DE -> CMA-ES (the fcmaes default algorithm). The best member of the resulting DE population is used as guess initializing CMA-ES.
+
+As a first test we check mean, standard deviation and best function value from all retries performed in 5 minutes
+for the best resonance sequence:
+ 
+.Mean, standard deviation and best
+[width="80%",cols="2,^2,^2,^2",options="header"]
+|=========================================================
+|algorithm |mean |sdev |best 
+|fcmaes-DE |320379 |234285 |8345  
+|DE->CMA-ES |375579 |408621 | 7342
+|GCL-DE |440808 |388441 |8217 
+|DE1220/1 |506448 |417118 |7938 
+|BiteOpt |560949 |546177 |7341 
+|DE1220/default |636792 |230051 |80989
+|PSO |802357 |481799 |21241 
+|GACO |1090971 |966984 |10602 
+|CMA-ES |2274047 |2113445 |8121 
+|=========================================================
+
+The mean result value gives no indication how "reliably" we find a 
+good best value. This experiment is not sufficient to evaluate and compare the tested algorithms. But it may explain why 
+fcmaes-DE and CMA-ES work well as sequence: Both are very different regarding mean/sdev but quite good 
+regarding the best value they find. CMA-ES alone often gets stuck early at local minima which causes the worst mean
+result of all algorithms tested. Nevertheless it can be used to improve fcmaes-DE if both algorithms are 
+chained together. Parameters for the pagmo algorithms PSO / GACO and DE1220 can probably be improved because we 
+have less experience in using them. 
+
+Instead only testing for one resonance sequence we repeat the experiment for all good resonance sequences taken from 
+https://github.com/dietmarwo/fcmaes-java/blob/master/src/main/resources/data/solo_results.txt[solo_results.txt]
+
+The experiment was performed as follows: 
+
+At first different algorithms were applied to the problem were all 281 different resonance sequences are permitted. The
+optimization can freely choose between these resonances to find an optimal trajectory. In this process the best arguments + value
+for each resonance were recorded. 
+
+Next the best resonances were selected and defined as single target resonance resulting in many different optimization
+problem variants each optimized separately. From the results the best known value was subtracted, the resulting list of differences
+was sorted and plotted. This plot represents how "reliable" and to which extent an optimization algorithm was able to reproduce the
+best known result for each of the 100 best resonance sequences. At first we choose a limit of 5 minutes execution time for each sequence
+on a AMD 5950x 16 core processor utilizing all 32 available parallel threads. Algorithms with lower overhead can 
+execute more function evaluations at the given time limit. As parallelization method both simple parallel retry - 
+in pagmo terms: "unconnected islands" - and a smart retry adjusting bounds and the evaluation budget are tested.
+
+=== Results
+
+image::solo_1.png[]
+
+Let us exclude "DE1220 default mutation variants" since it is not competitive here - maybe different parameters could help?
+
+image::solo_2.png[]
+
+PSO and GACO are significantly better, but still not sufficient to meet the high inclination mission goal.
+ 
+image::solo_3.png[]
+
+DE1220 / SADE "best/1/exp" and CMA-ES are quite similar here. Remember how different their "mean result" values listed in the table above 
+are? CMA has a much greater standard deviation / diversity enabling it to catch up if we ask for the best result out of many
+retries. But only BiteOpt and the DE-CMA sequence are able to really find good results, BiteOpt more reliably than DE->CMA. 
+The smart retry is not competitive using the 5 min time limit for both algorithms. But what happens if we increase the 
+limit to 25 minutes? How well do the algorithms scale? Now we only check for the 60 best resonance sequences since these test require much
+more time. 
+
+image::solo_4.png[]
+
+With 25 minutes limit the picture changes significantly: Now the smart retry takes over the lead. It scales better than the simple parallel retry (unconnected islands). 
+
+image::solo_5.png[]
+
+Zooming in on the best we see that both DE->CMA and BiteOpt improve now using the smart retry where DE->CMA has a better chance
+to "solve" the optimization problem where BiteOpt delivers more consistent results. 
