@@ -22,6 +22,7 @@ algorithms for the solar orbiter mission optimization problem is shown here: htt
 - New DE (differential evolution) variant optimized for usage with parallel coordinated retry.
 - Ask / Tell interface for CMA-ES and DE. 
 - GCL-DE (differential evolution) variant from Mingcheng Zuo.
+- BiteOpt algorithm from Aleksey Vaneev.
 - Fast C++ implementations of CMA-ES, differential evolution, dual annealing and the Harris hawks algorithm.
 - Supports Linux and Windows
 
@@ -153,3 +154,18 @@ image::DE-CMA_AMD_5950x.2.png[]
 
 About 1.7*10^6 function evaluations per second were performed which shows excellent scaling of the algorithm utilizing all
 16 cores / 32 threads.   
+
+=== Citing
+
+[source]
+----
+@misc{fcmaes-java2021,
+    author = {Dietmar Wolz},
+    title = {fcmaes-java - A Java derivative-free optimization library},
+    note = {Java/C++ source code, with description and examples},
+    year = {2021},
+    publisher = {GitHub},
+    journal = {GitHub repository},
+    howpublished = {Available at \url{https://github.com/dietmarwo/fcmaes-java}},
+}
+----
