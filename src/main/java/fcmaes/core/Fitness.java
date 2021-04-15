@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.hipparchus.analysis.UnivariateFunction;
 import org.hipparchus.optim.MaxEval;
 import org.hipparchus.optim.nonlinear.scalar.GoalType;
@@ -18,6 +19,7 @@ import org.hipparchus.optim.univariate.SearchInterval;
 import org.hipparchus.optim.univariate.UnivariateObjectiveFunction;
 import org.hipparchus.optim.univariate.UnivariateOptimizer;
 import org.hipparchus.random.RandomGenerator;
+import org.libj.util.function.TriPredicate;
 
 import fcmaes.core.Optimizers.Optimizer;
 import fcmaes.core.Optimizers.Result;
@@ -53,7 +55,18 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
      * Number of function evaluations.
      */
     public int _evals = 0;
-
+   
+    /**
+     * Creation time.
+     */   
+    public long _time = System.currentTimeMillis();
+    
+    /**
+     * Callback
+     */
+    
+    public TriPredicate<String,Double,List<Double>> _callBack;
+    
     /**
      * Set _parallelEval = true to enable parallel function evaluation for the
      * population. Set to false for parallel optimization runs.
@@ -64,6 +77,13 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
         _dim = dim;
     }
 
+    public boolean callBack(String key, double y, double[] x) {
+    	if (_callBack == null)
+    		return false;
+    	else 
+    		return _callBack.test(key, y, Arrays.asList(ArrayUtils.toObject(x)));
+    }
+    
     /**
      * lower point limit. Needs to be defined for coordinated parallel retry.
      */
@@ -79,7 +99,7 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
     }
 
     public double[] guess() {
-        return null;
+        return Utils.rnd(lower(), upper());
     }
 
     /**
@@ -204,12 +224,12 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
     }
 
     public Result minimizeN(int runs, Optimizer opt, int maxEvals, double stopVal, int popsize, double limit) {
-        return opt.minimizeN(runs, this, lower(), upper(), Utils.array(_dim, 0.3), null, 
+        return opt.minimizeN(runs, this, lower(), upper(), null, null, 
                 maxEvals, stopVal, popsize, limit);
     }
 
     public Result minimizeN(int runs, Optimizer opt, double[] guess, int maxEvals, double stopVal, int popsize, double limit) {
-        return opt.minimizeN(runs, this, lower(), upper(), Utils.array(_dim, 0.3), guess, 
+        return opt.minimizeN(runs, this, lower(), upper(), null, guess, 
                 maxEvals, stopVal, popsize, limit);
     }
 
@@ -229,8 +249,6 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
 
     public void minimizeSer(int runs, Optimizer opt, double[] lower, double[] upper, double[] guess, double[] sigma,
             int maxEvals, double stopVal, int popsize) {
-        if (sigma == null)
-            sigma = Utils.array(_dim, 0.3);
         for (int i = 0; i < runs && _bestY > stopVal; i++) {
             minimize(opt, lower, upper, guess, sigma, maxEvals, stopVal, popsize);
         }

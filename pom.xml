@@ -7,7 +7,7 @@
 
 	<groupId>com.github.dietmarwo</groupId>
 	<artifactId>fcmaes-java</artifactId>
-	<version>1.2.18</version>
+	<version>1.2.19</version>
 	<packaging>jar</packaging>
 
 	<name>fcmaes-java</name>
@@ -54,6 +54,16 @@
 			<artifactId>JTransforms</artifactId>
 			<version>3.1</version>
 			<classifier>with-dependencies</classifier>
+		</dependency>
+		<dependency>
+    		<groupId>edu.stanford.nlp</groupId>
+    		<artifactId>stanford-corenlp</artifactId>
+    		<version>4.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.libj</groupId>
+			<artifactId>util</artifactId>
+			<version>0.8.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.boofcv</groupId>

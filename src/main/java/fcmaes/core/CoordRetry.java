@@ -40,7 +40,7 @@ public class CoordRetry {
         threads.start();
         threads.join();
         retry.sort();
-        retry.dump(retry._next.get());
+        retry.dump(retry._countRuns.get());
         return retry.getResult();
     }
 
@@ -51,20 +51,20 @@ public class CoordRetry {
 
     public static class Optimize implements Runnable {
 
-        AtomicInteger _next = new AtomicInteger(0);
-        double _numRetries = 0;
-        double _maxEvals = 0;
-        double _maxEvalFac = 0;
-        double _evalFacIncr = 0;
-        double _evalFac = 1.0;
-        int _checkInterval = 0;
+    	protected AtomicInteger _countRuns = new AtomicInteger(0);
+        protected Fitness[] _store;
+        protected int _numStored = 0;
+        int _numSorted = 0;
+        double _maxEvals = 2000;
+        double _maxEvalFac = 50;
+        double _evalFac = 50.0;
+        int _checkInterval = 100;
+        double _numRetries = _maxEvalFac * _checkInterval;
+        double _evalFacIncr = _maxEvalFac / (_numRetries / _checkInterval);
         Fitness _fit0;
         double[] _delta;
         double[] _guess;
-        Fitness[] _store;
-        int _numStored = 0;
-        int _numSorted = 0;
-        AtomicLong _countAll;
+        AtomicLong _countAll = new AtomicLong(0);
         Optimizer _opt;
         int _popsize;
         double _limitVal;
@@ -105,8 +105,14 @@ public class CoordRetry {
             _store = store;
             _opt = opt;
             _popsize = popsize;
-            _countAll = new AtomicLong(0);
             _guess = guess;
+            _delta = Utils.minus(_fit0.upper(), _fit0.lower());
+            _log = log;
+        }
+
+        public Optimize(Fitness fit0, Fitness[] store, boolean log) {
+            _fit0 = fit0;
+            _store = store;
             _delta = Utils.minus(_fit0.upper(), _fit0.lower());
             _log = log;
         }
@@ -133,7 +139,7 @@ public class CoordRetry {
         @Override
         public void run() {
             int i;
-            while ((i = _next.getAndIncrement()) < _numRetries && statY.getMin() >= _stopVal) {
+            while ((i = _countRuns.getAndIncrement()) < _numRetries && statY.getMin() >= _stopVal) {
                 if (crossover(i))
                     continue;
                 Fitness fit = _fit0.create();
@@ -143,7 +149,11 @@ public class CoordRetry {
             }
         }
 
-        private void addResult(int countRuns, Fitness fit, double limit) {
+        public int countRuns() {
+            return _countRuns.get();
+        }
+        
+        public void addResult(int countRuns, Fitness fit, double limit) {
             synchronized (_store) {
                 incrCountEvals(countRuns, fit._evals);
                 if (fit._bestY < limit) {
@@ -228,7 +238,7 @@ public class CoordRetry {
             _countAll.addAndGet(evals);
         }
 
-        private void sort() {
+        public void sort() {
             Fitness[] sorted = _store.clone();
             Arrays.sort(sorted, 0, _numStored);
             Fitness prev = null;

@@ -388,7 +388,7 @@ public class OptimizerTest {
 		Optimizer opt = new CMA();
 
 		doTest(new Tablet(DIM, 1e3), opt, lower, upper, sigma, guess,
-				100000, -Double.MAX_VALUE, POPSIZE, 1e-6, 1e-11, expected);
+				100000, -Double.MAX_VALUE, POPSIZE, 1e-5, 1e-11, expected);
 	}
 
 	@Test
