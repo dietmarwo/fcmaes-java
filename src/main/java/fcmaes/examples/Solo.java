@@ -91,7 +91,7 @@ public class Solo extends Fitness {
 
     List<Double> logData = null;
 
-    Solo() {
+    public Solo() {
         super(10);
         init();
     }
@@ -112,6 +112,7 @@ public class Solo extends Fitness {
     public Solo create() {
         Solo solo = new Solo();
         solo._rotation_axis = _rotation_axis;
+        solo._callBack = _callBack;
         return solo;
     }
 
@@ -408,8 +409,11 @@ public class Solo extends Fitness {
         // store best trajectory for a given resonance sequence
         if (logData == null) {
             long hash = hash(resos);
-            if (!bestTrajectories_.containsKey(hash) || value < bestTrajectories_.get(hash).y)
+            if (!bestTrajectories_.containsKey(hash) || value < bestTrajectories_.get(hash).y) {
                 bestTrajectories_.put(hash, new Trajectory(value, x, hash));
+                if (value < max_log_y_value)
+                	callBack(Utils.r(resos, ""), value, x);
+            }
             if (counter_.getAndIncrement() % log_interval_evals == log_interval_evals - 1)
                 dumpTrajectories(resoFile_);
         }
@@ -425,7 +429,7 @@ public class Solo extends Fitness {
         }
         return value;
     }
-
+	
     void check_good_solutions() {
         double[][] xs = new double[][] { { 7456.679026533558, 399.69805305303163, 164.18980290024066, 334.2488325479292,
                 0.1630833705342643, -0.22564954170853885, 0.9805628198484782, 0.4977489581063494, 0.5363419684307973,
