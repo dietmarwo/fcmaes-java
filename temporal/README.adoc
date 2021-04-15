@@ -18,13 +18,13 @@ utilizing all cores of the CPU. Multiple workers per CPU are possible if the spe
 CPU architectures require these (for instance to avoid inter CCX-Latencies for Ryzen/Epyc). 
 All workers connect to the same Temporal Server and are coordinated by a  
 workflow worker. There is one workflow worker for regular retry ( 
-https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/temporal/src/main/java/fcmaes/temporal/core/OptimizerWorker.java[OptimizerWorker])
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/core/OptimizerWorker.java[OptimizerWorker])
 and one for the smart retry 
-https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/temporal/src/main/java/fcmaes/temporal/core/OptimizerWorker.java[SmartWorker]) 
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/core/SmartWorker.java[SmartWorker]) 
 corresponding to activity workers 
-https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/temporal/src/main/java/fcmaes/temporal/core/OptimizerActivities.java[OptimizerActivities])
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/core/OptimizerActivities.java[OptimizerActivities])
 and
-https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/temporal/src/main/java/fcmaes/temporal/core/OptimizerActivities.java[SmartActivities])
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/core/SmartActivities.java[SmartActivities])
 
 
 For the Temporal features see https://docs.temporal.io/docs/concept-overview . 
