@@ -7,7 +7,7 @@
 fcmaes-temporal enables multi-node gradient-free optimizations. It uses
 https://docs.temporal.io/docs/get-started/[Temporal] for inter-node communication 
 via tcp/ip and https://developers.google.com/protocol-buffers[Protocol Buffers] and
-persisting the exchanged messages.
+persists the exchanged messages in a database.
 
 === Features
 
