@@ -1,0 +1,64 @@
+:encoding: utf-8
+:imagesdir: img
+:cpp: C++
+
+= fcmaes-temporal - a distributed Java gradient-free optimization library
+
+fcmaes-temporal enables multi-node gradient-free optimizations. It uses
+https://docs.temporal.io/docs/get-started/[Temporal] for inter-node communication 
+via tcp/ip and https://developers.google.com/protocol-buffers[Protocol Buffers] and
+persisting the exchanged messages.
+
+=== Features
+
+fcmaes-temporal inherits features from https://github.com/dietmarwo/fcmaes-java[fcmaes-java]
+and Temporal. Both regular and smart (coordinated) optimization retries are supported.
+The preferred deployment uses a single optimization activity worker per physical CPU
+utilizing all cores of the CPU. Multiple workers per CPU are possible if the specific
+CPU architectures require these (for instance to avoid inter CCX-Latencies for Ryzen/Epyc). 
+All workers connect to the same Temporal Server and are coordinated by a  
+workflow worker. There is one workflow worker for regular retry ( 
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/temporal/src/main/java/fcmaes/temporal/core/OptimizerWorker.java[OptimizerWorker])
+and one for the smart retry 
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/temporal/src/main/java/fcmaes/temporal/core/OptimizerWorker.java[SmartWorker]) 
+corresponding to activity workers 
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/temporal/src/main/java/fcmaes/temporal/core/OptimizerActivities.java[OptimizerActivities])
+and
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/temporal/src/main/java/fcmaes/temporal/core/OptimizerActivities.java[SmartActivities])
+
+
+For the Temporal features see https://docs.temporal.io/docs/concept-overview . 
+Since Temporal provides templates for Kubernetes https://github.com/temporalio/helm-charts[helm-charts]
+both local cluster and cloud deployment is supported. As database backend Cassandra and Postgres
+can be configured. Temporal provides a https://github.com/temporalio/web[Web-UI] where all optimization 
+results exchanged between the cluster nodes can be observed. 
+ 
+=== Compilation
+ 
+* in fcmaes-java do `mvn install`
+* in fcmaes-java/temporal/ do `./gradlew build`
+
+=== Usage
+
+See the https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/examples/[examples]. 
+
+=== Dependencies
+
+- see https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/build.gradle
+- see https://github.com/dietmarwo/fcmaes-java/blob/master/pom.xml
+- temporal server must be running https://docs.temporal.io/docs/server-quick-install/
+
+=== Citing
+
+[source]
+----
+@misc{fcmaes-java2021,
+    author = {Dietmar Wolz},
+    title = {fcmaes-temporal - A distributed Java gradient-free optimization library},
+    note = {Java source code, with description and examples},
+    year = {2021},
+    publisher = {GitHub},
+    journal = {GitHub repository},
+    howpublished = {Available at \url{https://github.com/dietmarwo/fcmaes-java/temporal}},
+}
+----
