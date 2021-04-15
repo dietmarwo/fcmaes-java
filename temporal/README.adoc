@@ -52,7 +52,7 @@ See the https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/j
 
 [source]
 ----
-@misc{fcmaes-java2021,
+@misc{fcmaes-temporal2021,
     author = {Dietmar Wolz},
     title = {fcmaes-temporal - A distributed Java gradient-free optimization library},
     note = {Java source code, with description and examples},
