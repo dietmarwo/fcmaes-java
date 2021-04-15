@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
+ * Implements a smart retry optimization workflow worker. Requires a local instance of Temporal
+ * server to be running.
  */
 public class SmartWorker {
 

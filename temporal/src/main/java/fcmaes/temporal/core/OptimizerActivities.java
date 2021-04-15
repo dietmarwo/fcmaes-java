@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Demonstrates an asynchronous activity implementation. Requires a local instance of Temporal
+ * Implements an optimization activity worker. Requires a local instance of Temporal
  * server to be running.
  */
 public class OptimizerActivities {

@@ -28,6 +28,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * Implements a smart retry optimization activity worker. Requires a local instance of Temporal
+ * server to be running.
+ */
 public class SmartActivities {
 
     @ActivityInterface

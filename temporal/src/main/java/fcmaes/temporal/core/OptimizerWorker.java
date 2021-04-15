@@ -5,7 +5,6 @@
 
 package fcmaes.temporal.core;
 
-import fcmaes.core.Log;
 import io.temporal.activity.ActivityOptions;
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowOptions;
@@ -16,15 +15,19 @@ import io.temporal.worker.WorkerFactory;
 import io.temporal.workflow.*;
 import org.apache.commons.lang3.RandomStringUtils;
 
-import java.io.FileNotFoundException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * Implements an optimization workflow worker. Requires a local instance of Temporal
+ * server to be running.
  */
 public class OptimizerWorker {
 
