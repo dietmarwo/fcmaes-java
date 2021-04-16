@@ -6,7 +6,7 @@
 
 fcmaes-temporal enables multi-node gradient-free optimizations. It uses the
 https://docs.temporal.io/docs/get-started/[Temporal] orchestration engine for 
-node to node communication via http and https://developers.google.com/protocol-buffers[Protocol Buffers] and
+node to node communication via http / https://developers.google.com/protocol-buffers[Protocol Buffers] and
 persists the exchanged messages in a database. Here is a  
 https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/Tutorial.adoc[tutorial] 
 about distributed optimization using fcmaes-temporal. 
