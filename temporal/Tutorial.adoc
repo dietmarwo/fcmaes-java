@@ -87,6 +87,36 @@ shows how to configure and start the workflow:
         Map<String, List<Double>> xs = OptimizerRetryWorker.runWorkflow(numExecs, params);
     }
 ----
+
+The implementation of the optimization activity
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/core/OptimizerActivityImpl.java[OptimizerActivityImpl]
+uses a tricky callback injected into the fitness function:
+
+[source,java]
+----
+   synchronized private boolean signal(String key, Double y, List<Double> x) {
+        if (!ymap.containsKey(key) || y < ymap.get(key)) {
+            ymap.put(key, y);
+            xmap.put(key, x);
+            tmap.put(key, System.currentTimeMillis());
+        }
+        if (System.currentTimeMillis() - time > interval) {
+            for (String k : tmap.keySet()) {
+                if (tmap.get(k) > time) {
+                    // send data to workflow
+                    workflow.optimum(k, ymap.get(k), xmap.get(k));
+                }
+            }
+            time = System.currentTimeMillis();
+        }
+        return false;
+    }
+----
+
+delaying the data transfer to reduce the amount of signals sent to the workflow. The solar orbiter fitness
+function calls this callback in case of a local improvement for a resonance sequence. There may be many improvements
+until finally the data is transfered, only the final improvement for a given time interval reaches the workflow. 
+
 The workflow is configured to be executed at the same node as the temporal server. Since the workflow doesn't consume
 significant CPU resources, this node can also be used to execute a local optimization worker. This setup is essentially
 equivalent to a parallel local optimization run, but two things are different:
