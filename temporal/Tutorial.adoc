@@ -87,15 +87,44 @@ shows how to configure and start the workflow:
     }
 ----
 The workflow is configured to be executed at the same node as the temporal server. Since the workflow doesn't consume
-significant CPU resources, it can also be used to execute a local optimization worker. This setup is essentially
+significant CPU resources, this node can also be used to execute a local optimization worker. This setup is essentially
 equivalent to a parallel local optimization run, but two things are different:
 
 - As soon as optimization workers are started on other cluster nodes these "contribute" to the optimization.
 - Temporal stores all optimization results transferred as a signal to the central workflow. 
+
+Here we see the Temporal Web-UI showing the state of the workflows we started:
+
+image::temporalUI.png[]  
  
 To start an optimization worker we have to start:
 https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/core/OptimizerActivityWorker.java[OptimizerActivityWorker]
 at the cluster node configuring the URL of the temporal server as argument. 
+
+After the workflow is started we see:
+
+image::temporalUIOptSummary.png[] 
+
+Clicking on "History" reveals more details, we see the parameters of the optimization workflow:
+
+image::TemporalOptHist1.png[] 
+
+and its activities:
+
+image::TemporalOptHist1b.png[] 
+
+After the optimization workers are started we see the incoming signals showing their solutions:
+
+image::TemporalOptHist2.png[] 
+
+Using the "Query" interface we gain insights into the workflow status. The `getXMap` query shows the best
+solution vectors for each resonance sequence: 
+
+image::TemporalOptQuery1.png[] 
+
+The `getYmap` query shows their values. These are the results collected from all distributed workers:
+
+image::TemporalOptQuery2.png[] 
 
 === The Messenger Full Problem
 The Messenger Full problem optimizing the Messenger mission trajectory 
@@ -167,9 +196,29 @@ shows how to configure and start the workflow:
     }
 ----
 The workflow is configured to be executed at the same node as the temporal server. Since the workflow doesn't consume
-significant CPU resources, it can also be used to execute a local optimization worker.
+significant CPU resources, this node can also be used to execute a local optimization worker.
 
 To start an smart optimization worker we have to start:
 https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/core/SmartActivityWorker.java[SmartActivityWorker]
 at the cluster node configuring the URL of the temporal server as argument. 
 
+The Temporal Web_UI shows the "History" of the workflow, we see the workflow parameters:
+
+image::TemporalSmartHist1.png[] 
+
+After the smart activities/workers are started we see their parameters:
+
+image::TemporalSmartHist2.png[] 
+
+and the incoming signals showing their solutions:
+
+image::TemporalSmartSignal.png[] 
+
+Using the "Query" interface we gain insights into the workflow status. The `getXs` query shows the best
+solution vectors: 
+
+image::TemporalSmartQuery1.png[] 
+
+The `getYs` query shows their values. These are the results collected from all distributed workers:
+
+image::TemporalSmartQuery2.png[] 
