@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Implements a distributed smart/coordinated parallel optimization retry worker.
+ * Implements a distributed smart/coordinated parallel optimization retry activity worker.
  * Requires a local instance of Temporal server to be running.
  * Receives the target URL of the temporal server as argument.
  */
