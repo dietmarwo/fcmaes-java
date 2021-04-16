@@ -144,7 +144,7 @@ The other `query` methods can be used to retrieve the collected optimization sol
 optimization process itself. They deliver the best solution for a given resonance sequence represented by
 a String. 
 
-https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/examples/MessengerFull.java[Solo]
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/examples/MessengerFull.java[MessengerFull]
 shows how to configure and start the workflow:
 
 [source,java]
@@ -168,4 +168,8 @@ shows how to configure and start the workflow:
 ----
 The workflow is configured to be executed at the same node as the temporal server. Since the workflow doesn't consume
 significant CPU resources, it can also be used to execute a local optimization worker.
+
+To start an smart optimization worker we have to start:
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/core/SmartActivityWorker.java[SmartActivityWorker]
+at the cluster node configuring the URL of the temporal server as argument. 
 
