@@ -18,11 +18,14 @@ public interface SmartWorkflow {
     List<List<Double>> optimize(int num, Map<String, String> params);
 
     /**
-     * Receives new optimum for key.
+     * Receives new solutions from activities.
      */
     @SignalMethod
     void storeFitness(List<Double> ys, List<List<Double>> xs);
 
+    /**
+     * Provides new solutions to activities generated after minTime.
+     */
     @QueryMethod
     List<List<Double>> getFitness(long minTime);
 

@@ -1,0 +1,171 @@
+:encoding: utf-8
+:imagesdir: img
+:cpp: C++
+
+= fcmaes-temporal - Tutorial
+
+In this tutorial we show how to solve very hard optimization problems by distributing
+the workload on different machines inside a local network / local cluster. 
+
+- The Solar Orbiter trajectory optimization problem is used to show how distributed
+parallel optimization retry is performed. 
+
+- The GTOP Messenger Full trajectory optimization problem is used to show how distributed
+smart / coordinated parallel optimization retry is performed.
+
+For parallel retry each node in the local cluster works independently. It computes optimization
+solutions and submits them to a central workflow. The smart retry instead requires coordination
+between the nodes. Each node needs to be updated so that the global state of the optimization
+is shared between all nodes. 
+
+We use https://docs.temporal.io/docs/get-started/[Temporal] for node to node communication 
+via tcp/ip. Additionally Temporal persists all messages exchanged in a database and provides
+a Web-UI to browse workflows and their communications. 
+
+=== The Solar Orbiter Problem
+
+Here is an introduction into the  
+https://github.com/dietmarwo/fcmaes-java/blob/master/Solo.adoc[Solar Orbiter optimization problem]. 
+Goal is to find high inclination / low perhelion / low fuel consumption trajectories
+for a given set of Venus resonance sequences. It can be viewed as a mixed integer problem with 
+each venus resonance as discrete variable. We can dedicate our worker nodes either to the full set
+of resonance sequences, to subsets or even individual sequences we found to be promising by previous
+runs. 
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/core/OptimizerWorkflow.java[OptimizerWorkflow]
+specifies the workflow coordinating the worker nodes implemented as a Temporal workflow: 
+
+[source,java]
+----
+@WorkflowInterface
+public interface OptimizerWorkflow {
+
+    @WorkflowMethod
+    Map<String, List<Double>> optimize(int num, Map<String, String> params);
+
+    /**
+     * Receives new optimum for key.
+     */
+    @SignalMethod
+    void optimum(String key, double y, List<Double> x);
+
+    @QueryMethod
+    Map<String, Double> getYMap();
+
+    @QueryMethod
+    Map<String, List<Double>> getXMap();
+}
+----
+
+`optimize` receives a parameter set defining the fitness function, the optimization algorithm to apply
+and a set of optimization parameters. Then it starts the worker nodes which are registered as Temporal activities. 
+`optimum` is called by the worker nodes. It tells the central workflow about local optimization updates. 
+The `query` methods can be used to retrieve the collected optimization solutions, they are not required for the
+optimization process itself. They deliver the best solution for a given resonance sequence represented by
+a String. 
+
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/examples/Solo.java[Solo]
+shows how to configure and start the workflow:
+
+[source,java]
+----
+   public static void main(String[] args) throws FileNotFoundException {
+
+        Log.setLog();
+
+        Map<String,String> params = new HashMap<String,String>();
+
+        params.put("fitnessClass", "fcmaes.examples.Solo");
+        params.put("optimizerClass", "fcmaes.core.Optimizers$Bite(16)");
+        params.put("runs", "20000");
+        params.put("maxEvals", "150000");
+        params.put("popSize", "31");
+        params.put("stopVal", "-1E99");
+        params.put("limit", "1E99");
+
+        int numExecs = 1;
+        Map<String, List<Double>> xs = OptimizerRetryWorker.runWorkflow(numExecs, params);
+    }
+----
+The workflow is configured to be executed at the same node as the temporal server. Since the workflow doesn't consume
+significant CPU resources, it can also be used to execute a local optimization worker. This setup is essentially
+equivalent to a parallel local optimization run, but two things are different:
+
+- As soon as optimization workers are started on other cluster nodes these "contribute" to the optimization.
+- Temporal stores all optimization results transferred as a signal to the central workflow. 
+ 
+To start an optimization worker we have to start:
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/core/OptimizerActivityWorker.java[OptimizerActivityWorker]
+at the cluster node configuring the URL of the temporal server as argument. 
+
+=== The Messenger Full Problem
+The Messenger Full problem optimizing the Messenger mission trajectory 
+cannot be solved without some kind of "bounds management". This means that the optimization retries
+are organized so that the used bounds are adapted. These bounds are generated from previous
+optimization runs, so a global store of optimization results has to be maintained and shared between
+all smart retry worker nodes. So we need communication in both directions: The workers
+transfer optimization results to the central workflow and receive new solutions generated by other workers 
+from there. 
+
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/core/SmartWorkflow.java[OptimizerWorkflow]
+specifies the workflow coordinating the worker nodes implemented as a Temporal workflow: 
+
+[source,java]
+----
+@WorkflowInterface
+public interface SmartWorkflow {
+
+    @WorkflowMethod
+    List<List<Double>> optimize(int num, Map<String, String> params);
+
+    /**
+     * Receives new solutions from activities.
+     */
+    @SignalMethod
+    void storeFitness(List<Double> ys, List<List<Double>> xs);
+
+    /**
+     * Provides new solutions to activities generated after minTime.
+     */
+    @QueryMethod
+    List<List<Double>> getFitness(long minTime);
+
+    @QueryMethod
+    List<Double> getYs();
+
+    @QueryMethod
+    List<List<Double>> getXs();
+----
+
+`optimize` receives a parameter set defining the fitness function, the optimization algorithm to apply
+and a set of optimization parameters. Then it starts the worker nodes which are registered as Temporal activities. 
+`storeFitness` is called by the worker nodes. It tells the central workflow about local optimization updates. 
+`getFitness` provides the worker nodes with new solutions from other workers generated after the last call.
+The other `query` methods can be used to retrieve the collected optimization solutions, they are not required for the
+optimization process itself. They deliver the best solution for a given resonance sequence represented by
+a String. 
+
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/examples/MessengerFull.java[Solo]
+shows how to configure and start the workflow:
+
+[source,java]
+----
+    public static void main(String[] args) throws FileNotFoundException {
+
+        Log.setLog();
+        Map<String,String> params = new HashMap<String,String>();
+
+        params.put("fitnessClass", "fcmaes.examples.MessFull");
+        params.put("optimizerClass", "fcmaes.core.Optimizers$DECMA");
+        params.put("runs", "20000");
+        params.put("startEvals", "1500");
+        params.put("popSize", "31");
+        params.put("stopVal", "-1E99");
+        params.put("limit", "20.0");
+
+        int numExecs = 8;
+        List<List<Double>> xs = SmartRetryWorker.runWorkflow(numExecs, params);
+    }
+----
+The workflow is configured to be executed at the same node as the temporal server. Since the workflow doesn't consume
+significant CPU resources, it can also be used to execute a local optimization worker.
+
