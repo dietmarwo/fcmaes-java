@@ -28,6 +28,7 @@ and https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/Tutorial.adoc[
 - BiteOpt algorithm from Aleksey Vaneev.
 - Fast C++ implementations of CMA-ES, differential evolution, dual annealing and the Harris hawks algorithm.
 - Supports Linux and Windows
+- Supports multi node / cluster execution based on https://docs.temporal.io/docs/get-started/[Temporal]
 
 === Optimization Challenge
 
