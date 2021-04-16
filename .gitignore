@@ -1,9 +1,12 @@
 target
+.classpath
+.project
+.settings
 .*.swp
 .*.swo
 *.iml
 .DS_Store
 .idea
 .gradle
-/build
-/out
+build
+out
