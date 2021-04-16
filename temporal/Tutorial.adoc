@@ -18,9 +18,10 @@ solutions and submits them to a central workflow. The smart retry instead requir
 between the nodes. Each node needs to be updated so that the global state of the optimization
 is shared between all nodes. 
 
-We use https://docs.temporal.io/docs/get-started/[Temporal] for node to node communication 
-via tcp/ip. Additionally Temporal persists all messages exchanged in a database and provides
-a Web-UI to browse workflows and their communications. 
+We use the https://docs.temporal.io/docs/get-started/[Temporal] orchestration engine 
+for node to node communication 
+via http. Temporal persists all messages exchanged in a database and provides
+a Web-UI to browse workflows, their communications and results. 
 
 === The Solar Orbiter Problem
 
