@@ -1,1 +1,9 @@
-/target/
+target
+.*.swp
+.*.swo
+*.iml
+.DS_Store
+.idea
+.gradle
+/build
+/out
