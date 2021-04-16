@@ -36,7 +36,7 @@ public class SmartWorkerTest {
     }
 
     @Test
-    public void testTransfer() {
+    public void testSmartRetry() {
         SmartActivity activities = mock(SmartActivity.class);
         worker.registerActivitiesImplementations(activities);
         testEnv.start();

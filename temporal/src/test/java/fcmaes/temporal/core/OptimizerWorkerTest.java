@@ -36,7 +36,7 @@ public class OptimizerWorkerTest {
     }
 
     @Test
-    public void testTransfer() {
+    public void testParallelRetry() {
         OptimizerActivity activities = mock(OptimizerActivity.class);
         worker.registerActivitiesImplementations(activities);
         testEnv.start();
