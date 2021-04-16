@@ -1,4 +1,0 @@
-fcmaes/temporal/core/OptimizerWorkerTest.java
- fcmaes.temporal.core.OptimizerWorkerTest
-fcmaes/temporal/core/SmartWorkerTest.java
- fcmaes.temporal.core.SmartWorkerTest
