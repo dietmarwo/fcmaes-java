@@ -8,7 +8,7 @@ fcmaes-temporal enables multi-node gradient-free optimizations. It uses
 https://docs.temporal.io/docs/get-started/[Temporal] for inter-node communication 
 via tcp/ip and https://developers.google.com/protocol-buffers[Protocol Buffers] and
 persists the exchanged messages in a database. Here is a  
-https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/Tutorial.doc[tutorial] 
+https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/Tutorial.adoc[tutorial] 
 about distributed optimization using fcmaes-temporal. 
 
 === Features
@@ -41,7 +41,7 @@ results exchanged between the cluster nodes can be observed.
 * in fcmaes-java/temporal/ do `./gradlew build`
 
 === Usage
-See https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/Tutorial.doc[Tutorial] and
+See https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/Tutorial.adoc[Tutorial] and
 https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/src/main/java/fcmaes/temporal/examples/[examples]. 
 
 === Dependencies
