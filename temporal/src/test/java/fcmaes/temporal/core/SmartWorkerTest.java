@@ -1,10 +1,5 @@
 package fcmaes.temporal.core;
 
-import static fcmaes.temporal.core.SmartRetryWorker.TASK_QUEUE;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowOptions;
 import io.temporal.testing.TestWorkflowEnvironment;
@@ -15,6 +10,11 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static fcmaes.temporal.core.SmartRetryWorker.TASK_QUEUE;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class SmartWorkerTest {
 
