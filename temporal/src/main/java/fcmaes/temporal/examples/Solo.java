@@ -6,7 +6,7 @@
 package fcmaes.temporal.examples;
 
 import fcmaes.core.Log;
-import fcmaes.temporal.core.OptimizerWorker;
+import fcmaes.temporal.core.OptimizerRetryWorker;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
@@ -30,7 +30,7 @@ public class Solo {
         params.put("limit", "1E99");
 
         int numExecs = 1;
-        Map<String, List<Double>> xs = OptimizerWorker.runWorkflow(numExecs, params);
+        Map<String, List<Double>> xs = OptimizerRetryWorker.runWorkflow(numExecs, params);
     }
 
 }

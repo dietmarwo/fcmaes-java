@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - Class fcmaes.temporal.core.SmartWorkerTest</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>Class fcmaes.temporal.core.SmartWorkerTest</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/fcmaes.temporal.core.html">fcmaes.temporal.core</a> &gt; SmartWorkerTest</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">1</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">1m10.42s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div id="tabs">
+<ul class="tabLinks">
+<li>
+<a href="#tab0">Tests</a>
+</li>
+<li>
+<a href="#tab1">Standard output</a>
+</li>
+</ul>
+<div id="tab0" class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">testTransfer</td>
+<td class="success">1m10.42s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+<div id="tab1" class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre>10:08:22.884 [Test worker] INFO  i.t.s.WorkflowServiceStubsImpl - Created GRPC client for channel: ManagedChannelOrphanWrapper{delegate=ManagedChannelImpl{logId=2, target=directaddress:///be355c50-d570-4ae3-a14c-257520c2de32}}
+10:08:22.887 [Test worker] INFO  i.t.s.WorkflowServiceStubsImpl - Created GRPC client for channel: ManagedChannelOrphanWrapper{delegate=ManagedChannelImpl{logId=5, target=directaddress:///2b40157f-3725-4537-8d26-328e07caa0b1}}
+10:08:22.966 [Test worker] INFO  io.temporal.internal.worker.Poller - start(): Poller{options=PollerOptions{maximumPollRateIntervalMilliseconds=1000, maximumPollRatePerSecond=0.0, pollBackoffCoefficient=2.0, pollBackoffInitialInterval=PT0.1S, pollBackoffMaximumInterval=PT1M, pollThreadCount=2, pollThreadNamePrefix='Workflow Poller taskQueue=&quot;SmartOptimization&quot;, namespace=&quot;default&quot;'}, identity=35149@xxx-MS-7B77b}
+10:08:22.968 [Test worker] INFO  io.temporal.internal.worker.Poller - start(): Poller{options=PollerOptions{maximumPollRateIntervalMilliseconds=1000, maximumPollRatePerSecond=0.0, pollBackoffCoefficient=2.0, pollBackoffInitialInterval=PT0.1S, pollBackoffMaximumInterval=PT1M, pollThreadCount=1, pollThreadNamePrefix='Local Activity Poller taskQueue=&quot;SmartOptimization&quot;, namespace=&quot;default&quot;'}, identity=35149@xxx-MS-7B77b}
+10:08:22.970 [Test worker] INFO  io.temporal.internal.worker.Poller - start(): Poller{options=PollerOptions{maximumPollRateIntervalMilliseconds=1000, maximumPollRatePerSecond=0.0, pollBackoffCoefficient=2.0, pollBackoffInitialInterval=PT0.1S, pollBackoffMaximumInterval=PT1M, pollThreadCount=5, pollThreadNamePrefix='Activity Poller taskQueue=&quot;SmartOptimization&quot;, namespace=&quot;default&quot;'}, identity=35149@xxx-MS-7B77b}
+10:08:22.970 [Test worker] INFO  io.temporal.internal.worker.Poller - start(): Poller{options=PollerOptions{maximumPollRateIntervalMilliseconds=1000, maximumPollRatePerSecond=0.0, pollBackoffCoefficient=2.0, pollBackoffInitialInterval=PT0.1S, pollBackoffMaximumInterval=PT1M, pollThreadCount=5, pollThreadNamePrefix='Host Local Workflow Poller'}, identity=e0aa59b6-f9da-422a-8a87-e673b0af40f4}
+Duration: 0
+10:08:22.995 [Test worker] INFO  io.temporal.worker.WorkerFactory - shutdownNow
+10:08:22.995 [Test worker] INFO  io.temporal.internal.worker.Poller - shutdownNow poller=Host Local Workflow Poller
+10:08:22.999 [Host Local Workflow Poller: 5] INFO  io.temporal.internal.worker.Poller - poll loop done
+10:08:22.999 [Host Local Workflow Poller: 2] INFO  io.temporal.internal.worker.Poller - poll loop done
+10:08:22.999 [Host Local Workflow Poller: 3] INFO  io.temporal.internal.worker.Poller - poll loop done
+10:08:22.999 [Host Local Workflow Poller: 1] INFO  io.temporal.internal.worker.Poller - poll loop done
+10:08:23.998 [Test worker] INFO  io.temporal.internal.worker.Poller - shutdownNow poller=Activity Poller taskQueue=&quot;SmartOptimization&quot;, namespace=&quot;default&quot;
+10:08:23.998 [Test worker] INFO  io.temporal.internal.worker.Poller - shutdownNow poller=Local Activity Poller taskQueue=&quot;SmartOptimization&quot;, namespace=&quot;default&quot;
+10:08:23.999 [Test worker] INFO  io.temporal.internal.worker.Poller - shutdownNow poller=Workflow Poller taskQueue=&quot;SmartOptimization&quot;, namespace=&quot;default&quot;
+10:08:23.999 [Local Activity Poller taskQueue=&quot;SmartOptimization&quot;, namespace=&quot;default&quot;: 1] INFO  io.temporal.internal.worker.Poller - poll loop done
+10:08:23.999 [Test worker] INFO  io.temporal.worker.WorkerFactory - awaitTermination begin
+10:08:23.999 [Activity Poller taskQueue=&quot;SmartOptimization&quot;, namespace=&quot;default&quot;: 5] INFO  io.temporal.internal.worker.Poller - poll loop done
+10:08:24.000 [Activity Poller taskQueue=&quot;SmartOptimization&quot;, namespace=&quot;default&quot;: 1] INFO  io.temporal.internal.worker.Poller - poll loop done
+10:08:24.000 [Activity Poller taskQueue=&quot;SmartOptimization&quot;, namespace=&quot;default&quot;: 2] INFO  io.temporal.internal.worker.Poller - poll loop done
+10:08:24.000 [Activity Poller taskQueue=&quot;SmartOptimization&quot;, namespace=&quot;default&quot;: 3] INFO  io.temporal.internal.worker.Poller - poll loop done
+10:08:24.000 [Workflow Poller taskQueue=&quot;SmartOptimization&quot;, namespace=&quot;default&quot;: 1] INFO  io.temporal.internal.worker.Poller - poll loop done
+10:08:24.000 [Workflow Poller taskQueue=&quot;SmartOptimization&quot;, namespace=&quot;default&quot;: 2] INFO  io.temporal.internal.worker.Poller - poll loop done
+10:08:24.000 [Activity Poller taskQueue=&quot;SmartOptimization&quot;, namespace=&quot;default&quot;: 4] INFO  io.temporal.internal.worker.Poller - poll loop done
+10:08:34.000 [Test worker] INFO  io.temporal.worker.WorkerFactory - awaitTermination done
+10:08:34.002 [Test worker] INFO  i.t.s.WorkflowServiceStubsImpl - shutdownNow
+10:09:32.976 [Host Local Workflow Poller: 4] INFO  io.temporal.internal.worker.Poller - poll loop done
+</pre>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="http://www.gradle.org">Gradle 6.8</a> at Apr 16, 2021, 10:09:32 AM</p>
+</div>
+</div>
+</body>
+</html>

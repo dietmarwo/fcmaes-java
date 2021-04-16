@@ -5,7 +5,7 @@
 
 package fcmaes.temporal.examples;
 
-import fcmaes.temporal.core.SmartWorker;
+import fcmaes.temporal.core.SmartRetryWorker;
 import fcmaes.core.Log;
 
 import java.io.FileNotFoundException;
@@ -29,7 +29,7 @@ public class MessengerFull {
         params.put("limit", "20.0");
 
         int numExecs = 8;
-        List<List<Double>> xs = SmartWorker.runWorkflow(numExecs, params);
+        List<List<Double>> xs = SmartRetryWorker.runWorkflow(numExecs, params);
     }
 
 }
