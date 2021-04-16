@@ -32,24 +32,21 @@ public class SmartActivityWorker {
             String url = args.length == 0 ? "127.0.0.1:7233" : args[0];
             WorkflowServiceStubsOptions so = WorkflowServiceStubsOptions.newBuilder()
                     .setTarget(url).build();
-
             // gRPC stubs wrapper that talks to the docker instance of temporal service.
             WorkflowServiceStubs service = WorkflowServiceStubs.newInstance(so);
             // client that can be used to start and signal workflows
             WorkflowClient client = WorkflowClient.newInstance(service);
-
             // worker factory that can be used to create workers for specific task queues
             WorkerFactory factory = WorkerFactory.newInstance(client);
-            // Worker that listens on a task queue and hosts both workflow and activity implementations.
-
-            //int threadNum = Math.min(16, Runtime.getRuntime().availableProcessors());
+            // Worker that listens on a task queue and hosts the activity implementation.
+            // Only one activity is running. Parallelism is implemented by the smart/coordinated retry.
             WorkerOptions wo = WorkerOptions.newBuilder()
-                    .setMaxConcurrentActivityExecutionSize(4).build();
+                    .setMaxConcurrentActivityExecutionSize(1).build();
             Worker worker = factory.newWorker(SmartRetryWorker.TASK_QUEUE, wo);
-
             worker.registerActivitiesImplementations(new SmartActivityImpl(client));
-            // Start listening to the workflow and activity task queues.
+            // Start listening to the activity task queue.
             factory.start();
+            // keep main thread alive - to be killed manually
             Thread.sleep(100000000);
         } catch (Exception ex) {
             ex.printStackTrace();
