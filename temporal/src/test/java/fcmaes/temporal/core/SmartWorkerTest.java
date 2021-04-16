@@ -13,6 +13,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class SmartWorkerTest {
 
     private TestWorkflowEnvironment testEnv;
@@ -40,11 +43,18 @@ public class SmartWorkerTest {
         WorkflowOptions options = WorkflowOptions.newBuilder().setTaskQueue(TASK_QUEUE).build();
         SmartWorkflow workflow =
                 workflowClient.newWorkflowStub(SmartWorkflow.class, options);
-        long starty = testEnv.currentTimeMillis();
-        //workflow.transfer("account1", "account2", "reference1", 123);
-        //verify(activities).withdraw(eq("account1"), eq("reference1"), eq(123));
-        //verify(activities).deposit(eq("account2"), eq("reference1"), eq(123));
-        long duration = testEnv.currentTimeMillis() - starty;
+        Map<String,String> params = new HashMap<String,String>();
+        params.put("fitnessClass", "fcmaes.examples.MessFull");
+        params.put("optimizerClass", "fcmaes.core.Optimizers$DECMA");
+        params.put("runs", "20000");
+        params.put("startEvals", "1500");
+        params.put("popSize", "31");
+        params.put("stopVal", "-1E99");
+        params.put("limit", "20.0");
+        long startTime = testEnv.currentTimeMillis();
+        workflow.optimize(1, params);
+        verify(activities).optimize(eq(1), eq(params));
+        long duration = testEnv.currentTimeMillis() - startTime;
         System.out.println("Duration: " + duration);
     }
 }
