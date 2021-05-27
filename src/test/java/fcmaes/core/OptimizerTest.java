@@ -486,7 +486,7 @@ public class OptimizerTest {
 	 */
 	private void doTestParallel(int runs, Fitness fit, Optimizer opt, double[] lower, double[] upper, double[] sigma, double[] guess,
 			int maxEvals, double stopVal, int popsize, double xTol, double yTol, Result expected) {
-		Result result = opt.minimizeN(runs, fit, lower, upper, sigma, guess, maxEvals, stopVal, popsize, 0);		
+		Result result = opt.minimizeN(runs, fit, lower, upper, sigma, guess, maxEvals, stopVal, popsize, 0, null);		
 		Assert.assertArrayEquals(expected.X, result.X, xTol);
 		Assert.assertEquals(expected.y, result.y, yTol);
 		Assert.assertTrue(result.evals > 0);

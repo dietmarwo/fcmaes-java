@@ -106,24 +106,24 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
      * Function evaluation. Maps decision variables X to a function value. Overwrite
      * in descendants.
      * 
-     * @param X Decision variables. return y Function value.
+     * @param x Decision variables. return y Function value.
      */
-    public double eval(double[] X) {
+    public double eval(double[] x) {
         return Double.NaN;
     }
 
     /**
      * Function evaluation wrapper called by the optimization algorithm.
      */
-    public double value(double[] X) {
+    public double value(double[] x) {
         try {
             if (_bestY < _stopVal)
                 return _stopVal;
-            double y = eval(X);
+            double y = eval(x);
             _evals++;
             if (y < _bestY) {
                 _bestY = y;
-                _bestX = X;
+                _bestX = x;
 //					System.out.println(_evals + " " + _bestY);
             }
             return y;
@@ -173,19 +173,19 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
      * array of function values. Called via JNI from the optimization algorithms.
      * Enables parallel function evaluation.
      * 
-     * @param xss Decision variables for the whole population. return Function
+     * @param xs Decision variables for the whole population. return Function
      *            values.
      */
 
-    public double[] values(double[] xss) {
+    public double[] values(double[] xs) {
         if (_parallelEval)
-            return valuesPar(xss);
+            return valuesPar(xs);
         else {
-            int popsize = xss.length / _dim;
+            int popsize = xs.length / _dim;
             double[] values = new double[popsize];
             for (int i = 0; i < popsize; i++) {
-                double[] xs = Arrays.copyOfRange(xss, i * _dim, (i + 1) * _dim);
-                values[i] = value(xs);
+                double[] x = Arrays.copyOfRange(xs, i * _dim, (i + 1) * _dim);
+                values[i] = value(x);
             }
             return values;
         }
@@ -225,12 +225,12 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
 
     public Result minimizeN(int runs, Optimizer opt, int maxEvals, double stopVal, int popsize, double limit) {
         return opt.minimizeN(runs, this, lower(), upper(), null, null, 
-                maxEvals, stopVal, popsize, limit);
+                maxEvals, stopVal, popsize, limit, null);
     }
 
     public Result minimizeN(int runs, Optimizer opt, double[] guess, int maxEvals, double stopVal, int popsize, double limit) {
         return opt.minimizeN(runs, this, lower(), upper(), null, guess, 
-                maxEvals, stopVal, popsize, limit);
+                maxEvals, stopVal, popsize, limit, null);
     }
 
     /**
@@ -274,7 +274,7 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
         if (sigma == null)
             sigma = Utils.array(_dim, 0.3);
         return opt.minimizeN(runs, this, lower, upper, sigma, guess, maxEvals, stopVal, popsize,
-                limit);
+                limit, null);
     }
 
     public void minimizeOne(int maxEval) {

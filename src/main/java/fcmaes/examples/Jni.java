@@ -1,6 +1,23 @@
+/* Copyright (c) Dietmar Wolz.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory.
+ */
+
 package fcmaes.examples;
 
+import java.io.IOException;
+
+import com.nativeutils.NativeUtils;
+
 public class Jni {
+
+    static {
+        try {
+            NativeUtils.loadLibraryFromJar(("/natives/" + System.mapLibraryName("fcmaeslib")));
+        } catch (IOException e1) {
+            throw new RuntimeException(e1);
+        }
+    }
 
     public static native double gtoc1_C(double[] x, int[] seq, int[] rev, double dvLaunch, double[] rp, double[] dv);
 
@@ -77,5 +94,9 @@ public class Jni {
     public static double tandem(double[] x, int[] sequence) {
         return tandem_C(x, sequence);
     }
+    
+    public static native double[] bounds_re_C(String problem);
 
+    public static native double[] objectives_re_C(String problem, double[] x);
+    
 }

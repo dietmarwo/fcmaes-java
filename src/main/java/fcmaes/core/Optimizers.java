@@ -5,6 +5,7 @@
 
 package fcmaes.core;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -77,13 +78,16 @@ public class Optimizers {
          * @param maxEvals Maximum number of evaluations.
          * @param stopVal  Termination criteria for optimization.
          * @param popsize  Population size used for offspring.
+         * @param limit    only values < limit are used for statistics.
+         * @param popsize  Population size used for offspring.
+         * @param xs       array of solution vectors for each retry - must be null or of size = runs.
          * @return Result Minimized function value / optimized point.
          */
 
         public Result minimizeN(int runs, Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize, double limit) {
+                int maxEvals, double stopVal, int popsize, double limit, double[][] xs) {
             RunOptimizer ropt = new RunOptimizer(runs, this, fit, lower, upper, sigma, guess, maxEvals, stopVal,
-                    popsize, limit);
+                    popsize, limit, xs);
             Threads threads = new Threads(ropt);
             threads.start();
             threads.join();
@@ -674,9 +678,11 @@ public class Optimizers {
 
         Statistics stat;
         double limit = 0;
+        
+        double[][] xs;
 
         RunOptimizer(int runs, Optimizer opt, Fitness fit, double[] lower, double[] upper, double[] sigma,
-                double[] guess, int maxEvals, double stopVal, int popsize, double limit) {
+                double[] guess, int maxEvals, double stopVal, int popsize, double limit, double[][] xs) {
 
             this.runs = runs;
             this.opt = opt;
@@ -692,6 +698,8 @@ public class Optimizers {
                 stat = new Statistics();
                 this.limit = limit;
             }
+            if (xs != null)
+                this.xs = xs;
         }
 
         @Override
@@ -702,14 +710,23 @@ public class Optimizers {
                     return;
                 if (limit != 0) {
                     Fitness f = fit.create();
-                    evals += opt.minimize(f, lower, upper, sigma, guess != null ? guess : Utils.rnd(lower, upper),
+                    evals += opt.minimize(f, lower, upper, 
+                            sigma != null ? sigma : Utils.array(fit._dim, Utils.rnd(0.05, 0.1)),
+                            guess != null ? guess : Utils.rnd(lower, upper),
                             maxEvals, stopVal, popsize).evals;
                     if (f._bestY < limit)
                         stat.add(f._bestY);
-                    if (i % 100 == 99 || i == runs-1)
-                        System.out.println(Utils.r(Utils.measuredMillis()) + " " + (i+1) + " " + stat);
-
+                    if (i % 100 == 99 || i == runs-1) {
+                        if (f instanceof FitnessMO) {
+                        	double[] y = ((FitnessMO)f).moeval(f._bestX);
+                        	System.out.println(Utils.r(Utils.measuredMillis()) + " " + (i+1) + 
+                        			" " + stat + " " + Arrays.toString(y));
+                        } else
+                        	System.out.println(Utils.r(Utils.measuredMillis()) + " " + (i+1) + " " + stat);
+                    }
                     fit.updateBest(f);
+                    if (xs != null)
+                        xs[i] = f._bestX;
                 } else {
                     evals += opt.minimize(fit, lower, upper, sigma, guess != null ? guess : Utils.rnd(lower, upper),
                             maxEvals, stopVal, popsize).evals;

@@ -171,6 +171,13 @@ public class Utils {
         return m;
     }
 
+    public static double[] prod(double[] x1, double[] x2) {
+        double[] m = new double[x1.length];
+        for (int i = 0; i < x1.length; i++)
+            m[i] = x1[i] * x2[i];
+        return m;
+    }
+
     public static double[] quot(double[] x1, double[] x2) {
         double[] m = new double[x1.length];
         for (int i = 0; i < x1.length; i++)

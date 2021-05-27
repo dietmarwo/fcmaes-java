@@ -158,7 +158,7 @@ public class F8 extends Fitness {
         Fitness func = new F8(dim);
         func._stopVal = stopVal;
 		Optimizer opt = new DECMA();
-		Result res = opt.minimizeN(32, func, lower, upper, sigma, null, maxEvals, stopVal, popsize, 0);
+		Result res = opt.minimizeN(32, func, lower, upper, sigma, null, maxEvals, stopVal, popsize, 0, null);
 //        Result res = opt.minimize(func, lower, upper, sigma, guess, maxEvals, stopVal, popsize);
         System.out.println("best = " + res.y 
                 + ", time = " + 0.001*Utils.measuredMillis() + " sec, evals = " + res.evals);

@@ -7,7 +7,7 @@
 
 	<groupId>com.github.dietmarwo</groupId>
 	<artifactId>fcmaes-java</artifactId>
-	<version>1.2.19</version>
+	<version>1.2.21</version>
 	<packaging>jar</packaging>
 
 	<name>fcmaes-java</name>
@@ -48,6 +48,11 @@
 			<groupId>org.hipparchus</groupId>
 			<artifactId>hipparchus-optim</artifactId>
 			<version>1.7</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.jfree</groupId>
+		    <artifactId>jfreechart</artifactId>
+		    <version>1.5.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.wendykierp</groupId>
