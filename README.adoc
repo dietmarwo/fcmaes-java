@@ -1,5 +1,5 @@
 :encoding: utf-8
-:imagesdir: img
+:imagesdir: tutorials/img
 :cpp: C++
 
 = fcmaes-java - a Java gradient-free optimization library
@@ -10,8 +10,8 @@ can be viewed as a meta algorithm operating on a population of user defined opti
 fcmaes-java provides the same functionality as its Python variant https://github.com/dietmarwo/fast-cma-es[fcmaes].
 It was used by the team Jena & Wuhan for the 
 https://github.com/dietmarwo/fcmaes-java/blob/master/img/CTOC11problemdescription.pdf[11th China Trajectory Optimization Competition]
-see https://github.com/dietmarwo/fcmaes-java/blob/master/CTOC11.adoc[fcmaes for CTOC11]. A comparison of optimization
-algorithms for the solar orbiter mission optimization problem is shown here: https://github.com/dietmarwo/fcmaes-java/blob/master/Solo.adoc[Solar Orbiter].
+see https://github.com/dietmarwo/fcmaes-java/blob/master/tutorials/CTOC11.adoc[fcmaes for CTOC11]. A comparison of optimization
+algorithms for the solar orbiter mission optimization problem is shown here: https://github.com/dietmarwo/fcmaes-java/blob/master/tutorials/Solo.adoc[Solar Orbiter].
 Cluster support is implemented based on the https://docs.temporal.io/docs/get-started/[Temporal] orchestration engine. 
 See https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/README.adoc[Temporal-readme] 
 and https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/Tutorial.adoc[Temporal-tutorial] 
