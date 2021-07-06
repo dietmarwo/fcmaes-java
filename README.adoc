@@ -34,7 +34,7 @@ and https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/Tutorial.adoc[
 
 On windows there may be an issue with recursive dll dependencies preventing loading of fcmaeslib.dll.
 It is compiled using mingw64, so if you neither have mingw64 nor Anaconda installed you should add
-```/YOUR_PATH_TO/fcmaes-java/src/main/resources/natives/``` to the ```PATH``` environment variable.
+"/YOUR_PATH_TO/fcmaes-java/src/main/resources/natives/" to the "PATH" environment variable.
 
 === Optimization Challenge
 
