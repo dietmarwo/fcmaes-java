@@ -32,12 +32,39 @@ public class De {
 	
     private long nativeDe;
 
+    public static Result minimize(Fitness fit, double[] lower, double[] upper, double[] result, int maxEvals,
+            double stopfitness, int popsize, double keep, double F, double CR, long seed, int runid, int workers) {
+       	if (workers <= 1) {
+       		Jni.optimizeDE(fit, lower, upper, result, maxEvals, stopfitness, popsize, keep, F, CR, seed, runid, 1);
+    		return new Result(fit, fit._evals);
+    	} else {
+    		return minimize_parallel(fit, lower, upper, maxEvals, stopfitness, 
+    				popsize, keep, F, CR, seed, runid, workers);
+    	}
+    }
+
     /**
      * Create a DE object for ask/tell.
      * 
      * @param lower    	lower point limit.
      * @param upper    	upper point limit.
      * @param guess    	Starting point.
+     * @param popsize  	Population size used for offspring.
+     */
+
+    public De(Fitness fit, double[] lower, double[] upper, int popsize) {
+    	int keep = 200; 
+    	double F = 0.5;
+    	double CR = 0.9;
+    	long seed = Utils.rnd().nextLong();
+        nativeDe = Jni.initDE(fit, lower, upper, popsize, keep, F, CR, seed, 0);
+    }
+    
+    /**
+     * Create a DE object for ask/tell.
+     * 
+     * @param lower    	lower point limit.
+     * @param upper    	upper point limit.
      * @param popsize  	Population size used for offspring.
      * @param keep  	Changes the reinitialization probability of individuals based on their age. 
      * 					Higher value means lower probability of reinitialization.
@@ -48,11 +75,11 @@ public class De {
      * @param runid    	id for debugging/logging.
      */
 
-    public De(double[] lower, double[] upper, double[] guess, int popsize, double keep, double F, double CR, long seed,
+    public De(Fitness fit, double[] lower, double[] upper, int popsize, double keep, double F, double CR, long seed,
             int runid) {
-        nativeDe = Jni.initDE(lower, upper, guess, popsize, keep, F, CR, seed, runid);
+        nativeDe = Jni.initDE(fit, lower, upper, popsize, keep, F, CR, seed, runid);
     }
-    
+
     /**
      * Ask for argument vector.
      * 
@@ -93,13 +120,16 @@ public class De {
         destroy();
     }
 
+    public double[] population() {
+        return Jni.populationDE(nativeDe);
+    }
+
     /**
      * Minimize evaluating the fitness function in parallel.
      * 
      * @param fit      	fitness function.     
      * @param lower    	lower point limit.
      * @param upper    	upper point limit.
-     * @param guess    	Starting point.
      * @param maxEvals 	Maximum number of evaluations.
      * @param stopfitness target function value.
      * @param popsize  	Population size used for offspring.
@@ -114,31 +144,44 @@ public class De {
      * @return Result 	Minimized function value / optimized point.
      */
 
-    public static Result minimize_parallel(Fitness fit, double[] lower, double[] upper, double[] guess, int maxEvals,
+	public static Result minimize_parallel(Fitness fit, double[] lower, double[] upper, int maxEvals,
             double stopfitness, int popsize, double keep, double F, double CR, long seed, int runid, int workers) {
-        int dim = fit._dim;
-        if (guess == null)
-            guess = Utils.rnd(lower, upper);
-        De opt = new De(lower, upper, guess, popsize, keep, F, CR, Utils.rnd().nextLong(), 0);
-        if (workers <= 0 || workers > Threads.numWorkers()) // set default and limit
-            workers = Threads.numWorkers();
-        Evaluator evaluator = new Evaluator(fit, popsize, workers);
-        int evals = 0;
-        int stop = 0;    
-        for (; evals < maxEvals && stop == 0; evals += workers) {
-            double[][] xs = new double[workers][dim];
-            int[] pos = new int[workers];
-            MutableInt cp = new MutableInt();
-            for (int p = 0; p < workers; p++) {
-                xs[p] = opt.ask(cp);
-                pos[p] = cp.intValue();
-            }
-            double[] ys = evaluator.eval(xs);
-            for (int p = 0; p < workers && stop == 0; p++)
-                stop = opt.tell(xs[p], ys[p], pos[p]);
-        }
-        evaluator.destroy();
-        return new Result(fit, fit._evals);
-    }
+		De opt = new De(fit, lower, upper, popsize, keep, F, CR, Utils.rnd().nextLong(), 0);
+		int workerLimit = Math.min(popsize, Threads.numWorkers());
+		if (workers <= 0 || workers > workerLimit) // set default and limit
+			workers = workerLimit;
+		Evaluator evaluator = new Evaluator(fit, popsize, workers);
+		fit._evals = 0;
+		int stop = 0;
+		int cp = 0;
+		int evals_size = 10*popsize;
+		double[][] evals_x = new double[evals_size][];
+		int[] evals_p = new int[evals_size];
+		// fill eval queue with initial population
+		for (int i = 0; i < workers; i++) {
+			MutableInt mp = new MutableInt();
+			double[] x = opt.ask(mp);
+			evaluator.evaluate(x, cp);
+			evals_x[cp] = x;
+			evals_p[cp] = mp.getValue();
+			cp = (cp + 1) % evals_size; 
+		}
+		while (fit._evals < maxEvals && stop == 0) {
+			Evaluator.VecId vid = evaluator.result();
+			double y = vid.v[0]; // single objective
+			int id = vid.id;
+			double[] x = evals_x[id];
+			int p = evals_p[id];
+			opt.tell(x, y, p);
+			MutableInt mp = new MutableInt();
+			x = opt.ask(mp);
+			evaluator.evaluate(x, cp);
+			evals_x[cp] = x;
+			evals_p[cp] = mp.getValue();
+			cp = (cp + 1) % evals_size; 
+		}
+		evaluator.join();
+		return new Result(fit, fit._evals);
+	}
 
 }

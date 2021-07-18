@@ -14,32 +14,64 @@ public class Jni {
         } catch (IOException e1) {
             throw new RuntimeException(e1);
         }
+        libraryLoaded = true;
     }
+    
+    public static boolean libraryLoaded = false;
 
-    public static native int optimizeACMA(Fitness func, double[] lower, double[] upper, double[] sigma, double[] guess,
+    public static native int optimizeACMA(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
             int maxIter, int maxEvals, double stopValue, int popsize, int mu, double accuracy, long seed, int runid,
-            int normalize, int update_gap);
+            boolean normalize, int update_gap, int workers);
 
-    static native long initCmaes(double[] lower, double[] upper, double[] sigma, double[] guess, int popsize, int mu,
-            double accuracy, long seed, int runid, int normalize, int update_gap);
+    static native long initCmaes(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess, int popsize, int mu,
+            double accuracy, long seed, int runid, boolean normalize, int update_gap);
 
-    static native void destroyCmaes(long cmaes);
+    static native void destroyCmaes(long ptr);
 
-    static native double[] askCmaes(long cmaes);
+    static native double[] askCmaes(long ptr);
 
-    static native int tellCmaes(long cmaes, double[] x, double y);
+    static native int tellCmaes(long ptr, double[] x, double y);
 
-    public static native int optimizeDE(Fitness func, double[] lower, double[] upper, double[] guess, int maxEvals,
-            double stopfitness, int popsize, double keep, double F, double CR, long seed, int runid);
+    static native double[] populationCmaes(long ptr);
 
-    static native long initDE(double[] lower, double[] upper, double[] guess, int popsize, double keep, double F,
+    public static native int optimizeDE(Fitness fit, double[] lower, double[] upper, double[] result, int maxEvals,
+            double stopfitness, int popsize, double keep, double F, double CR, long seed, int runid, int workers);
+
+    static native long initDE(Fitness fit, double[] lower, double[] upper, int popsize, double keep, double F,
             double CR, long seed, int runid);
 
-    static native void destroyDE(long cmaes);
+    static native void destroyDE(long ptr);
 
-    static native double[] askDE(long cmaes);
+    static native double[] askDE(long ptr);
 
-    static native int tellDE(long cmaes, double[] x, double y, int p);
+    static native int tellDE(long ptr, double[] x, double y, int p);
+    
+    static native double[] populationDE(long ptr);
+        
+    public static native double[] optimizeMODE(Fitness fit, 
+    		int dim, int nobj, int ncon,
+    		double[] lower, double[] upper, 
+    		int maxEvals, double stopfitness, int popsize, 
+    		double keep, double F, double CR, 
+    		double pro_c, double dis_c, double pro_m, double dis_m,
+    	    boolean nsga_update, boolean pareto_update, int log_period,
+    		long seed, int workers, int runid);
+    
+    static native long initMODE(Fitness fit, int dim, int nobj, int ncon,
+    		double[] lower, double[] upper, 
+    		int maxEvals, double stopfitness, int popsize, 
+    		double keep, double F, double CR, 
+    		double pro_c, double dis_c, double pro_m, double dis_m,
+    	    boolean nsga_update, boolean pareto_update, int log_period,
+    		long seed, int runid);
+
+    static native void destroyMODE(long ptr);
+
+    static native double[] askMODE(long ptr);
+
+    static native int tellMODE(long ptr, double[] x, double[] y, int p);
+
+    static native double[] populationMODE(long ptr);
 
     public static native int integrateF8(double[] y, double w, double dt, double step);
 	
@@ -52,28 +84,25 @@ public class Jni {
 
     public static native int integratePVCtoc11R(double[] tpv, double dt, double step, boolean dopri);
 
-    public static native int optimizeHawks(Fitness func, double[] lower, double[] upper, double[] guess, int maxEvals,
-            double stopfitness, int popsize, long seed, int runid);
-
-    public static native int optimizeLDE(Fitness func, double[] lower, double[] upper, double[] guess, double[] sigma,
+    public static native int optimizeLDE(Fitness fit, double[] lower, double[] upper, double[] guess, double[] sigma,
             int maxEvals, double stopfitness, int popsize, double keep, double F, double CR, long seed, int runid);
 
-    public static native int optimizeGCLDE(Fitness func, double[] lower, double[] upper, double[] guess, int maxEvals,
+    public static native int optimizeGCLDE(Fitness fit, double[] lower, double[] upper, double[] guess, int maxEvals,
             double stopfitness, int popsize, double pbest, double F0, double CR0, long seed, int runid);
 
-    public static native int optimizeLCLDE(Fitness func, double[] lower, double[] upper, double[] guess, double[] sigma,
+    public static native int optimizeLCLDE(Fitness fit, double[] lower, double[] upper, double[] guess, double[] sigma,
             int maxEvals, double stopfitness, int popsize, double pbest, double F0, double CR0, long seed, int runid);
 
-    public static native int optimizeDA(Fitness func, double[] lower, double[] upper, double[] guess, int maxEvals,
+    public static native int optimizeDA(Fitness fit, double[] lower, double[] upper, double[] guess, int maxEvals,
             int use_local_search, long seed, int runid);
 
-    public static native int optimizeCLDE(Fitness func, double[] lower, double[] upper, double[] guess, 
+    public static native int optimizeCLDE(Fitness fit, double[] lower, double[] upper, double[] guess, 
             int maxEvals, double stopfitness, int popsize, double pbest, double K1, double K2, long seed, int runid);
 
-    public static native int optimizeBite(Fitness func, double[] lower, double[] upper, double[] guess, int maxEvals,
+    public static native int optimizeBite(Fitness fit, double[] lower, double[] upper, double[] guess, int maxEvals,
             double stopfitness, int M, int stallLimit, long seed, int runid);
 
-    public static native int optimizeCsma(Fitness func, double[] lower, double[] upper, double[] sigma, double[] guess,
+    public static native int optimizeCsma(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
             int maxEvals, double stopfitness, int popsize, int stallLimit, long seed, int runid);
     
     public static native void planetEplC(int pli, double mjd2000, double[] r, double[] v);

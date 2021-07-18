@@ -111,6 +111,22 @@ JNIEXPORT jdouble JNICALL Java_fcmaes_examples_Jni_messengermga_1C
 JNIEXPORT jdouble JNICALL Java_fcmaes_examples_Jni_tandem_1C
   (JNIEnv *, jclass, jdoubleArray, jintArray);
 
+/*
+ * Class:     fcmaes_examples_Jni
+ * Method:    bounds_re_C
+ * Signature: (Ljava/lang/String;)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_fcmaes_examples_Jni_bounds_1re_1C
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     fcmaes_examples_Jni
+ * Method:    objectives_re_C
+ * Signature: (Ljava/lang/String;[D)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_fcmaes_examples_Jni_objectives_1re_1C
+  (JNIEnv *, jclass, jstring, jdoubleArray);
+
 #ifdef __cplusplus
 }
 #endif

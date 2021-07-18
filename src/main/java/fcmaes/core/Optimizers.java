@@ -59,7 +59,7 @@ public class Optimizers {
          */
 
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
 
             throw new RuntimeException("minimize not implemented.");
         }
@@ -93,6 +93,7 @@ public class Optimizers {
             threads.join();
             return new Result(fit, fit._evals);
         }
+        
     }
 
     public static class Bite extends Optimizer {
@@ -117,7 +118,7 @@ public class Optimizers {
 
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
             if (guess == null)
                 guess = Utils.rnd(lower, upper);
             int evals = Jni.optimizeBite(fit, lower, upper, guess, maxEvals, stopVal, M, 
@@ -142,7 +143,7 @@ public class Optimizers {
 
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
             if (guess == null)
                 guess = Utils.rnd(lower, upper);
             int evals = Jni.optimizeCsma(fit, lower, upper, sigma, guess, maxEvals, stopVal, popsize,
@@ -167,16 +168,15 @@ public class Optimizers {
          */
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
             if (popsize <= 0)
                 popsize = 31;
             if (guess == null)
                 guess = Utils.rnd(lower, upper);
             if (sigma == null)
                 sigma = Utils.array(fit._dim, Utils.rnd(0.05, 0.1));
-            int evals = Jni.optimizeACMA(fit, lower, upper, sigma, guess, 1000000, maxEvals, stopVal, popsize,
-                    popsize / 2, 1.0, Utils.rnd().nextLong(), 0, 1, -1);
-            return new Result(fit, evals);
+            return Cmaes.minimize(fit, lower, upper, sigma, guess, 1000000, maxEvals, stopVal, popsize,
+                    popsize / 2, 1.0, Utils.rnd().nextLong(), 0, true, -1, workers);
         }
 
     }
@@ -194,17 +194,19 @@ public class Optimizers {
 
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
             if (popsize <= 0)
                 popsize = 31;
             if (guess == null)
                 guess = Utils.rnd(lower, upper);
-            Cmaes cma = new Cmaes(lower, upper, sigma, guess, popsize, popsize / 2, 1.0, Utils.rnd().nextLong(), 0, 1,
+            if (sigma == null)
+                sigma = Utils.array(fit._dim, Utils.rnd(0.05, 0.1));
+            Cmaes cma = new Cmaes(fit, lower, upper, sigma, guess, popsize, popsize / 2, 1.0, Utils.rnd().nextLong(), 0, true,
                     -1);
             int evals = 0;
             int stop = 0;
             int[] p = new int[1];
-            for (; evals < maxEvals && stop == 0; evals++) {
+            for (; evals < maxEvals && stop == 0; evals++) {            	
                 double[] x = cma.ask();
                 double y = fit.value(x);
                 stop = cma.tell(x, y);
@@ -213,31 +215,6 @@ public class Optimizers {
         }
     }
     
-    /**
-     * Eigen based implementation of active CMA-ES derived from
-     * http:*cma.gforge.inria.fr/cmaes.m. Uses parallel function argument evaluation which uses the ask / tell interface. 
-     * Alternative to setting fitness._parallelEval = true. Advantage is that the number of parallel evaluations is
-     * independent from popsize. 
-     */
-   
-    public static class CMAPAR extends Optimizer {
-
-        public CMAPAR() {
-            super();
-        }
-
-        @Override
-        public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
-            if (popsize <= 0)
-                popsize = 31;
-            if (guess == null)
-                guess = Utils.rnd(lower, upper);
-            return Cmaes.minimize_parallel(fit, lower, upper, sigma, guess, maxEvals, 0, popsize, 
-                    popsize / 2, 1.0, Utils.rnd().nextLong(), 0, 1, -1, 0);
-        }
-    }
-
     /**
      * Eigen based implementation of differential evolution using on the DE/best/1
      * strategy. Uses two deviations from the standard DE algorithm: a) temporal
@@ -258,13 +235,12 @@ public class Optimizers {
          * {@inheritDoc}
          */
         @Override
-        public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+        public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] result,
+                int maxEvals, double stopVal, int popsize, int workers) {
             if (popsize <= 0)
-                popsize = 31;
-            int evals = Jni.optimizeDE(fit, lower, upper, guess, maxEvals, stopVal, popsize, 200, 0.5, 0.9,
-                    Utils.rnd().nextLong(), 0);
-            return new Result(fit, evals);
+                popsize = 31;            
+            return De.minimize(fit, lower, upper, result, maxEvals, stopVal, popsize, 200, 0.5, 0.9,
+                    Utils.rnd().nextLong(), 0, workers);
         }
     }
     
@@ -281,12 +257,10 @@ public class Optimizers {
 
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
             if (popsize <= 0)
                 popsize = 31;
-            if (guess == null)
-                guess = Utils.rnd(lower, upper);
-            De de = new De(lower, upper, guess, popsize, 200, 0.5, 0.9, Utils.rnd().nextLong(), 0);
+            De de = new De(fit, lower, upper, popsize, 200, 0.5, 0.9, Utils.rnd().nextLong(), 0);
             int evals = 0;
             int stop = 0;
             MutableInt pos = new MutableInt();
@@ -299,29 +273,6 @@ public class Optimizers {
         }
     }
     
-    /**
-     * Eigen based implementation of differential evolution using on the DE/best/1
-     * strategy. Uses parallel function argument evaluation which uses the ask / tell interface. 
-     * Alternative to setting fitness._parallelEval = true. Advantage is that the number of parallel evaluations is
-     * independent from popsize. 
-     */
-   
-    public static class DEPAR extends Optimizer {
-
-        public DEPAR() {
-            super();
-        }
-
-        @Override
-        public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
-            if (popsize <= 0)
-                popsize = 31;
-            return De.minimize_parallel(fit, lower, upper, guess, maxEvals, stopVal, popsize, 200, 0.5, 0.9,
-                    Utils.rnd().nextLong(), 0, 0);
-        }
-    }
-
     /**
      * Eigen based implementation of differential evolution (GCL-DE) derived from "A
      * case learning-based differential evolution algorithm for global optimization
@@ -341,7 +292,7 @@ public class Optimizers {
          */
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
             int dim = guess != null ? guess.length : lower.length;
             if (popsize <= 0)
                 popsize = (int) (dim * 8.5 + 150);
@@ -367,7 +318,7 @@ public class Optimizers {
          */
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
             int dim = guess != null ? guess.length : lower.length;
             if (popsize <= 0)
                 popsize = (int) (dim * 8.5 + 150);
@@ -403,7 +354,7 @@ public class Optimizers {
          */
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
             int dim = guess != null ? guess.length : lower.length;
             if (popsize <= 0)
                 popsize = dim * 15;
@@ -427,44 +378,13 @@ public class Optimizers {
          */
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
             int dim = guess != null ? guess.length : lower.length;
             if (popsize <= 0)
                 popsize = dim * 15;
             if (guess == null)
                 guess = Utils.rnd(lower, upper);
             int evals = Jni.optimizeDA(fit, lower, upper, guess, maxEvals, 0, Utils.rnd().nextLong(), 0);
-            return new Result(fit, evals);
-        }
-    }
-
-    /**
-     * Eigen based implementation of the Harris hawks optimization, see Harris hawks
-     * optimization: Algorithm and applications Ali Asghar Heidari, Seyedali
-     * Mirjalili, Hossam Faris, Ibrahim Aljarah, Majdi Mafarja, Huiling Chen Future
-     * Generation Computer Systems, DOI:
-     * https://doi.org/10.1016/j.future.2019.02.028
-     * 
-     * derived from
-     * https://github.com/7ossam81/EvoloPy/blob/master/optimizers/HHO.py
-     */
-
-    public static class Hawks extends Optimizer {
-
-        public Hawks() {
-            super();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
-            if (popsize <= 0)
-                popsize = 31;
-            int evals = Jni.optimizeHawks(fit, lower, upper, guess, maxEvals, stopVal, popsize, Utils.rnd().nextLong(),
-                    0);
             return new Result(fit, evals);
         }
     }
@@ -484,7 +404,7 @@ public class Optimizers {
          */
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
             int dim = guess != null ? guess.length : lower.length;
             if (popsize <= 0)
                 popsize = dim * 15;
@@ -509,7 +429,7 @@ public class Optimizers {
          */
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
             int dim = guess != null ? guess.length : lower.length;
             if (popsize <= 0)
                 popsize = (int) (dim * 8.5 + 150);
@@ -534,7 +454,7 @@ public class Optimizers {
          */
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
             if (popsize <= 0)
                 popsize = 31;
             if (sigma == null)
@@ -542,9 +462,9 @@ public class Optimizers {
             double deEvals = Utils.rnd(0.1, 0.5);
             double cmaEvals = 1.0 - deEvals;
             int evals = Jni.optimizeDE(fit, lower, upper, guess, (int) (deEvals * maxEvals), stopVal, popsize, 200, 0.5,
-                    0.9, Utils.rnd().nextLong(), 0);
+                    0.9, Utils.rnd().nextLong(), 0, 1);
             evals += Jni.optimizeACMA(fit, lower, upper, sigma, fit._bestX, 1000000, (int) (cmaEvals * maxEvals),
-                    stopVal, popsize, popsize / 2, 1, Utils.rnd().nextLong(), 0, 1, -1);
+                    stopVal, popsize, popsize / 2, 1, Utils.rnd().nextLong(), 0, true, -1, workers);
             return new Result(fit, evals);
         }
     }
@@ -576,7 +496,7 @@ public class Optimizers {
 
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
             double deEvals = Utils.rnd(0.3, 0.7);
             double biteEvals = 1.0 - deEvals;
             if (guess == null)
@@ -584,7 +504,7 @@ public class Optimizers {
             int evals = Jni.optimizeBite(fit, lower, upper, guess, (int) (biteEvals * maxEvals), stopVal, M, stallLimit,
                     Utils.rnd().nextLong(), 0);
             evals += Jni.optimizeDE(fit, lower, upper, guess, (int) (deEvals * maxEvals), stopVal, popsize, 200, 0.5,
-                    0.9, Utils.rnd().nextLong(), 0);
+                    0.9, Utils.rnd().nextLong(), 0, 1);
             return new Result(fit, evals);
         }
     }
@@ -615,13 +535,13 @@ public class Optimizers {
 
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
             double deEvals = Utils.rnd(0.1, 0.5);
             double biteEvals = 1.0 - deEvals;
             if (guess == null)
                 guess = Utils.rnd(lower, upper);
             int evals = Jni.optimizeDE(fit, lower, upper, guess, (int) (deEvals * maxEvals), stopVal, popsize, 200, 0.5,
-                     0.9, Utils.rnd().nextLong(), 0);
+                     0.9, Utils.rnd().nextLong(), 0, 1);
             evals += Jni.optimizeBite(fit, lower, upper, guess, (int) (biteEvals * maxEvals), stopVal, M, 
             		stallLimit, Utils.rnd().nextLong(), 0);
             return new Result(fit, evals);
@@ -643,7 +563,7 @@ public class Optimizers {
          */
         @Override
         public Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-                int maxEvals, double stopVal, int popsize) {
+                int maxEvals, double stopVal, int popsize, int workers) {
             int dim = guess != null ? guess.length : lower.length;
             if (popsize <= 0)
                 popsize = 31;
@@ -652,12 +572,12 @@ public class Optimizers {
             double cmaEvals = 1.0 - deEvals;
             if (Utils.rnd().nextBoolean())
                 evals += Jni.optimizeDE(fit, lower, upper, guess, (int) (deEvals * maxEvals), stopVal, 
-                        popsize, 200, 0.5, 0.9, Utils.rnd().nextLong(), 0);
+                        popsize, 200, 0.5, 0.9, Utils.rnd().nextLong(), 0, 1);
             else
                 evals += Jni.optimizeGCLDE(fit, lower, upper, guess, (int) (deEvals * maxEvals), stopVal, 
                         (int) (dim * 8.5 + 150), 0.7, 0, 0, Utils.rnd().nextLong(), 0);
             evals += Jni.optimizeACMA(fit, lower, upper, sigma, fit._bestX, 1000000, (int) (cmaEvals * maxEvals), 
-                    stopVal, popsize, popsize / 2, 1, Utils.rnd().nextLong(), 0, 1, -1);
+                    stopVal, popsize, popsize / 2, 1, Utils.rnd().nextLong(), 0, true, -1, 1);
             return new Result(fit, evals);
         }
     }
@@ -713,7 +633,7 @@ public class Optimizers {
                     evals += opt.minimize(f, lower, upper, 
                             sigma != null ? sigma : Utils.array(fit._dim, Utils.rnd(0.05, 0.1)),
                             guess != null ? guess : Utils.rnd(lower, upper),
-                            maxEvals, stopVal, popsize).evals;
+                            maxEvals, stopVal, popsize, 1).evals;
                     if (f._bestY < limit)
                         stat.add(f._bestY);
                     if (i % 100 == 99 || i == runs-1) {
@@ -729,7 +649,7 @@ public class Optimizers {
                         xs[i] = f._bestX;
                 } else {
                     evals += opt.minimize(fit, lower, upper, sigma, guess != null ? guess : Utils.rnd(lower, upper),
-                            maxEvals, stopVal, popsize).evals;
+                            maxEvals, stopVal, popsize, 1).evals;
                 }
             }
         }

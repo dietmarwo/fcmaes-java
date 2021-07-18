@@ -4,9 +4,7 @@
 
 = fcmaes-java - a Java gradient-free optimization library
 
-fcmaes-java provides fast {cpp}/Eigen based implementations of its gradient free optimization algorithms.
-It supports parallel optimization and parallel function evaluation. A new coordinated parallel retry mechanism 
-can be viewed as a meta algorithm operating on a population of user defined optimization runs. 
+fcmaes started with a fast CMA-ES implementation combined with a new smart parallel retry mechanism aimed to solve hard optimization problems from the space flight planning domain. It evolved to a general library of state-of-the-art gradient free optimization algorithms applicable to all kind of real world problems covering multi-objective and constrained problems. Its algorithms are implemented both in C++ and support parallel fitness function evaluation.
 fcmaes-java provides the same functionality as its Python variant https://github.com/dietmarwo/fast-cma-es[fcmaes].
 It was used by the team Jena & Wuhan for the 
 https://github.com/dietmarwo/fcmaes-java/blob/master/img/CTOC11problemdescription.pdf[11th China Trajectory Optimization Competition]
@@ -18,15 +16,14 @@ and https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/Tutorial.adoc[
 
 === Features
 
-- fcmaes-java is focused on optimization problems hard to solve.
+- fcmaes is focused on optimization problems hard to solve utilizing modern many-core CPUs.
+- Parallel fitness function evaluation and different parallel retry mechanisms. 
 - Minimized algorithm overhead - relative to the objective function evaluation time - even for high dimensions. 
-- Parallel coordinated retry of sequences and random choices of optimization algorithms. 
-- Parallel function evaluation.
-- New DE (differential evolution) variant optimized for usage with parallel coordinated retry.
-- Ask / Tell interface for CMA-ES and DE. 
-- GCL-DE (differential evolution) variant from Mingcheng Zuo.
+- New multi-objective/constrained optimization algorithm combining features from NGSA and Differential evolution supporting parallel function evaluation.
 - BiteOpt algorithm from Aleksey Vaneev.
-- Fast C++ implementations of CMA-ES, differential evolution, dual annealing and the Harris hawks algorithm.
+- New DE (differential evolution) variant optimized for usage with parallel retry.
+- GCL-DE (differential evolution) variant from Mingcheng Zuo.
+- Fast C++ implementations of CMA-ES
 - Supports Linux and Windows
 - Supports multi node / cluster execution based on https://docs.temporal.io/docs/get-started/[Temporal]
 

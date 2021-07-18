@@ -18,149 +18,13 @@
 #include <stdint.h>
 #include <ctime>
 #include "pcg_random.hpp"
-#include "call_java.hpp"
+#include "evaluator.h"
 
 using namespace std;
 
-typedef Eigen::Matrix<double, Eigen::Dynamic, 1> vec;
-typedef Eigen::Matrix<int, Eigen::Dynamic, 1> ivec;
-typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> mat;
-
-typedef void (*callback_parallel)(int, int, double[], double[]);
 typedef bool (*is_terminate_type)(long, int, double); // runid, iter, value -> isTerminate
 
 namespace acmaes {
-
-static vec zeros(int n) {
-    return Eigen::MatrixXd::Zero(n, 1);
-}
-
-static ivec inverse(const ivec &indices) {
-    ivec inverse = ivec(indices.size());
-    for (int i = 0; i < indices.size(); i++)
-        inverse(indices(i)) = i;
-    return inverse;
-}
-
-static vec sequence(double start, double end, double step) {
-    int size = (int) ((end - start) / step + 1);
-    vec d(size);
-    double value = start;
-    for (int r = 0; r < size; r++) {
-        d(r) = value;
-        value += step;
-    }
-    return d;
-}
-
-struct IndexVal {
-    int index;
-    double val;
-};
-
-static bool compareIndexVal(IndexVal i1, IndexVal i2) {
-    return (i1.val < i2.val);
-}
-
-static ivec sort_index(const vec &x) {
-    int size = x.size();
-    IndexVal ivals[size];
-    for (int i = 0; i < size; i++) {
-        ivals[i].index = i;
-        ivals[i].val = x[i];
-    }
-    std::sort(ivals, ivals + size, compareIndexVal);
-    return Eigen::MatrixXi::NullaryExpr(size, 1, [&ivals](int i) {
-        return ivals[i].index;
-    });
-}
-
-static normal_distribution<> gauss_01 = std::normal_distribution<>(0, 1);
-
-static Eigen::MatrixXd normal(int dx, int dy, pcg64 &rs) {
-    return Eigen::MatrixXd::NullaryExpr(dx, dy, [&]() {
-        return gauss_01(rs);
-    });
-}
-
-static Eigen::MatrixXd normalVec(int dim, pcg64 &rs) {
-    return Eigen::MatrixXd::NullaryExpr(dim, 1, [&]() {
-        return gauss_01(rs);
-    });
-}
-
-// wrapper around the fitness function, scales according to boundaries
-
-class Fitness {
-
-public:
-
-    Fitness(CallJava *func_par_, const vec &lower_limit, const vec &upper_limit,
-            bool normalize_) {
-        func_par = func_par_;
-        lower = lower_limit;
-        upper = upper_limit;
-        normalize = normalize_ && lower.size() > 0;
-        evaluationCounter = 0;
-        if (lower.size() > 0) { // bounds defined
-            scale = 0.5 * (upper - lower);
-            typx = 0.5 * (upper + lower);
-        }
-    }
-
-    vec getClosestFeasible(const vec &X) const {
-        if (lower.size() > 0) {
-            if (normalize)
-                return X.cwiseMin(1.0).cwiseMax(-1.0);
-            else
-                return X.cwiseMin(upper).cwiseMax(lower);
-        }
-        return X;
-    }
-
-    void values(const mat &popX, vec &ys) {
-        int popsize = popX.cols();
-        int n = popX.rows();
-        double pargs[popsize * n];
-        double res[popsize];
-        for (int p = 0; p < popX.cols(); p++) {
-            vec x = decode(getClosestFeasible(popX.col(p)));
-            for (int i = 0; i < n; i++)
-                pargs[p * n + i] = x[i];
-        }
-        func_par->evalJava(popsize, n, pargs, res);
-        for (int p = 0; p < popX.cols(); p++)
-            ys[p] = res[p];
-        evaluationCounter += popsize;
-    }
-
-    vec encode(const vec &X) const {
-        if (normalize)
-            return (X - typx).array() / scale.array();
-        else
-            return X;
-    }
-
-    vec decode(const vec &X) const {
-        if (normalize)
-            return (X.array() * scale.array()).matrix() + typx;
-        else
-            return X;
-    }
-
-    int getEvaluations() {
-        return evaluationCounter;
-    }
-
-private:
-    CallJava *func_par;
-    vec lower;
-    vec upper;
-    long evaluationCounter;
-    vec scale;
-    vec typx;
-    bool normalize;
-};
 
 class AcmaesOptimizer {
 
@@ -406,7 +270,7 @@ public:
         fitness = vec(popsize);
     }
 
-    vec ask_one() {
+    vec ask() {
         // ask for one new argument vector.
         vec arz1 = normalVec(dim, *rs);
         vec delta = (BD * arz1) * sigma;
@@ -414,7 +278,7 @@ public:
         return fitfun->decode(arx1);
     }
 
-    int tell_one(double y, const vec &x) {
+    int tell(double y, const vec &x) {
         //tell function value for a argument list retrieved by ask_one().
         if (told == 0) {
             fitness = vec(popsize);
@@ -527,7 +391,7 @@ public:
         // -------------------- Generation Loop --------------------------------
         for (iterations = 1;
                 iterations <= maxIterations
-                        && fitfun->getEvaluations() < maxEvaluations;
+                        && fitfun->evaluations() < maxEvaluations;
                 iterations++) {
             // generate and evaluate popsize offspring
             newArgs();
@@ -542,12 +406,42 @@ public:
         }
     }
 
+    void do_optimize_delayed_update(int workers) {
+    	 iterations = 0;
+    	 fitfun->resetEvaluations();
+    	 evaluator eval(fitfun, 1, workers);
+    	 vec evals_x[workers];
+	     // fill eval queue with initial population
+    	 for (int i = 0; i < workers; i++) {
+    		 vec x = ask();
+    		 eval.evaluate(x, i);
+    		 evals_x[i] = x;
+    	 }
+    	 while (fitfun->evaluations() < maxEvaluations) {
+    		 vec_id* vid = eval.result();
+    		 vec y = vec(vid->_v);
+    		 int p = vid->_id;
+    		 delete vid;
+    		 vec x = evals_x[p];
+    		 tell(y(0), x); // tell evaluated x
+    		 if (fitfun->evaluations() >= maxEvaluations)
+    			 break;
+    		 x = ask();
+    		 eval.evaluate(x, p);
+    		 evals_x[p] = x;
+    	 }
+	}
+
     vec getBestX() {
         return bestX;
     }
 
     double getBestValue() {
         return bestValue;
+    }
+
+    vec getX() {
+        return xmean;
     }
 
     double getIterations() {
@@ -624,40 +518,37 @@ using namespace acmaes;
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeACMA
- * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIIDIIDJIII)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIIDIIDJIZII)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeACMA(JNIEnv *env,
         jclass cls, jobject func, jdoubleArray jlower, jdoubleArray jupper,
         jdoubleArray jsigma, jdoubleArray jinit, jint maxIter, jint maxEvals,
         jdouble stopfitness, jint popsize, jint mu, jdouble accuracy,
-        jlong seed, jint runid, jint normalize, jint update_gap) {
+        jlong seed, jint runid, jboolean normalize, jint update_gap, jint workers) {
 
     double *init = env->GetDoubleArrayElements(jinit, JNI_FALSE);
     double *lower = env->GetDoubleArrayElements(jlower, JNI_FALSE);
     double *upper = env->GetDoubleArrayElements(jupper, JNI_FALSE);
     double *sigma = env->GetDoubleArrayElements(jsigma, JNI_FALSE);
-    int dim = env->GetArrayLength(jinit);
+    int dim = env->GetArrayLength(jlower);
 
     vec guess(dim), lower_limit(dim), upper_limit(dim), inputSigma(dim);
-    bool useLimit = false;
     for (int i = 0; i < dim; i++) {
         guess[i] = init[i];
         inputSigma[i] = sigma[i];
         lower_limit[i] = lower[i];
         upper_limit[i] = upper[i];
-        useLimit |= (lower[i] != 0);
-        useLimit |= (upper[i] != 0);
-    }
-    if (useLimit == false) {
-        lower_limit.resize(0);
-        upper_limit.resize(0);
     }
     CallJava callJava(func, env);
-    Fitness fitfun(&callJava, lower_limit, upper_limit, normalize != 0);
+    Fitness fitfun(&callJava, dim, 1, lower_limit, upper_limit);
+    fitfun.setNormalize(normalize);
     AcmaesOptimizer opt(runid, &fitfun, popsize, mu, guess, inputSigma, maxIter,
             maxEvals, accuracy, stopfitness, update_gap, NULL, seed);
     try {
-        opt.doOptimize();
+        if (workers <= 1)
+            opt.doOptimize();
+        else
+            opt.do_optimize_delayed_update(workers);
         vec bestX = opt.getBestX();
         double bestY = opt.getBestValue();
 
@@ -669,11 +560,11 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeACMA(JNIEnv *env,
         env->ReleaseDoubleArrayElements(jupper, upper, 0);
         env->ReleaseDoubleArrayElements(jlower, lower, 0);
         env->ReleaseDoubleArrayElements(jsigma, sigma, 0);
-        return fitfun.getEvaluations();
+        return fitfun.evaluations();
 
     } catch (std::exception &e) {
         cout << e.what() << endl;
-        return fitfun.getEvaluations();
+        return fitfun.evaluations();
     }
     return 0;
 }
@@ -681,35 +572,30 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeACMA(JNIEnv *env,
 /*
  * Class:     fcmaes_core_Jni
  * Method:    initCmaes
- * Signature: ([D[D[D[DIIDJIII)J
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIIDJIZI)J
  */
-JNIEXPORT intptr_t JNICALL Java_fcmaes_core_Jni_initCmaes(JNIEnv *env, jclass cls,
-        jdoubleArray jlower, jdoubleArray jupper, jdoubleArray jsigma,
+JNIEXPORT jlong JNICALL Java_fcmaes_core_Jni_initCmaes(JNIEnv *env, jclass cls,
+        jobject func, jdoubleArray jlower, jdoubleArray jupper, jdoubleArray jsigma,
         jdoubleArray jinit, jint popsize, jint mu, jdouble accuracy, jlong seed,
-        jint runid, jint normalize, jint update_gap) {
+        jint runid, jboolean normalize, jint update_gap) {
 
     double *init = env->GetDoubleArrayElements(jinit, JNI_FALSE);
     double *lower = env->GetDoubleArrayElements(jlower, JNI_FALSE);
     double *upper = env->GetDoubleArrayElements(jupper, JNI_FALSE);
     double *sigma = env->GetDoubleArrayElements(jsigma, JNI_FALSE);
-    int dim = env->GetArrayLength(jinit);
+    int dim = env->GetArrayLength(jlower);
 
     vec guess(dim), lower_limit(dim), upper_limit(dim), inputSigma(dim);
-    bool useLimit = false;
     for (int i = 0; i < dim; i++) {
         guess[i] = init[i];
         inputSigma[i] = sigma[i];
         lower_limit[i] = lower[i];
         upper_limit[i] = upper[i];
-        useLimit |= (lower[i] != 0);
-        useLimit |= (upper[i] != 0);
     }
-    if (useLimit == false) {
-        lower_limit.resize(0);
-        upper_limit.resize(0);
-    }
-    Fitness *fitfun = new Fitness(NULL, lower_limit, upper_limit,
-            normalize != 0);
+    CallJava* callJava = new CallJava(func, env);
+    Fitness* fitfun = new Fitness(callJava, dim, 1, lower_limit, upper_limit);     
+    fitfun->setNormalize(normalize);
+
     AcmaesOptimizer *opt = new AcmaesOptimizer(runid, fitfun, popsize, mu,
             guess, inputSigma, 0, 0, accuracy, -DBL_MAX, update_gap, NULL,
             seed);
@@ -728,6 +614,7 @@ JNIEXPORT intptr_t JNICALL Java_fcmaes_core_Jni_initCmaes(JNIEnv *env, jclass cl
 JNIEXPORT void JNICALL Java_fcmaes_core_Jni_destroyCmaes(JNIEnv *env, jclass cls, intptr_t ptr) {
     AcmaesOptimizer* opt = (AcmaesOptimizer*)ptr;
     Fitness* fitfun = opt->getFitfun();
+    delete fitfun->getFunc();    
     delete fitfun;
     delete opt;
 }
@@ -743,7 +630,7 @@ JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_askCmaes(JNIEnv *env,
     int dim = opt->getDim();
     jdoubleArray jx = env->NewDoubleArray(dim);
     double x[dim];
-    vec args = opt->ask_one();
+    vec args = opt->ask();
     for (int i = 0; i < dim; i++)
         x[i] = args[i];
     env->SetDoubleArrayRegion(jx, 0, dim, x);
@@ -763,8 +650,23 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_tellCmaes(JNIEnv *env, jclass cls,
     vec args(dim);
     for (int i = 0; i < dim; i++)
         args[i] = x[i];
-    opt->tell_one(y, args);
+    opt->tell(y, args);
     env->ReleaseDoubleArrayElements(jx, x, 0);
     return opt->getStop();
+}
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    populationCmaes
+ * Signature: (J)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_populationCmaes(JNIEnv *env,
+        jclass cls, intptr_t ptr) {
+    AcmaesOptimizer *opt = (AcmaesOptimizer*) ptr;
+    int size = opt->getX().size();
+    double* xdata = opt->getX().data();
+    jdoubleArray jres = env->NewDoubleArray(size);
+    env->SetDoubleArrayRegion(jres, 0, size, (jdouble*) xdata);
+    return jres;
 }
 

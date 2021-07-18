@@ -20,14 +20,11 @@ import fcmaes.core.Optimizers.Bite;
 import fcmaes.core.Optimizers.CLDE;
 import fcmaes.core.Optimizers.CMA;
 import fcmaes.core.Optimizers.CMAAT;
-import fcmaes.core.Optimizers.CMAPAR;
 import fcmaes.core.Optimizers.CSMA;
 import fcmaes.core.Optimizers.DA;
 import fcmaes.core.Optimizers.DE;
 import fcmaes.core.Optimizers.DEAT;
-import fcmaes.core.Optimizers.DEPAR;
 import fcmaes.core.Optimizers.GCLDE;
-import fcmaes.core.Optimizers.Hawks;
 import fcmaes.core.Optimizers.Optimizer;
 import fcmaes.core.Optimizers.Result;
 
@@ -54,7 +51,7 @@ public class OptimizerTest {
 		doTest(new Rosen(DIM), opt, lower, upper, sigma, guess,
 				100000, -Double.MAX_VALUE, POPSIZE, 1e-6, 1e-12, expected);
 	}
-	
+		
     @Test
     @Retry(6)
     public void testRosenCmaAskTell() {
@@ -79,24 +76,9 @@ public class OptimizerTest {
 		Result expected = new Result(0, 0.0, point(DIM, 1.0));
 		Optimizer opt = new CMA();
 		Fitness fitness = new Rosen(DIM);
-		fitness._parallelEval = true;
-		doTest(fitness, opt, lower, upper, sigma, guess,
+		doTestParallelEval(fitness, opt, lower, upper, sigma, guess,
 				100000, -Double.MAX_VALUE, POPSIZE, 1e-6, 1e-12, expected);
 	}
-
-    @Test
-    @Retry(6)
-    public void testRosenCmaParallelEvalAskTell() {
-        double[] guess = point(DIM, 0.5);
-        double[] sigma = point(DIM, 0.3);
-        double[] lower = point(DIM, -1);
-        double[] upper = point(DIM, 1);
-        Result expected = new Result(0, 0.0, point(DIM, 1.0));
-        Optimizer opt = new CMAPAR();
-        Fitness fitness = new Rosen(DIM);
-        fitness._parallelEval = true;
-        doTest(fitness, opt, lower, upper, sigma, guess, 100000, -Double.MAX_VALUE, POPSIZE, 1e-6, 1e-12, expected);
-    }
 
 	@Test
 	@Retry(1)
@@ -138,7 +120,7 @@ public class OptimizerTest {
 		doTest(new Rosen(DIM), opt, lower, upper, sigma, guess,
 				100000, -Double.MAX_VALUE, POPSIZE, 1e-6, 1e-12, expected);
 	}
-	
+
     @Test
     @Retry(3)
     public void testRosenDEAskTell() {
@@ -152,21 +134,21 @@ public class OptimizerTest {
         doTest(new Rosen(DIM), opt, lower, upper, sigma, guess, 100000, -Double.MAX_VALUE, POPSIZE, 1e-6, 1e-12,
                 expected);
     }
-    
-    @Test
-    @Retry(3)
-    public void testRosenDEParallelEvalAskTell() {
-        double[] guess = point(DIM, 1);
-        double[] sigma = point(DIM, 0.3);
-        double[] lower = point(DIM, -1);
-        double[] upper = point(DIM, 2);
-        Result expected = new Result(0, 0.0, point(DIM, 1.0));
-        Optimizer opt = new DEPAR();
 
-        doTest(new Rosen(DIM), opt, lower, upper, sigma, guess, 100000, -Double.MAX_VALUE, POPSIZE, 1e-6, 1e-12,
-                expected);
-    }
-	
+	@Test
+	@Retry(6)
+	public void testRosenDEParallelEval() {
+		double[] guess = point(DIM, 1);
+		double[] sigma = point(DIM, 0.3);
+		double[] lower = point(DIM, -1);
+		double[] upper = point(DIM, 2);
+		Result expected = new Result(0, 0.0, point(DIM, 1.0));
+		Optimizer opt = new DE();
+
+		doTestParallelEval(new Rosen(DIM), opt, lower, upper, sigma, guess,
+				100000, -Double.MAX_VALUE, POPSIZE, 0.1, 0.1, expected);
+	}
+  
 	@Test
 	@Retry(6)
 	public void testRosenCLDE() {
@@ -263,34 +245,6 @@ public class OptimizerTest {
 
 		doTestParallel(8, new Rosen(DIM), opt, lower, upper, sigma, guess,
 				100000, -Double.MAX_VALUE, POPSIZE, 1e-6, 1e-12, expected);
-	}
-
-	@Test
-	@Retry(3)
-	public void testRosenHawks() {
-		double[] guess = point(DIM, 1);
-		double[] sigma = point(DIM, 0.3);
-		double[] lower = point(DIM, -1);
-		double[] upper = point(DIM, 2);
-		Result expected = new Result(0, 0.0, point(DIM, 1.0));
-		Optimizer opt = new Hawks();
-
-		doTest(new Rosen(DIM), opt, lower, upper, sigma, guess,
-				100000, -Double.MAX_VALUE, POPSIZE, 5e5, 5e-3, expected);
-	}
-
-	@Test
-	@Retry(1)
-	public void testRosenHawksParallel() {
-		double[] guess = point(DIM, 1);
-		double[] sigma = point(DIM, 0.3);
-		double[] lower = point(DIM, -1);
-		double[] upper = point(DIM, 2);
-		Result expected = new Result(0, 0.0, point(DIM, 1.0));
-		Optimizer opt = new Hawks();
-
-		doTestParallel(8, new Rosen(DIM), opt, lower, upper, sigma, guess,
-				100000, -Double.MAX_VALUE, POPSIZE, 1e5, 1e-3, expected);
 	}
 
 	@Test
@@ -463,11 +417,20 @@ public class OptimizerTest {
 	 */
 	private void doTest(Fitness fit, Optimizer opt, double[] lower, double[] upper, double[] sigma, double[] guess,
 			int maxEvals, double stopVal, int popsize, double xTol, double yTol, Result expected) {
-		Result result = opt.minimize(fit, lower, upper, sigma, guess, maxEvals, stopVal, popsize);		
+		Result result = opt.minimize(fit, lower, upper, sigma, guess, maxEvals, stopVal, popsize, 1);		
 		Assert.assertArrayEquals(expected.X, result.X, xTol);
 		Assert.assertEquals(expected.y, result.y, yTol);
 		Assert.assertTrue(result.evals > 0);
 	}
+	
+	private void doTestParallelEval(Fitness fit, Optimizer opt, double[] lower, double[] upper, double[] sigma, double[] guess,
+			int maxEvals, double stopVal, int popsize, double xTol, double yTol, Result expected) {
+		Result result = opt.minimize(fit, lower, upper, sigma, guess, maxEvals, stopVal, popsize, 8);		
+		Assert.assertArrayEquals(expected.X, result.X, xTol);
+		Assert.assertEquals(expected.y, result.y, yTol);
+		Assert.assertTrue(result.evals > 0);
+	}
+
 
 	/**
 	 * @param runs         	number of parallel optimization runs.

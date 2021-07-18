@@ -16,6 +16,15 @@ import fcmaes.core.Optimizers.Optimizer;
 
 public class FitnessMO extends Fitness {
     
+    public FitnessMO(int dim, int nobj) {
+        super(dim);
+        _nobj = nobj;
+        _weights = new double[nobj];
+        for (int i = 0; i < nobj; i++)
+        	_weights[i] = 1.0;
+        _exp = 1.0;
+    }
+
     public FitnessMO(int dim, double[] weights, double exp) {
         super(dim);
         _nobj = weights.length;
@@ -47,8 +56,10 @@ public class FitnessMO extends Fitness {
 
     public double[] _lower_weights;
 
-    public double[] _upper_weights;
+    public double[] _upper_weights;    
 
+    // overwritten by descendants
+    
     /**
      * Function evaluation. Maps decision variables X to a value vector. Overwrite
      * in descendants.
@@ -59,6 +70,30 @@ public class FitnessMO extends Fitness {
         return null;
     }
 
+    // called form the optimization algorithm
+
+    /**
+     * Function evaluation wrapper called by the optimization algorithm.
+     */
+    public double[] movalue(double[] x) {
+        try {
+            if (_bestY < _stopVal)
+                return null;
+            double[] y = moeval(x);
+            _evals++;
+            if (y[0] < _bestY) {
+                _bestY = y[0];
+                _bestX = x;
+//					System.out.println(_evals + " " + _bestY);
+            }
+            return y;
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    // derived functions
+    
     /**
      * Single objective mapping using weighted sum. 
      * 

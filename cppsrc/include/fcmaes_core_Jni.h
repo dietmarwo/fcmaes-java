@@ -10,18 +10,18 @@ extern "C" {
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeACMA
- * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIIDIIDJIII)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIIDIIDJIZII)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeACMA
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint, jdouble, jint, jint, jdouble, jlong, jint, jint, jint);
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint, jdouble, jint, jint, jdouble, jlong, jint, jboolean, jint, jint);
 
 /*
  * Class:     fcmaes_core_Jni
  * Method:    initCmaes
- * Signature: ([D[D[D[DIIDJIII)J
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIIDJIZI)J
  */
 JNIEXPORT jlong JNICALL Java_fcmaes_core_Jni_initCmaes
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint, jdouble, jlong, jint, jint, jint);
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint, jdouble, jlong, jint, jboolean, jint);
 
 /*
  * Class:     fcmaes_core_Jni
@@ -49,19 +49,27 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_tellCmaes
 
 /*
  * Class:     fcmaes_core_Jni
+ * Method:    populationCmaes
+ * Signature: (J)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_populationCmaes
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     fcmaes_core_Jni
  * Method:    optimizeDE
- * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIDDDJI)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIDDDJII)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeDE
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint);
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jlong, jint, jint);
 
 /*
  * Class:     fcmaes_core_Jni
  * Method:    initDE
- * Signature: ([D[D[DIDDDJI)J
+ * Signature: (Lfcmaes/core/Fitness;[D[DIDDDJI)J
  */
 JNIEXPORT jlong JNICALL Java_fcmaes_core_Jni_initDE
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jdouble, jdouble, jlong, jint);
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jint, jdouble, jdouble, jdouble, jlong, jint);
 
 /*
  * Class:     fcmaes_core_Jni
@@ -86,6 +94,62 @@ JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_askDE
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_tellDE
   (JNIEnv *, jclass, jlong, jdoubleArray, jdouble, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    populationDE
+ * Signature: (J)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_populationDE
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    optimizeMODE
+ * Signature: (Lfcmaes/core/Fitness;III[D[DIDIDDDDDDDZZIJII)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_optimizeMODE
+  (JNIEnv *, jclass, jobject, jint, jint, jint, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jboolean, jboolean, jint, jlong, jint, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    initMODE
+ * Signature: (Lfcmaes/core/Fitness;III[D[DIDIDDDDDDDZZIJI)J
+ */
+JNIEXPORT jlong JNICALL Java_fcmaes_core_Jni_initMODE
+  (JNIEnv *, jclass, jobject, jint, jint, jint, jdoubleArray, jdoubleArray, jint, jdouble, jint, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jboolean, jboolean, jint, jlong, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    destroyMODE
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_fcmaes_core_Jni_destroyMODE
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    askMODE
+ * Signature: (J)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_askMODE
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    tellMODE
+ * Signature: (J[D[DI)I
+ */
+JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_tellMODE
+  (JNIEnv *, jclass, jlong, jdoubleArray, jdoubleArray, jint);
+
+/*
+ * Class:     fcmaes_core_Jni
+ * Method:    populationMODE
+ * Signature: (J)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_populationMODE
+  (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     fcmaes_core_Jni
@@ -126,14 +190,6 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_integratePVCtoc11
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_integratePVCtoc11R
   (JNIEnv *, jclass, jdoubleArray, jdouble, jdouble, jboolean);
-
-/*
- * Class:     fcmaes_core_Jni
- * Method:    optimizeHawks
- * Signature: (Lfcmaes/core/Fitness;[D[D[DIDIJI)I
- */
-JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeHawks
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jlong, jint);
 
 /*
  * Class:     fcmaes_core_Jni

@@ -67,12 +67,6 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
     
     public TriPredicate<String,Double,List<Double>> _callBack;
     
-    /**
-     * Set _parallelEval = true to enable parallel function evaluation for the
-     * population. Set to false for parallel optimization runs.
-     */
-    public boolean _parallelEval = false;
-
     public Fitness(int dim) {
         _dim = dim;
     }
@@ -102,6 +96,8 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
         return Utils.rnd(lower(), upper());
     }
 
+    // overwritten by descendants
+
     /**
      * Function evaluation. Maps decision variables X to a function value. Overwrite
      * in descendants.
@@ -111,6 +107,8 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
     public double eval(double[] x) {
         return Double.NaN;
     }
+    
+    // called form the optimization algorithm
 
     /**
      * Function evaluation wrapper called by the optimization algorithm.
@@ -129,6 +127,28 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
             return y;
         } catch (Exception ex) {
             return Double.MAX_VALUE;
+        }
+    }
+    
+    // derived functions
+
+    /**
+     * Function evaluation wrapper called by the optimization algorithm.
+     */
+    public double[] movalue(double[] x) {
+        try {
+            if (_bestY < _stopVal)
+                return new double[] {_stopVal};
+            double y = eval(x);
+            _evals++;
+            if (y < _bestY) {
+                _bestY = y;
+                _bestX = x;
+//					System.out.println(_evals + " " + _bestY);
+            }
+            return new double[] {y};
+        } catch (Exception ex) {
+            return null;
         }
     }
 
@@ -150,6 +170,15 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
 
     public void print(byte[] s) {
         System.out.println(new String(s));
+        System.out.flush();
+    }
+
+    /**
+     * get log values from C++
+     */
+
+    public void log(int cols, double[] xdata, double[] ydata) {
+        System.out.println(Arrays.toString(ydata));
         System.out.flush();
     }
 
@@ -178,17 +207,13 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
      */
 
     public double[] values(double[] xs) {
-        if (_parallelEval)
-            return valuesPar(xs);
-        else {
-            int popsize = xs.length / _dim;
-            double[] values = new double[popsize];
-            for (int i = 0; i < popsize; i++) {
-                double[] x = Arrays.copyOfRange(xs, i * _dim, (i + 1) * _dim);
-                values[i] = value(x);
-            }
-            return values;
+        int popsize = xs.length / _dim;
+        double[] values = new double[popsize];
+        for (int i = 0; i < popsize; i++) {
+            double[] x = Arrays.copyOfRange(xs, i * _dim, (i + 1) * _dim);
+            values[i] = value(x);
         }
+        return values;
     }
 
     /**
@@ -211,7 +236,7 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
             guess = Utils.rnd(lower, upper);
         if (sigma == null)
             sigma = Utils.array(_dim, 0.3);
-        return opt.minimize(this, lower, upper, sigma, guess, maxEvals, stopVal, popsize);
+        return opt.minimize(this, lower, upper, sigma, guess, maxEvals, stopVal, popsize, 1);
     }
 
     public Result minimize(Optimizer opt, double[] guess, double[] sigma, int maxEvals,
@@ -220,7 +245,7 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
             guess = Utils.rnd(lower(), upper());
         if (sigma == null)
             sigma = Utils.array(_dim, 0.3);
-        return opt.minimize(this, lower(), upper(), sigma, guess, maxEvals, stopVal, popsize);
+        return opt.minimize(this, lower(), upper(), sigma, guess, maxEvals, stopVal, popsize, 1);
     }
 
     public Result minimizeN(int runs, Optimizer opt, int maxEvals, double stopVal, int popsize, double limit) {
@@ -232,6 +257,7 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
         return opt.minimizeN(runs, this, lower(), upper(), null, guess, 
                 maxEvals, stopVal, popsize, limit, null);
     }
+
 
     /**
      * Perform a single threaded retry.
@@ -297,41 +323,6 @@ public class Fitness implements Comparable<Fitness>, UnivariateFunction {
         }
     }    
     
-    private Evaluator evaluator = null;
-
-    public void destroyEvaluator() {
-        if (evaluator != null) {
-            evaluator.destroy();
-            evaluator = null;
-        }
-    }
-    
-    /**
-     * Parallel function evaluation. Maps decision variables for the whole
-     * population to an array of function values.
-     * 
-     * Note: Keep in mind that for performance reasons the evaluator threads 
-     * are kept running after valuesPar returns and are reused for the next call. 
-     * They need to be be destroyed using destroyEvaluator().
-     * 
-     * @param xss Decision variables for the whole population. return Function
-     *            values.
-     */
-    
-    public double[] valuesPar(double[] xss) {
-        int popsize = xss.length / _dim;
-        if (evaluator == null)
-            evaluator = new Evaluator(this, popsize, 0);
-        else if (evaluator.popsize != popsize) {
-            evaluator.destroy();
-            evaluator = new Evaluator(this, popsize, 0);
-        }
-        double[][] xs = new double[popsize][_dim];
-        for (int i = 0; i < popsize; i++)
-            xs[i] = Arrays.copyOfRange(xss, i * _dim, (i + 1) * _dim);
-        return evaluator.eval(xs);    
-    }
-
     @Override
     public int compareTo(Fitness o) {
         return Double.compare(_bestY, o._bestY);

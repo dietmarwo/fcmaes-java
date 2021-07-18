@@ -11,14 +11,6 @@ import com.nativeutils.NativeUtils;
 
 public class Jni {
 
-    static {
-        try {
-            NativeUtils.loadLibraryFromJar(("/natives/" + System.mapLibraryName("fcmaeslib")));
-        } catch (IOException e1) {
-            throw new RuntimeException(e1);
-        }
-    }
-
     public static native double gtoc1_C(double[] x, int[] seq, int[] rev, double dvLaunch, double[] rp, double[] dv);
 
     public static native double gtoc1part_C(double[] x, int[] seq, int[] rev, double dvLaunch, double[] rp,

@@ -178,7 +178,7 @@ public class Interferometry extends Fitness {
 
     // Differential Evolution parallel function evaluation
     void de_parallel(int max_evals) {
-        Result res = De.minimize_parallel(this, lower(), upper(), null, max_evals, 0, 32, 200, 0.5, 0.9,
+        Result res = De.minimize_parallel(this, lower(), upper(), max_evals, 0, 32, 200, 0.5, 0.9,
                 Utils.rnd().nextLong(), 0, 32);
         System.out.println(res.evals + ": " + _bestY + " time = " + Utils.measuredMillis());
     }
@@ -186,7 +186,7 @@ public class Interferometry extends Fitness {
     // CMA-ES parallel function evaluation
     void cma_parallel(int max_evals) {
         Result res = Cmaes.minimize_parallel(this, lower(), upper(), null, null, max_evals, 0, 32, 16, 1,
-                Utils.rnd().nextLong(), 0, 1, -1, 32);
+                Utils.rnd().nextLong(), 0, true, -1, 32);
         System.out.println(res.evals + ": " + _bestY + " time = " + Utils.measuredMillis());
     }
 
