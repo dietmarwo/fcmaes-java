@@ -187,6 +187,10 @@ public:
     vec evalMo(const vec &X) {
         double res[_nobj];
         _func->evalJavaMo(_dim, _nobj, X.data(), res);
+        for (int i = 0; i < _nobj; i++) {
+            if (std::isnan(res[i]) || !std::isfinite(res[i]))
+               res[i] = 1E99;      
+        }
         _evaluationCounter++;
         vec rvec = Eigen::Map<vec, Eigen::Unaligned>(res, _nobj);
         return rvec;
@@ -195,6 +199,8 @@ public:
     double eval(const vec &X) {
         double y = _func->evalJava1(_dim, X.data());
         _evaluationCounter++;
+        if (std::isnan(y) || !std::isfinite(y))
+            y = 1E99;      
         return y;
     }
 
