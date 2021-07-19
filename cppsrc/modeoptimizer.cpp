@@ -97,7 +97,6 @@ public:
 
     ~MoDeOptimizer() {
         delete rs;
-        delete fitfun;
     }
 
     double rnd01() {
