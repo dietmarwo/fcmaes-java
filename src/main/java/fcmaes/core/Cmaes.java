@@ -24,10 +24,10 @@ public class Cmaes {
     private long nativeCmaes;
 
     public static Result minimize(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-            int maxIter, int maxEvals, double stopValue, int popsize, int mu, double accuracy, long seed, int runid,
+            int maxEvals, double stopValue, int popsize, int mu, double accuracy, long seed, int runid,
             boolean normalize, int update_gap, int workers) {
     	if (workers <= 1) {
-    		Jni.optimizeACMA(fit, lower, upper, sigma, guess, 1000000, maxEvals, stopValue, popsize,
+    		Jni.optimizeACMA(fit, lower, upper, sigma, guess, maxEvals, stopValue, popsize,
     				popsize / 2, accuracy, seed, runid, normalize, update_gap, 1);
     		return new Result(fit, fit._evals);
     	} else {

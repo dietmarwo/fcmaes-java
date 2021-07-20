@@ -22,8 +22,6 @@
 
 using namespace std;
 
-typedef bool (*is_terminate_type)(long, int, double); // runid, iter, value -> isTerminate
-
 namespace acmaes {
 
 class AcmaesOptimizer {
@@ -31,10 +29,10 @@ class AcmaesOptimizer {
 public:
 
     AcmaesOptimizer(long runid_, Fitness *fitfun_, int popsize_, int mu_,
-            const vec &guess_, const vec &inputSigma_, int maxIterations_,
+            const vec &guess_, const vec &inputSigma_,
             int maxEvaluations_, double accuracy_, double stopfitness_,
-            int update_gap_, is_terminate_type isTerminate_, long seed) {
-        // runid used in isTerminate callback to identify a specific run at different iteration
+            int update_gap_, long seed) {
+        // runid for debugging/logging
         runid = runid_;
         // fitness function to minimize
         fitfun = fitfun_;
@@ -42,8 +40,6 @@ public:
         guess = guess_;
         // accuracy = 1.0 is default, > 1.0 reduces accuracy
         accuracy = accuracy_;
-        // callback to check if to terminate
-        isTerminate = isTerminate_;
         // number of objective variables/problem dimension
         dim = guess_.size();
         // population size, offspring number. The primary strategy parameter to play
@@ -67,8 +63,6 @@ public:
         // termination criteria
         // maximal number of evaluations allowed.
         maxEvaluations = maxEvaluations_;
-        // maximal number of iterations allowed.
-        maxIterations = maxIterations_;
         // limit for fitness value.
         stopfitness = stopfitness_;
         // stop if x-changes larger stopTolUpX.
@@ -99,11 +93,7 @@ public:
         damps = (1. + 2. * std::max(0., sqrt((mueff - 1.) / (dim + 1.)) - 1.))
                 * max(0.3,
                         1. - // modification for short runs
-                                dim
-                                        / (1e-6
-                                                + min(maxIterations,
-                                                        maxEvaluations
-                                                                / popsize)))
+                                dim / (1e-6 + (maxEvaluations/popsize)))
                 + cs; // minor increment
         // learning rate for rank-one update.
         ccov1 = 2. / ((dim + 1.3) * (dim + 1.3) + mueff);
@@ -367,10 +357,6 @@ public:
             stop = 6;
             return;
         }
-        if (isTerminate != NULL && isTerminate(runid, iterations, bestValue)) {
-            stop = 7;
-            return;
-        }
         // adjust step size in case of equal function values (flat fitness)
         if (bestValue == fitness[arindex[(int) (0.1 + popsize / 4.)]]) {
             sigma *= exp(0.2 + cs / damps);
@@ -389,9 +375,7 @@ public:
     void doOptimize() {
 
         // -------------------- Generation Loop --------------------------------
-        for (iterations = 1;
-                iterations <= maxIterations
-                        && fitfun->evaluations() < maxEvaluations;
+        for (iterations = 1; fitfun->evaluations() < maxEvaluations;
                 iterations++) {
             // generate and evaluate popsize offspring
             newArgs();
@@ -465,11 +449,9 @@ private:
     Fitness *fitfun;
     vec guess;
     double accuracy;
-    is_terminate_type isTerminate;
     int popsize; // population size
     vec inputSigma;
     int dim;
-    int maxIterations;
     int maxEvaluations;
     double stopfitness;
     double stopTolUpX;
@@ -518,11 +500,11 @@ using namespace acmaes;
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeACMA
- * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIIDIIDJIZII)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIIDJIZII)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeACMA(JNIEnv *env,
         jclass cls, jobject func, jdoubleArray jlower, jdoubleArray jupper,
-        jdoubleArray jsigma, jdoubleArray jinit, jint maxIter, jint maxEvals,
+        jdoubleArray jsigma, jdoubleArray jinit, jint maxEvals,
         jdouble stopfitness, jint popsize, jint mu, jdouble accuracy,
         jlong seed, jint runid, jboolean normalize, jint update_gap, jint workers) {
 
@@ -542,8 +524,8 @@ JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeACMA(JNIEnv *env,
     CallJava callJava(func, env);
     Fitness fitfun(&callJava, dim, 1, lower_limit, upper_limit);
     fitfun.setNormalize(normalize);
-    AcmaesOptimizer opt(runid, &fitfun, popsize, mu, guess, inputSigma, maxIter,
-            maxEvals, accuracy, stopfitness, update_gap, NULL, seed);
+    AcmaesOptimizer opt(runid, &fitfun, popsize, mu, guess, inputSigma,
+            maxEvals, accuracy, stopfitness, update_gap, seed);
     try {
         if (workers <= 1)
             opt.doOptimize();
@@ -597,8 +579,7 @@ JNIEXPORT jlong JNICALL Java_fcmaes_core_Jni_initCmaes(JNIEnv *env, jclass cls,
     fitfun->setNormalize(normalize);
 
     AcmaesOptimizer *opt = new AcmaesOptimizer(runid, fitfun, popsize, mu,
-            guess, inputSigma, 0, 0, accuracy, -DBL_MAX, update_gap, NULL,
-            seed);
+            guess, inputSigma, 0, accuracy, -DBL_MAX, update_gap, seed);
     env->ReleaseDoubleArrayElements(jinit, init, 0);
     env->ReleaseDoubleArrayElements(jupper, upper, 0);
     env->ReleaseDoubleArrayElements(jlower, lower, 0);

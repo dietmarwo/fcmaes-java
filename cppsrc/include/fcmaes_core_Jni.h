@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeACMA
- * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIIDIIDJIZII)I
+ * Signature: (Lfcmaes/core/Fitness;[D[D[D[DIDIIDJIZII)I
  */
 JNIEXPORT jint JNICALL Java_fcmaes_core_Jni_optimizeACMA
-  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint, jdouble, jint, jint, jdouble, jlong, jint, jboolean, jint, jint);
+  (JNIEnv *, jclass, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdouble, jint, jint, jdouble, jlong, jint, jboolean, jint, jint);
 
 /*
  * Class:     fcmaes_core_Jni

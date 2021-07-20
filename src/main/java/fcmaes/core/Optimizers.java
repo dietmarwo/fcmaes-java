@@ -175,7 +175,7 @@ public class Optimizers {
                 guess = Utils.rnd(lower, upper);
             if (sigma == null)
                 sigma = Utils.array(fit._dim, Utils.rnd(0.05, 0.1));
-            return Cmaes.minimize(fit, lower, upper, sigma, guess, 1000000, maxEvals, stopVal, popsize,
+            return Cmaes.minimize(fit, lower, upper, sigma, guess, maxEvals, stopVal, popsize,
                     popsize / 2, 1.0, Utils.rnd().nextLong(), 0, true, -1, workers);
         }
 
@@ -463,7 +463,7 @@ public class Optimizers {
             double cmaEvals = 1.0 - deEvals;
             int evals = Jni.optimizeDE(fit, lower, upper, guess, (int) (deEvals * maxEvals), stopVal, popsize, 200, 0.5,
                     0.9, Utils.rnd().nextLong(), 0, 1);
-            evals += Jni.optimizeACMA(fit, lower, upper, sigma, fit._bestX, 1000000, (int) (cmaEvals * maxEvals),
+            evals += Jni.optimizeACMA(fit, lower, upper, sigma, fit._bestX, (int) (cmaEvals * maxEvals),
                     stopVal, popsize, popsize / 2, 1, Utils.rnd().nextLong(), 0, true, -1, workers);
             return new Result(fit, evals);
         }
@@ -576,7 +576,7 @@ public class Optimizers {
             else
                 evals += Jni.optimizeGCLDE(fit, lower, upper, guess, (int) (deEvals * maxEvals), stopVal, 
                         (int) (dim * 8.5 + 150), 0.7, 0, 0, Utils.rnd().nextLong(), 0);
-            evals += Jni.optimizeACMA(fit, lower, upper, sigma, fit._bestX, 1000000, (int) (cmaEvals * maxEvals), 
+            evals += Jni.optimizeACMA(fit, lower, upper, sigma, fit._bestX, (int) (cmaEvals * maxEvals), 
                     stopVal, popsize, popsize / 2, 1, Utils.rnd().nextLong(), 0, true, -1, 1);
             return new Result(fit, evals);
         }

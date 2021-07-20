@@ -20,7 +20,7 @@ public class Jni {
     public static boolean libraryLoaded = false;
 
     public static native int optimizeACMA(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
-            int maxIter, int maxEvals, double stopValue, int popsize, int mu, double accuracy, long seed, int runid,
+            int maxEvals, double stopValue, int popsize, int mu, double accuracy, long seed, int runid,
             boolean normalize, int update_gap, int workers);
 
     static native long initCmaes(Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess, int popsize, int mu,
