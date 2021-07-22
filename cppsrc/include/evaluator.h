@@ -74,6 +74,7 @@ public:
 typedef Eigen::Matrix<double, Eigen::Dynamic, 1> vec;
 typedef Eigen::Matrix<int, Eigen::Dynamic, 1> ivec;
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> mat;
+typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> imat;
 
 typedef void (*callback_type)(int, const double*, double*);
 
