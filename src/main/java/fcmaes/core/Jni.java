@@ -54,7 +54,7 @@ public class Jni {
     		int maxEvals, double stopfitness, int popsize, 
     		double keep, double F, double CR, 
     		double pro_c, double dis_c, double pro_m, double dis_m,
-    	    boolean nsga_update, boolean pareto_update, int log_period,
+    	    boolean nsga_update, double pareto_update, int log_period,
     		long seed, int workers, int runid);
     
     static native long initMODE(Fitness fit, int dim, int nobj, int ncon,
@@ -62,7 +62,7 @@ public class Jni {
     		int maxEvals, double stopfitness, int popsize, 
     		double keep, double F, double CR, 
     		double pro_c, double dis_c, double pro_m, double dis_m,
-    	    boolean nsga_update, boolean pareto_update, int log_period,
+    	    boolean nsga_update, double pareto_update, int log_period,
     		long seed, int runid);
 
     static native void destroyMODE(long ptr);

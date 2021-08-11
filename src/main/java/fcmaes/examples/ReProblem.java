@@ -117,7 +117,7 @@ public class ReProblem extends FitnessMO {
 	           new double[] {0, 10}, new double[] {0.001, 100}, 1.0);	    
 	    double[] xss = MoDe.minimize(reProb, reProb._nobj, reProb._nconstr, 
 	    		reProb.lower(), reProb.upper(), 100000, 128, 
-	    		false, false, Integer.MAX_VALUE, 32);
+	    		false, 0, Integer.MAX_VALUE, 32);
 	    int dim = reProb._dim;
 	    int n = xss.length/dim;
 	    double[][] xs = new double[n][];

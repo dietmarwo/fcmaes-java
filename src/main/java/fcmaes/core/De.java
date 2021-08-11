@@ -32,6 +32,27 @@ public class De {
 	
     private long nativeDe;
 
+    /**
+     * Determine the minimum of a single objective fitness function.
+     * 
+     * @param fit       single objective fitness function.
+     * @param lower     lower point limit.
+     * @param upper     upper point limit.
+     * @param result    (out) resulting argument vector
+     * @param maxEvals  maximal number of fitness function evaluations.
+     * @param popsize   Population size used for offspring.
+     * @param keep      changes the reinitialization probability of individuals based on their age. Higher value
+     *                  means lower probablity of reinitialization.
+     * @param F         The mutation constant. In the literature this is also known as differential weight, 
+     *                  being denoted by F. Should be in the range [0, 2].
+     * @param CR        The recombination constant. Should be in the range [0, 1]. 
+     *                  In the literature this is also known as the crossover probability.  
+     * @param seed      Random seed.
+     * @param runid     Id used for logging / debugging
+     * @param workers   If workers > 1, function evaluation is performed in parallel for the whole population. 
+     *                  Useful for costly objective functions.     
+     * @return optimization result
+     */
     public static Result minimize(Fitness fit, double[] lower, double[] upper, double[] result, int maxEvals,
             double stopfitness, int popsize, double keep, double F, double CR, long seed, int runid, int workers) {
        	if (workers <= 1) {
@@ -46,9 +67,9 @@ public class De {
     /**
      * Create a DE object for ask/tell.
      * 
+     * @param fit       single objective fitness function.
      * @param lower    	lower point limit.
      * @param upper    	upper point limit.
-     * @param guess    	Starting point.
      * @param popsize  	Population size used for offspring.
      */
 
@@ -63,6 +84,7 @@ public class De {
     /**
      * Create a DE object for ask/tell.
      * 
+     * @param fit       single objective fitness function.
      * @param lower    	lower point limit.
      * @param upper    	upper point limit.
      * @param popsize  	Population size used for offspring.

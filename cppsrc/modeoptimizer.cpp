@@ -4,7 +4,7 @@
 // LICENSE file in the root directory.
 
 // Eigen based implementation of multi objective
-// Differential Evolution using either DE/rand/1 or DE/best/1 strategy ('best' refers to the current pareto front').
+// Differential Evolution using the DE/all/1 strategy.
 //
 // Can switch to NSGA-II like population update via parameter 'nsga_update'.
 // Then it works essentially like NSGA-II but instead of the tournament selection
@@ -50,7 +50,7 @@ public:
     		int nobj_, int ncon_, int seed_,
             int popsize_, int maxEvaluations_, double F_, double CR_,
             double pro_c_, double dis_c_, double pro_m_, double dis_m_,
-            bool nsga_update_, bool pareto_update_, int log_period_) {
+            bool nsga_update_, double pareto_update_, int log_period_) {
         // runid used to identify a specific run
         runid = runid_;
         // fitness function to minimize
@@ -83,12 +83,13 @@ public:
     	pro_m = pro_m_;
     	dis_m = dis_m_;
         // if true, use NSGA population update, if false, use DE population update
-        // usually should be true, use DE update to diversify your results when you plan
-        // to merge the NSGA-front with the DE-front
+        // Use DE update to diversify your results.
     	nsga_update = nsga_update_;
-        // DE population update parameter, use pareto front for parameter generation,
-        // if false, use the whole population; ignored if nsga_update == true
-        // usually should be false, optimization can get stuck in local minima otherwise. 
+        // DE population update parameter. Only applied if nsga_update = false.
+    	// Use the pareto front for population update
+    	// with probability pareto_update, else use the whole population.
+    	// If pareto_update == 0: use always the whole population.
+        // usually should be 0, optimization can get stuck in local minima otherwise.
     	pareto_update = pareto_update_;
         // The log callback is called each log_period iterations
 		log_period = log_period_;
@@ -127,7 +128,7 @@ public:
             F = iterations % 2 == 0 ? 0.5 * F0 : F0;
         }
         int r3;
-        if (pareto_update) {
+        if (rnd01() < pareto_update) {
 			// sample from pareto front
             do {
             	r3 = rndInt(bestP.size());
@@ -556,7 +557,7 @@ private:
     std::vector<bool> vdone;
     int pos;
     bool nsga_update;
-    bool pareto_update;
+    double pareto_update;
     int log_period;
 };
 }
@@ -566,7 +567,7 @@ using namespace mode_optimizer;
 /*
  * Class:     fcmaes_core_Jni
  * Method:    optimizeMODE
- * Signature: (Lfcmaes/core/Fitness;III[D[DIDIDDDDDDDZZIJII)[D
+ * Signature: (Lfcmaes/core/Fitness;III[D[DIDIDDDDDDDZDIJII)[D
  */
 JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_optimizeMODE(JNIEnv *env, jclass cls,
         jobject func, jint dim, jint nobj, jint ncon,
@@ -574,7 +575,7 @@ JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_optimizeMODE(JNIEnv *env, jc
         jint maxEvals, jdouble stopfitness, jint popsize,
         jdouble keep, jdouble F, jdouble CR, 
 	    jdouble pro_c, jdouble dis_c, jdouble pro_m, jdouble dis_m,
-        jboolean nsga_update, jboolean pareto_update, jint log_period,
+        jboolean nsga_update, jdouble pareto_update, jint log_period,
         jlong seed, jint runid, jint workers) {
 
     double *lower = env->GetDoubleArrayElements(jlower, JNI_FALSE);
@@ -613,7 +614,7 @@ JNIEXPORT jdoubleArray JNICALL Java_fcmaes_core_Jni_optimizeMODE(JNIEnv *env, jc
 /*
  * Class:     fcmaes_core_Jni
  * Method:    initMODE
- * Signature: (Lfcmaes/core/Fitness;III[D[DIDIDDDDDDDZZIJI)J
+ * Signature: (Lfcmaes/core/Fitness;III[D[DIDIDDDDDDDZDIJI)J
  */
 JNIEXPORT jlong JNICALL Java_fcmaes_core_Jni_initMODE(JNIEnv *env, jclass cls,
 		jobject func, jint dim, jint nobj, jint ncon,
@@ -621,7 +622,7 @@ JNIEXPORT jlong JNICALL Java_fcmaes_core_Jni_initMODE(JNIEnv *env, jclass cls,
 		jint maxEvals, jdouble stopfitness, jint popsize,
 		jdouble keep, jdouble F, jdouble CR,
 		jdouble pro_c, jdouble dis_c, jdouble pro_m, jdouble dis_m,
-		jboolean nsga_update, jboolean pareto_update, jint log_period,
+		jboolean nsga_update, jdouble pareto_update, jint log_period,
 		jlong seed, jint runid) {
 
     double *lower = env->GetDoubleArrayElements(jlower, JNI_FALSE);

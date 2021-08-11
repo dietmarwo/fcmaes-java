@@ -37,28 +37,31 @@ import org.apache.commons.lang3.mutable.MutableInt;
 
 import fcmaes.core.Optimizers.Result;
 
-/**
- * Create a DE object for ask/tell.
- * 
- * @param lower    	lower point limit.
- * @param upper    	upper point limit.
- * @param popsize  	Population size used for offspring.
- * @param keep  	Changes the reinitialization probability of individuals based on their age. 
- * 					Higher value means lower probability of reinitialization.
- * @param F  		The mutation constant. In the literature this is also known as differential weight, 
-    		 		being denoted by F. Should be in the range [0, 2].
- * @param CR  		The recombination constant. Should be in the range [0, 1].
- * @param seed  	Random seed.
- * @param runid    	id for debugging/logging.
- */
-
-
 public class MoDe {
 	
     private long nativeMoDe;
     
+    /**
+     * Determine the pareto front of a multi objective fitness function.
+     * 
+     * @param fit       multi objective fitness function.
+     * @param nobj      number of objectives. 
+     * @param ncon      number of constraints.
+     * @param lower     lower point limit.
+     * @param upper     upper point limit.
+     * @param maxEvals  maximal number of fitness function evaluations.
+     * @param popsize   Population size used for offspring.
+     * @param nsga_update  If true, use NSGA population update, if false, use DE population update.
+     * @param pareto_update     DE population update parameter. Only applied if nsga_update = false.
+     *                          Use the pareto front for population update
+     *                          with probability pareto_update, else use the whole population.
+     *                          If pareto_update == 0: use always the whole population.
+     * @param log_period    The log callback is called each log_period iterations.
+     * @param workers   Number of parallel threads used to evaluate the fitness function for the population.
+     * @return pareto front - flattened argument values for the resulting population.
+     */
     public static double[] minimize(FitnessMO fit, int nobj, int ncon, double[] lower, double[] upper, int maxEvals, int popsize,
-    		boolean nsga_update, boolean pareto_update, int log_period, int workers) {
+    		boolean nsga_update, double pareto_update, int log_period, int workers) {
     	int dim = lower.length;    
     	int keep = 200; 
     	double F = 0.5;
@@ -76,11 +79,32 @@ public class MoDe {
         		keep, F, CR, pro_c, dis_c, pro_m, dis_m, nsga_update, pareto_update, log_period, workers);
     }
         
+    /**
+     * @param fit
+     * @param nobj
+     * @param ncon
+     * @param lower
+     * @param upper
+     * @param maxEvals
+     * @param popsize
+     * @param keep
+     * @param F
+     * @param CR
+     * @param pro_c
+     * @param dis_c
+     * @param pro_m
+     * @param dis_m
+     * @param nsga_update
+     * @param pareto_update
+     * @param log_period
+     * @param workers
+     * @return
+     */
     public static double[] minimize_parallel(FitnessMO fit, int nobj, int ncon, 
     		double[] lower, double[] upper, int maxEvals, int popsize,
     		double keep, double F, double CR, 
     		double pro_c, double dis_c, double pro_m, double dis_m,
-    		boolean nsga_update, boolean pareto_update, int log_period, int workers) {
+    		boolean nsga_update, double pareto_update, int log_period, int workers) {
         MoDe opt = new MoDe(fit, nobj, ncon, lower, upper, maxEvals, popsize,
         		keep, F, CR, pro_c, dis_c, pro_m, dis_m,
         		nsga_update, pareto_update, Integer.MAX_VALUE, Utils.rnd().nextLong());	
@@ -113,8 +137,20 @@ public class MoDe {
 		return opt.population();
 	}
      
+    /**
+     * @param fit
+     * @param nobj
+     * @param ncon
+     * @param lower
+     * @param upper
+     * @param maxEvals
+     * @param popsize
+     * @param nsga_update
+     * @param pareto_update
+     * @param log_period
+     */
     public MoDe(FitnessMO fit, int nobj, int ncon, double[] lower, double[] upper, int maxEvals, int popsize,
-    		boolean nsga_update, boolean pareto_update, int log_period) {
+    		boolean nsga_update, double pareto_update, int log_period) {
     	int dim = lower.length;    
     	int keep = 200; 
     	double F = 0.5;
@@ -151,7 +187,7 @@ public class MoDe {
     public MoDe(Fitness fit, int nobj, int ncon, double[] lower, double[] upper, int maxEvals, int popsize, 
     		double keep, double F, double CR, 
     		double pro_c, double dis_c, double pro_m, double dis_m,
-    	    boolean nsga_update, boolean pareto_update, int log_period,
+    	    boolean nsga_update, double pareto_update, int log_period,
     		long seed) {
     	int dim = lower.length;    	
     	nativeMoDe = Jni.initMODE(fit, dim, nobj, ncon, lower, upper, maxEvals, Double.MIN_VALUE, popsize, 
@@ -164,7 +200,6 @@ public class MoDe {
      * @param pos      	Set to position of argument.     
      * @return  		Argument vector for evaluation.
      */
-
     public double[] ask(MutableInt pos) {
         double[] asked = Jni.askMODE(nativeMoDe);
         int dim = asked.length - 1;
@@ -180,7 +215,6 @@ public class MoDe {
      * @param p      	Position of argument.     
      * @return  		Status of optimization, stop if > 0.
      */
-
     public int tell(double[] x, double[] y, int p) {
         return Jni.tellMODE(nativeMoDe, x, y, p);
     }
