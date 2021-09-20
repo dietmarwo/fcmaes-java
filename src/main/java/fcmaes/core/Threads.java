@@ -86,7 +86,7 @@ public class Threads {
     	public Runner(Runnable[] runnables) {
     		this.runnables = runnables;
     		int n = runnables.length;
-    		int workers = 32;//16;//Math.min(n, Threads.numWorkers());
+    		int workers = Math.min(n, Threads.numWorkers());
        	    this.requests = new ArrayBlockingQueue<Integer>(workers);
     		for (int i = 0; i < workers; i++)
     			requests.add(i);
