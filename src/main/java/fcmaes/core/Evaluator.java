@@ -69,10 +69,10 @@ public class Evaluator {
 		if (workers <= 0 || workers > maxWorkers) // set default and limit
 			workers = Threads.numWorkers();
 		this.workers = workers;
-		this.requests = new ArrayBlockingQueue<VecId>(2 * workers);
-		this.evaled = new ArrayBlockingQueue<VecId>(2 * workers);
-		jobs = new ArrayList<Job>(2 * workers);
-		for (int i = 0; i < 2 * workers; i++)
+		this.requests = new ArrayBlockingQueue<VecId>(workers);
+		this.evaled = new ArrayBlockingQueue<VecId>(workers);
+		jobs = new ArrayList<Job>(workers);
+		for (int i = 0; i < workers; i++)
 			jobs.add(new Job(i, this, fit instanceof FitnessMO));
 	}
 
@@ -108,7 +108,9 @@ public class Evaluator {
 		try {
 			while (!stop) {
 				VecId vid = requests.take();
-				if (!stop) {
+				if (stop) {
+					requests.add(new VecId());
+				} else {
 					try {
 						double y = fit.value(vid.v);
 						vid.v = new double[] { y };
