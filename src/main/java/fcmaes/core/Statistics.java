@@ -117,5 +117,10 @@ public class Statistics {
         return "n=" + i + " m=" + Utils.r(ai) + " sd=" + Utils.r(standardDev()) + " l=" + Utils.r(min) + " u="
                 + Utils.r(max);
     }
+    
+    public String toString(int n) {
+        return "n=" + i + " m=" + Utils.r(ai, n) + " sd=" + Utils.r(standardDev(), n) + " l=" + Utils.r(min, n) + " u="
+                + Utils.r(max, n);
+    }
 
 }
