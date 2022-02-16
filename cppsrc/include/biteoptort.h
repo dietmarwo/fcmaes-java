@@ -7,7 +7,7 @@
  *
  * @section license License
  *
- * Copyright (c) 2016-2021 Aleksey Vaneev
+ * Copyright (c) 2016-2022 Aleksey Vaneev
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -27,7 +27,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
- * @version 2021.17
+ * @version 2022.3
  */
 
 #ifndef BITEOPTORT_INCLUDED
@@ -402,7 +402,7 @@ public:
 
 		for( i = 0; i < ParamCount; i++ )
 		{
-			TmpParams[ i ] = getGaussian( rnd );
+			TmpParams[ i ] = rnd.getGaussian();
 
 			TmpParams[ i ] *= ( TmpParams[ i ] < 0.0 ?
 				DParamsN[ i ] : DParams[ i ]);
@@ -619,7 +619,7 @@ protected:
 	 * Function returns maximum of 2 values.
 	 */
 
-	static double max( const double a, const double b )
+	static double max_( const double a, const double b )
 	{
 		return( a > b ? a : b );
 	}
@@ -648,7 +648,7 @@ protected:
 
 			// Find small subdiagonal element
 
-			tst1 = max(tst1,abs(d[l]) + abs(e[l]));
+			tst1 = max_(tst1,abs(d[l]) + abs(e[l]));
 			int m = l;
 			while (m < n) {
 				if (abs(e[m]) <= eps*tst1) {
