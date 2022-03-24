@@ -53,9 +53,8 @@ public class MoDe {
      * @param popsize   Population size used for offspring.
      * @param nsga_update  If true, use NSGA population update, if false, use DE population update.
      * @param pareto_update     DE population update parameter. Only applied if nsga_update = false.
-     *                          Use the pareto front for population update
-     *                          with probability pareto_update, else use the whole population.
-     *                          If pareto_update == 0: use always the whole population.
+     *                          Only applied if nsga_update = False. Favor better solutions for 
+     *                          sample generation. Default 0: use all population members with the same probability.   
      * @param log_period    The log callback is called each log_period iterations.
      * @param workers   Number of parallel threads used to evaluate the fitness function for the population.
      * @return pareto front - flattened argument values for the resulting population.
