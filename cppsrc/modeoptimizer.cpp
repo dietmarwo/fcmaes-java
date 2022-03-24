@@ -350,10 +350,13 @@ public:
     }
 
     void pop_update() {
-        // sort the population using the fist objective, helps pareto computation.
-        ivec yi = sort_index(popY.row(0)).reverse();
-        mat x0 = popX(Eigen::all, yi);
-        mat y0 = popY(Eigen::all, yi);
+        mat x0 = popX;
+        mat y0 = popY;
+        if (nobj == 1) {
+            ivec yi = sort_index(popY.row(0)).reverse();
+            x0 = popX(Eigen::all, yi);
+            y0 = popY(Eigen::all, yi);
+        }
         vec domination = pareto(y0);
         std::vector<vec> x;
         std::vector<vec> y;
