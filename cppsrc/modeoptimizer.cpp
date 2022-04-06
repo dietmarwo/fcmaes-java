@@ -124,29 +124,21 @@ public:
             CR = iterations % 2 == 0 ? 0.5 * CR0 : CR0;
             F = iterations % 2 == 0 ? 0.5 * F0 : F0;
         }
-        int r3;
-        if (pareto_update > 0) {
-            // sample elite solutions
-            do {
-                r3 = (int) (pow(rnd01(), 1.0 + pareto_update) * popsize);
-            } while (r3 == p);
-        } else {
-            // sample from whole population
-            do {
-                r3 = rndInt(popsize);
-            } while (r3 == p);
-        }
         vec xp = popX.col(p);
-        vec x3 = popX.col(r3);
-        int r1, r2;
+        int r1, r2, r3;
         do {
             r1 = rndInt(popsize);
-        } while (r1 == p || r1 == r3);
-        do {
             r2 = rndInt(popsize);
-        } while (r2 == p || r2 == r3 || r2 == r1);
+            if (pareto_update > 0)
+                // sample elite solutions
+                 r3 = (int) (pow(rnd01(), 1.0 + pareto_update) * popsize);
+            else
+                // sample from whole population
+                 r3 = rndInt(popsize);
+        } while (r3 == p || r3 == r1 || r3 == r2 || r2 == p || r2 == r1 || r1 == p);
         vec x1 = popX.col(r1);
         vec x2 = popX.col(r2);
+        vec x3 = popX.col(r3);
         vec x = x3 + (x1 - x2) * F;
         int r = rndInt(dim);
         for (int j = 0; j < dim; j++)
@@ -177,6 +169,13 @@ public:
         vec ds(n);
         ds(si) = dsum;  // inverse order
         return ds;
+    }
+
+    bool is_dominated(const vec &y, int p) {
+        for (int j = 0; j < popY.rows(); j++)
+            if (y(j) < popY(j, p))
+                return false;
+        return true;
     }
 
     bool is_dominated(const mat &y, int i, int index) {
@@ -228,20 +227,21 @@ public:
         for (int i = 0; i < cons.rows(); i++)
             ci.col(i) = sort_index(cons.row(i).transpose());
         mat rank(cons.rows(), cons.cols());
-        vec alpha = zeros(cons.rows());
+        vec alpha = zeros(cons.cols());
         for (int j = 0; j < cons.rows(); j++) {
             for (int i = 0; i < cons.cols(); i++) {
-                if (cons(j, i) <= 0) {
-                    rank(j, ci(i, j)) = 0;
+                int ci_ = ci(i, j);
+                if (cons(j, ci_) <= 0) {
+                    rank(j, ci_) = 0;
                 } else {
-                    rank(j, ci(i, j)) = i;
-                    alpha[j]++;
+                    rank(j, ci_) = i;
+                    alpha[ci_]++;
                 }
             }
         }
         for (int j = 0; j < cons.rows(); j++) {
             for (int i = 0; i < cons.cols(); i++)
-                rank(j, ci(i, j)) *= alpha[j] / cons.rows();
+                rank(j, i) *= alpha[i] / cons.rows();
         }
         return rank.colwise().sum();
     }
@@ -349,6 +349,15 @@ public:
         return offspring;
     }
 
+    ivec random_int_vector(int size) {
+        std::vector<int> v;
+        for (int i = 0; i < size; i++)
+            v.push_back(i);
+        std::random_shuffle(v.begin(), v.end());
+        return Eigen::Map<ivec, Eigen::Unaligned>(v.data(),
+                v.size());
+    }
+
     void pop_update() {
         mat x0 = popX;
         mat y0 = popY;
@@ -408,6 +417,8 @@ public:
     }
 
     int tell(const vec &y, const vec &x, int p) {
+        if (is_dominated(y, p))
+            return stop;
         long unsigned int dp = 0;
         for (; dp < vdone.size(); dp++)
             if (!vdone[dp])
