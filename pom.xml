@@ -7,8 +7,10 @@
 
 	<groupId>com.github.dietmarwo</groupId>
 	<artifactId>fcmaes-java</artifactId>
-	<version>1.3.19</version>
+	<version>1.3.23</version>
 	<packaging>jar</packaging>
+    
+    <inceptionYear>2022</inceptionYear>
 
 	<name>fcmaes-java</name>
 	<description>fcmaes-java is a Java Framework ...</description>
@@ -98,7 +100,35 @@
        				 <release>11</release>
     			</configuration>
 			</plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+            <version>2.0.0</version>
+            <configuration>
+                <includedScopes>compile</includedScopes>
+                <excludedScopes>test|provided|runtime|system</excludedScopes>
+                <outputDirectory>${project.basedir}</outputDirectory>
+                <thirdPartyFilename>NOTICES.txt</thirdPartyFilename>
+                <licenseMerges>
+                   <licenseMerge>Apache License 2.0|The Apache License, Version 2.0|The Apache Software License|Version 2.0,Apache License, Version 2.0|The Apache Software License, Version 2.0|Apache License, Version 2.0|Apache 2</licenseMerge>
+                   <licenseMerge>MIT License|The MIT License|The MIT License (MIT)</licenseMerge>
+                </licenseMerges>
+            </configuration>
+            <executions>
+              <execution>
+                <id>download-licenses</id>
+                <goals>
+                  <goal>download-licenses</goal>
+                  <goal>add-third-party</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+ <!--           <plugin>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-build-plugin</artifactId>
+                <version>1.11</version>
+            </plugin> -->
 		</plugins>
 	</build>
-
 </project>
