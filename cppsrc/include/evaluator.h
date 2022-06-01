@@ -76,7 +76,7 @@ typedef Eigen::Matrix<int, Eigen::Dynamic, 1> ivec;
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> mat;
 typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> imat;
 
-typedef void (*callback_type)(int, const double*, double*);
+typedef bool (*callback_type)(int, const double*, double*);
 
 static std::uniform_real_distribution<> distr_01 = std::uniform_real_distribution<>(
         0, 1);
@@ -111,9 +111,16 @@ static vec zeros(int n) {
     return Eigen::MatrixXd::Zero(n, 1);
 }
 
+static mat zeros(int n, int m) {
+    return Eigen::MatrixXd::Zero(n, m);
+}
 
 static vec constant(int n, double val) {
 	return  Eigen::MatrixXd::Constant(n, 1, val);
+}
+
+static mat constant(int n, int m, double val) {
+    return  Eigen::MatrixXd::Constant(n, m, val);
 }
 
 struct IndexVal {
@@ -183,8 +190,13 @@ public:
         _normalize = false;
         _scale = upper - lower;
         _typx = 0.5 * (upper + lower);
+        _terminate = false;
     }
- 
+
+    bool terminate() {
+    	return _terminate;
+    }
+
     vec evalMo(const vec &X) {
         double res[_nobj];
         _func->evalJavaMo(_dim, _nobj, X.data(), res);
@@ -274,16 +286,20 @@ public:
         _normalize = normalize;
     }
 
+    void setTerminate() {
+        _terminate = true;
+    }
+
     vec encode(const vec &X) const {
         if (_normalize)
-            return (X - _typx).array()*2.0 / _scale.array();
+            return 2*(X - _typx).array() / _scale.array();
         else
             return X;
     }
 
     vec decode(const vec &X) const {
         if (_normalize)
-            return (X.array() * _scale.array() * 0.5).matrix() + _typx;
+            return 0.5*(X.array() * _scale.array()).matrix() + _typx;
         else
             return X;
     }
@@ -296,6 +312,15 @@ public:
     void getMaxValues(double *const p) const {
         for (int i = 0; i < _upper.size(); i++)
             p[i] = _upper[i];
+    }
+
+    vec violations(const mat &X, double penalty_coef) {
+         vec violations = zeros(X.cols());
+         for (int i = 0; i < X.cols(); i++) {
+             vec x = decode(X.col(i));
+             violations[i] =  penalty_coef * ((_lower - x).cwiseMax(0).sum() + (x - _upper).cwiseMax(0).sum());
+         }
+         return violations;
     }
 
     void log(int cols, int xsize, int ysize,
@@ -336,6 +361,7 @@ private:
     vec _scale;
     vec _typx;
     bool _normalize;
+    bool _terminate;
     long _evaluationCounter;
     std::mutex _mutex;
 };

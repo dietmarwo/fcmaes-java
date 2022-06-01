@@ -98,8 +98,9 @@ public class Optimizers {
 
     public static class Bite extends Optimizer {
 
-        int M = 6;
-        int stallLimit = 32;
+        int M = 1;
+        // terminate if f stallCriterion*128*evaluations stalled, if <= 0 not used
+        int stallCriterion = 0;
 
         public Bite() {
             super();
@@ -113,7 +114,7 @@ public class Optimizers {
         public Bite(int M, int stallLimit) {
             super();
             this.M = M;
-            this.stallLimit = stallLimit;
+            this.stallCriterion = stallLimit;
         }
 
         @Override
@@ -121,8 +122,8 @@ public class Optimizers {
                 int maxEvals, double stopVal, int popsize, int workers) {
             if (guess == null)
                 guess = Utils.rnd(lower, upper);
-            int evals = Jni.optimizeBite(fit, lower, upper, guess, maxEvals, stopVal, M, 
-            		stallLimit, Utils.rnd().nextLong(), 0);
+            int evals = Jni.optimizeBite(fit, lower, upper, guess, maxEvals, stopVal, M,
+                    stallCriterion, Utils.rnd().nextLong(), 0);
             return new Result(fit, evals);
         }
     }

@@ -107,6 +107,62 @@ public:
         return (int) (max * distr_01(*rs));
     }
 
+    mat variation(const mat &x) {
+        int n2 = x.cols() / 2;
+        int n = 2 * n2;
+        mat parent1 = x(Eigen::indexing::all, Eigen::seq(0, n2 - 1));
+        mat parent2 = x(Eigen::indexing::all, Eigen::seq(n2, n - 1));
+        mat beta = mat(dim, n2);
+        vec to1;
+        if (pro_c < 1.0) {
+            to1 = uniformVec(dim, *rs);
+        }
+        for (int p = 0; p < n2; p++) {
+            for (int i = 0; i < dim; i++) {
+                if (rnd01() > 0.5 || (pro_c < 1.0 && to1(i) < pro_c))
+                    beta(i, p) = 1.0;
+                else {
+                    double r = rnd01();
+                    if (r <= 0.5)
+                        beta(i, p) = pow(2 * r, 1.0 / (dis_c + 1.0));
+                    else
+                        beta(i, p) = pow(2 * r, -1.0 / (dis_c + 1.0));
+                    if (rnd01() > 0.5)
+                        beta(i, p) = -beta(i, p);
+                }
+            }
+        }
+        mat offspring1 = ((parent1 + parent2) * 0.5);
+        mat offspring2 = mat(offspring1);
+        mat delta = (beta.array() * (parent1 - parent2).array()).matrix() * 0.5;
+        offspring1 += delta;
+        offspring2 -= delta;
+        mat offspring = mat(dim, n);
+        offspring << offspring1, offspring2;
+
+        double limit = pro_m / dim;
+        vec scale = fitfun->scale();
+        for (int p = 0; p < n; p++) {
+            for (int i = 0; i < dim; i++) {
+                if (rnd01() < limit) { // site
+                    double mu = rnd01();
+                    double norm = fitfun->norm_i(i, offspring(i, p));
+                    if (mu <= 0.5) // temp
+                        offspring(i, p) += scale(i) *
+                        (pow(2. * mu + (1. - 2. * mu) * pow(1. - norm, dis_m + 1.),
+                                1. / (dis_m + 1.)) - 1.);
+                    else
+                        offspring(i, p) += scale(i) *
+                        (1. - pow(2. * (1. - mu) + 2. * (mu - 0.5) * pow(1. - norm, dis_m + 1.),
+                                1. / (dis_m + 1.)));
+                }
+            }
+        }
+        fitfun->setClosestFeasible(offspring);
+        return offspring;
+    }
+
+
     vec nextX(int p) {
         if (p == 0) {
             iterations++;
@@ -172,7 +228,7 @@ public:
     }
 
     bool is_dominated(const vec &y, int p) {
-        for (int j = 0; j < popY.rows(); j++)
+        for (int j = 0; j < y.rows(); j++)
             if (y(j) < popY(j, p))
                 return false;
         return true;
@@ -250,8 +306,8 @@ public:
         if (ncon == 0)
             return pareto_levels(ys);
         int popn = ys.cols();
-        mat yobj = ys(Eigen::seqN(0, nobj), Eigen::all);
-        mat ycon = ys(Eigen::lastN(ncon), Eigen::all);
+        mat yobj = ys(Eigen::seqN(0, nobj), Eigen::indexing::all);
+        mat ycon = ys(Eigen::indexing::lastN(ncon), Eigen::indexing::all);
         vec csum = ranks(ycon);
         bool feasible[ys.cols()];
         bool hasFeasible = false;
@@ -270,7 +326,7 @@ public:
                 cyv.push_back(i);
         ivec cy = Eigen::Map<ivec, Eigen::Unaligned>(cyv.data(), cyv.size());
         if (hasFeasible) { // compute pareto levels only for feasible
-            vec ypar = pareto_levels(yobj(Eigen::all, cy));
+            vec ypar = pareto_levels(yobj(Eigen::indexing::all, cy));
             domination(cy) += ypar;
         }
         // then constraint violations
@@ -294,61 +350,6 @@ public:
         return domination;
     }
 
-    mat variation(const mat &x) {
-        int n2 = x.cols() / 2;
-        int n = 2 * n2;
-        mat parent1 = x(Eigen::all, Eigen::seq(0, n2 - 1));
-        mat parent2 = x(Eigen::all, Eigen::seq(n2, n - 1));
-        mat beta = mat(dim, n2);
-        vec to1;
-        if (pro_c < 1.0) {
-            to1 = uniformVec(dim, *rs);
-        }
-        for (int p = 0; p < n2; p++) {
-            for (int i = 0; i < dim; i++) {
-                if (rnd01() > 0.5 || (pro_c < 1.0 && to1(i) < pro_c))
-                    beta(i, p) = 1.0;
-                else {
-                    double r = rnd01();
-                    if (r <= 0.5)
-                        beta(i, p) = pow(2 * r, 1.0 / (dis_c + 1.0));
-                    else
-                        beta(i, p) = pow(2 * r, -1.0 / (dis_c + 1.0));
-                    if (rnd01() > 0.5)
-                        beta(i, p) = -beta(i, p);
-                }
-            }
-        }
-        mat offspring1 = ((parent1 + parent2) * 0.5);
-        mat offspring2 = mat(offspring1);
-        mat delta = (beta.array() * (parent1 - parent2).array()).matrix() * 0.5;
-        offspring1 += delta;
-        offspring2 -= delta;
-        mat offspring = mat(dim, n);
-        offspring << offspring1, offspring2;
-
-        double limit = pro_m / dim;
-        vec scale = fitfun->scale();
-        for (int p = 0; p < n; p++) {
-            for (int i = 0; i < dim; i++) {
-                if (rnd01() < limit) { // site
-                    double mu = rnd01();
-                    double norm = fitfun->norm_i(i, offspring(i, p));
-                    if (mu <= 0.5) // temp
-                        offspring(i, p) += scale(i) *
-                        (pow(2. * mu + (1. - 2. * mu) * pow(1. - norm, dis_m + 1.),
-                                1. / (dis_m + 1.)) - 1.);
-                    else
-                        offspring(i, p) += scale(i) *
-                        (1. - pow(2. * (1. - mu) + 2. * (mu - 0.5) * pow(1. - norm, dis_m + 1.),
-                                1. / (dis_m + 1.)));
-                }
-            }
-        }
-        fitfun->setClosestFeasible(offspring);
-        return offspring;
-    }
-
     ivec random_int_vector(int size) {
         std::vector<int> v;
         for (int i = 0; i < size; i++)
@@ -363,8 +364,8 @@ public:
         mat y0 = popY;
         if (nobj == 1) {
             ivec yi = sort_index(popY.row(0)).reverse();
-            x0 = popX(Eigen::all, yi);
-            y0 = popY(Eigen::all, yi);
+            x0 = popX(Eigen::indexing::all, yi);
+            y0 = popY(Eigen::indexing::all, yi);
         }
         vec domination = pareto(y0);
         std::vector<vec> x;
@@ -377,8 +378,8 @@ public:
                     level.push_back(i);
             ivec domlevel = Eigen::Map<ivec, Eigen::Unaligned>(level.data(),
                     level.size());
-            mat domx = x0(Eigen::all, domlevel);
-            mat domy = y0(Eigen::all, domlevel);
+            mat domx = x0(Eigen::indexing::all, domlevel);
+            mat domy = y0(Eigen::indexing::all, domlevel);
             if ((int) (x.size() + domlevel.size()) <= popsize) {
                 // whole level fits
                 for (int i = 0; i < domy.cols(); i++) {
@@ -406,7 +407,7 @@ public:
             popY.col(i) = y[i];
         }
         if (nsga_update)
-            vX = variation(popX(Eigen::all, Eigen::seqN(0, popsize)));
+            vX = variation(popX(Eigen::indexing::all, Eigen::seqN(0, popsize)));
     }
 
     vec ask(int &p) {

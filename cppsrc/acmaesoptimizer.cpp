@@ -186,7 +186,7 @@ public:
             double negalphaold = 0.5; // where to make up for the variance loss,
             // prepare vectors, compute negative updating matrix Cneg
             ivec arReverseIndex = arindex.reverse();
-            mat arzneg = arz(Eigen::all, arReverseIndex.head(mu));
+            mat arzneg = arz(Eigen::indexing::all, arReverseIndex.head(mu));
             vec arnorms = arzneg.colwise().norm();
             ivec idxnorms = sort_index(arnorms);
             vec arnormsSorted = arnorms(idxnorms);
@@ -300,9 +300,9 @@ public:
         // calculate new xmean, this is selection and recombination
         vec xold = xmean; // for speed up of Eq. (2) and (3)
         ivec bestIndex = arindex.head(mu);
-        mat bestArx = arx(Eigen::all, bestIndex);
+        mat bestArx = arx(Eigen::indexing::all, bestIndex);
         xmean = bestArx * weights;
-        mat bestArz = arz(Eigen::all, bestIndex);
+        mat bestArz = arz(Eigen::indexing::all, bestIndex);
         mat zmean = bestArz * weights;
         bool hsig = updateEvolutionPaths(zmean, xold);
         // adapt step size sigma
@@ -375,7 +375,7 @@ public:
     void doOptimize() {
 
         // -------------------- Generation Loop --------------------------------
-        for (iterations = 1; fitfun->evaluations() < maxEvaluations;
+        for (iterations = 1; fitfun->evaluations() < maxEvaluations && !fitfun->terminate();
                 iterations++) {
             // generate and evaluate popsize offspring
             newArgs();
