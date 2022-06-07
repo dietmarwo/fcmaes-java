@@ -7,7 +7,7 @@
  *
  * @section license License
  *
- * Copyright (c) 2016-2021 Aleksey Vaneev
+ * Copyright (c) 2016-2022 Aleksey Vaneev
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -27,7 +27,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
- * @version 2021.17
+ * @version 2022.15
  */
 
 #ifndef SPHEROPT_INCLUDED
@@ -44,16 +44,10 @@
 class CSpherOpt : public CBiteOptBase< double >
 {
 public:
-	double Jitter; ///< Solution sampling random jitter, improves convergence
-		///< at low dimensions. Usually, a fixed value.
-		///<
-
 	CSpherOpt()
 		: WPopCent( NULL )
 		, WPopRad( NULL )
 	{
-		Jitter = 2.5;
-
 		addHist( CentPowHist, "CentPowHist" );
 		addHist( RadPowHist, "RadPowHist" );
 		addHist( EvalFacHist, "EvalFacHist" );
@@ -78,7 +72,7 @@ public:
 
 		initBuffers( aParamCount, aPopSize );
 
-		JitMult = 2.0 * Jitter / aParamCount;
+		JitMult = 5.0 * ParamCountI;
 		JitOffs = 1.0 - JitMult * 0.5;
 	}
 
@@ -164,7 +158,7 @@ public:
 
 			for( i = 0; i < ParamCount; i++ )
 			{
-				Params[ i ] = rnd.getRndValue() - 0.5;
+				Params[ i ] = rnd.get() - 0.5;
 				s2 += Params[ i ] * Params[ i ];
 			}
 
@@ -184,7 +178,7 @@ public:
 			{
 				for( i = 0; i < ParamCount; i++ )
 				{
-					const double m = JitOffs + rnd.getRndValue() * JitMult;
+					const double m = JitOffs + rnd.get() * JitMult;
 
 					Params[ i ] = wrapParam( rnd,
 						CentParams[ i ] + Params[ i ] * d * m );
