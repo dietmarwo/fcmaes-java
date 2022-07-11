@@ -7,7 +7,7 @@
  *
  * @section license License
  *
- * Copyright (c) 2016-2021 Aleksey Vaneev
+ * Copyright (c) 2016-2022 Aleksey Vaneev
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -27,13 +27,13 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
- * @version 2021.17
+ * @version 2022.28
  */
 
 #ifndef SMAESOPT_INCLUDED
 #define SMAESOPT_INCLUDED
 
-#include "biteoptort.h"
+#include "biteort.h"
 
 /**
  * Sigma Adaptation Evolution Strategy class. Fundamentally similar to CMA-ES,
@@ -78,12 +78,9 @@ public:
 	 */
 
 	void init( CBiteRnd& rnd, const double* const InitParams = NULL,
-		const double InitRadius = 1.0, const double* const sdevs = NULL )
+		const double InitRadius = 1.0, const double* const sdevs = NULL  )
 	{
-		getMinValues( MinValues );
-		getMaxValues( MaxValues );
-
-		resetCommonVars( rnd );
+		initCommonVars( rnd );
 
 		cure = 0;
 		curem = (int) ceil( CurPopSize * Ort.EvalFac );
@@ -98,11 +95,8 @@ public:
 		{
 			for( i = 0; i < ParamCount; i++ )
 			{
-				PopParams[ 0 ][ i ] =
-					( MinValues[ i ] + MaxValues[ i ]) * 0.5;
-
-				const double d = MaxValues[ i ] - MinValues[ i ];
-				PopParams[ 1 ][ i ] = fabs( d ) * (sdevs == NULL ?  sd : sdevs[i]);
+				PopParams[ 0 ][ i ] = MinValues[ i ] + DiffValues[ i ] * 0.5;
+				PopParams[ 1 ][ i ] = fabs( DiffValues[ i ]) * (sdevs == NULL ?  sd : sdevs[i]);
 			}
 		}
 		else
@@ -110,8 +104,7 @@ public:
 			for( i = 0; i < ParamCount; i++ )
 			{
 				PopParams[ 0 ][ i ] = InitParams[ i ];
-				const double d = MaxValues[ i ] - MinValues[ i ];
-				PopParams[ 1 ][ i ] = fabs( d ) * (sdevs == NULL ?  sd : sdevs[i]);
+				PopParams[ 1 ][ i ] = fabs( DiffValues[ i ]) * (sdevs == NULL ?  sd : sdevs[i]);
 			}
 		}
 
@@ -164,9 +157,9 @@ public:
 	 * objective function evaluation.
 	 *
 	 * @param rnd Random number generator.
-	 * @param OutCost If not NULL, pointer to variable that receives cost
+	 * @param[out] OutCost If not NULL, pointer to variable that receives cost
 	 * of the newly-evaluated solution.
-	 * @param OutValues If not NULL, pointer to array that receives a
+	 * @param[out] OutValues If not NULL, pointer to array that receives a
 	 * newly-evaluated parameter vector, in real scale, in real value bounds.
 	 * @return The number of non-improving iterations so far.
 	 */
@@ -174,7 +167,7 @@ public:
 	int optimize( CBiteRnd& rnd, double* const OutCost = NULL,
 		double* const OutValues = NULL )
 	{
-		double* const Params = PopParams[ CurPopPos ];
+		double* const Params = getCurParams();
 
 		sample( rnd, Params );
 
@@ -187,26 +180,11 @@ public:
 
 		if( OutValues != NULL )
 		{
-			memcpy( OutValues, Params, ParamCount * sizeof( OutValues[ 0 ]));
+			copyValues( OutValues, Params );
 		}
 
+		updatePop( NewCost, Params, false );
 		updateBestCost( NewCost, Params );
-
-		if( CurPopPos < CurPopSize )
-		{
-			sortPop( NewCost, CurPopPos );
-			CurPopPos++;
-		}
-		else
-		{
-			if( isAcceptedCost( NewCost ))
-			{
-				memcpy( PopParams[ CurPopSize1 ], Params,
-					ParamCount * sizeof( PopParams[ 0 ][ 0 ]));
-
-				sortPop( NewCost, CurPopSize1 );
-			}
-		}
 
 		AvgCost += NewCost;
 		cure++;
@@ -225,8 +203,8 @@ public:
 				StallCount += cure;
 			}
 
+			resetCurPopPos();
 			AvgCost = 0.0;
-			CurPopPos = 0;
 			cure = 0;
 
 			Ort.update( *this );
@@ -236,7 +214,7 @@ public:
 	}
 
 protected:
-	CBiteOptOrt Ort; ///< Rotation vector and orthogonalization calculator.
+	CBiteOrt Ort; ///< Rotation vector and orthogonalization calculator.
 		///<
 	int cure; ///< Current evaluation index, greater or equal to
 		///< "curem" if population distribution needs to be updated.
