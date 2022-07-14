@@ -2,6 +2,10 @@
 :imagesdir: img
 :cpp: C++
 
+= fcmaes-java - a Java gradient-free optimization library
+
+image::logo.gif[]
+
 == Solar Orbiter
 
 In 2020 ESA created a pykep pull request defining a new optimization model for the Solar Orbiter mission

@@ -2,6 +2,10 @@
 :imagesdir: img
 :cpp: C++
 
+= fcmaes-java - a Java gradient-free optimization library
+
+image::logo.gif[]
+
 == CTOC11
 
 https://github.com/dietmarwo/fcmaes-java/blob/master/README.adoc[fcmaes-java] 
