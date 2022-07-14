@@ -19,15 +19,12 @@ and https://github.com/dietmarwo/fcmaes-java/blob/master/temporal/Tutorial.adoc[
 
 === Features
 
-- fcmaes is focused on optimization problems hard to solve utilizing modern many-core CPUs.
-- Parallel fitness function evaluation and different parallel retry mechanisms. 
+- Focused on optimization problems hard to solve utilizing modern many-core CPUs.
+- Parallel fitness function evaluation and different parallel retry mechanisms.
+- Excellent scaling with the number of available CPU-cores. 
 - Minimized algorithm overhead - relative to the objective function evaluation time - even for high dimensions. 
-- New multi-objective/constrained optimization algorithm combining features from Differential evolution and NSGA-II supporting parallel function evaluation. Features https://www.jstage.jst.go.jp/article/tjpnsec/11/2/11_18/_article/-char/en/[enhanced multiple constraint ranking] improving its performance in handling constraints for engineering design optimization.
-- BiteOpt algorithm from Aleksey Vaneev.
-- New DE (differential evolution) variant optimized for usage with parallel retry.
-- GCL-DE (differential evolution) variant from Mingcheng Zuo.
-- Fast C++ implementations of CMA-ES
-- Supports Linux and Windows
+- New multi-objective/constrained optimization algorithm MODE combining features from Differential evolution and NSGA-II, supporting parallel function evaluation. Features https://www.jstage.jst.go.jp/article/tjpnsec/11/2/11_18/_article/-char/en/[enhanced multiple constraint ranking] improving its performance in handling constraints for engineering design optimization.
+- Selection of highly efficient single-objective algorithms to choose from.
 - Supports multi node / cluster execution based on https://docs.temporal.io/docs/get-started/[Temporal]
 
 === DLL dependencies
