@@ -4,6 +4,8 @@
 
 = fcmaes-java - a Java gradient-free optimization library
 
+image::logo.gif[]
+
 fcmaes started as a fast CMA-ES implementation combined with a new smart parallel retry mechanism aimed to solve hard optimization problems from the space flight planning domain. It evolved to a general library of state-of-the-art gradient free optimization algorithms applicable to all kind of real world problems covering multi-objective and constrained problems. Its algorithms are implemented both in C++ and support parallel fitness function evaluation.
 fcmaes-java provides the same functionality as its Python variant https://github.com/dietmarwo/fast-cma-es[fcmaes].
 It was used by the team Jena & Wuhan for the 
