@@ -150,7 +150,7 @@ public class Solo extends Fitness {
 
     static double ga_dv(int pli, double time, Vector3D vin, Vector3D vout) {
         Vector3D vpl = v_planet(pli, time);
-        double[] v_rel_in = Utils.array(vin.subtract(vpl));
+        double[] v_rel_in = Utils.array(vpl.subtract(vin));
         double[] v_rel_out = Utils.array(vout.subtract(vpl));
         return Jni.fb_vel(v_rel_in, v_rel_out, pli);
     }
