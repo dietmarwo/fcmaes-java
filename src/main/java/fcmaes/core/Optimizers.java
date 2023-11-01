@@ -84,23 +84,28 @@ public class Optimizers {
          * @return Result Minimized function value / optimized point.
          */
 
-        public Result minimizeN(int runs, Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
+        public Result minimizeN(int workers, int runs, Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
                 int maxEvals, double stopVal, int popsize, double limit, double[][] xs) {
             RunOptimizer ropt = new RunOptimizer(runs, this, fit, lower, upper, sigma, guess, maxEvals, stopVal,
                     popsize, limit, xs);
-            Threads threads = new Threads(ropt);
+            Threads threads = workers >= 1 ? new Threads(ropt, workers) : new Threads(ropt);
+            //Threads threads = new Threads(ropt);
             threads.start();
             threads.join();
             return new Result(fit, fit._evals);
         }
         
+        public Result minimizeN(int runs, Fitness fit, double[] lower, double[] upper, double[] sigma, double[] guess,
+                int maxEvals, double stopVal, int popsize, double limit, double[][] xs) {
+        	return minimizeN(0, runs, fit, lower, upper, sigma, guess, maxEvals, stopVal, popsize, limit, xs);
+        }
+
     }
 
     public static class Bite extends Optimizer {
 
         int M = 1;
-        // terminate if f stallCriterion*128*evaluations stalled, if <= 0 not used
-        int stallCriterion = 0;
+        int stallLimit = 32;
 
         public Bite() {
             super();
@@ -114,7 +119,7 @@ public class Optimizers {
         public Bite(int M, int stallLimit) {
             super();
             this.M = M;
-            this.stallCriterion = stallLimit;
+            this.stallLimit = stallLimit;
         }
 
         @Override
@@ -122,8 +127,8 @@ public class Optimizers {
                 int maxEvals, double stopVal, int popsize, int workers) {
             if (guess == null)
                 guess = Utils.rnd(lower, upper);
-            int evals = Jni.optimizeBite(fit, lower, upper, guess, maxEvals, stopVal, M,
-                    stallCriterion, Utils.rnd().nextLong(), 0);
+            int evals = Jni.optimizeBite(fit, lower, upper, guess, maxEvals, stopVal, M, 
+            		stallLimit, Utils.rnd().nextLong(), 0);
             return new Result(fit, evals);
         }
     }
@@ -637,14 +642,14 @@ public class Optimizers {
                             maxEvals, stopVal, popsize, 1).evals;
                     if (f._bestY < limit)
                         stat.add(f._bestY);
-                    if (i % 100 == 99 || i == runs-1) {
-                        if (f instanceof FitnessMO) {
-                        	double[] y = ((FitnessMO)f).moeval(f._bestX);
-                        	System.out.println(Utils.r(Utils.measuredMillis()) + " " + (i+1) + 
-                        			" " + stat + " " + Arrays.toString(y));
-                        } else
-                        	System.out.println(Utils.r(Utils.measuredMillis()) + " " + (i+1) + " " + stat);
-                    }
+//                    if (i % 100 == 99 || i == runs-1) {
+//                        if (f instanceof FitnessMO) {
+//                        	double[] y = ((FitnessMO)f).moeval(f._bestX);
+//                        	System.out.println(Utils.r(Utils.measuredMillis()) + " " + (i+1) + 
+//                        			" " + stat + " " + Arrays.toString(y));
+//                        } else
+//                        	System.out.println(Utils.r(Utils.measuredMillis()) + " " + (i+1) + " " + stat);
+//                    }
                     fit.updateBest(f);
                     if (xs != null)
                         xs[i] = f._bestX;

@@ -42,7 +42,7 @@ public class Log {
 
     public static void setLog() throws FileNotFoundException {
 
-        String dateString = new SimpleDateFormat("yyyyMMdd").format(new Date());
+        String dateString = new SimpleDateFormat("yyyyMMddhhmm").format(new Date());
         File logFile = new File("log_" + dateString + ".log");
         @SuppressWarnings("resource")
         PrintStream logOut = new PrintStream(new FileOutputStream(logFile, true));

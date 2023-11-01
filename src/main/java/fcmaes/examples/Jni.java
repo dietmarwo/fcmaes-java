@@ -5,10 +5,6 @@
 
 package fcmaes.examples;
 
-import java.io.IOException;
-
-import com.nativeutils.NativeUtils;
-
 public class Jni {
 
     public static native double gtoc1_C(double[] x, int[] seq, int[] rev, double dvLaunch, double[] rp, double[] dv);

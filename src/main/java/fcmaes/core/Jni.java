@@ -75,14 +75,9 @@ public class Jni {
 
     public static native int integrateF8(double[] y, double w, double dt, double step);
 	
-	public static native int integratePVthrust(double[] tpv, double veff, 
+    public static native int integratePVthrust(double[] tpv, double veff, 
 		    double ux, double uy, double uz, double dt, double step);
 
-    public static native int integratePVgtocX(double[] tpv, double dt, double step);
-
-    public static native int integratePVCtoc11(double[] tpv, double dt, double step, boolean dopri);
-
-    public static native int integratePVCtoc11R(double[] tpv, double dt, double step, boolean dopri);
 
     public static native int optimizeLDE(Fitness fit, double[] lower, double[] upper, double[] guess, double[] sigma,
             int maxEvals, double stopfitness, int popsize, double keep, double F, double CR, long seed, int runid);

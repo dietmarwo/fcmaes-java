@@ -112,9 +112,16 @@ public class FitnessMO extends Fitness {
         return ys;
     }
     
+    public double[][] minimizeMO(int workers, int runs, Optimizer opt, int maxEvals, double stopVal, int popsize, double limit) {
+        double[][] xs = new double[runs][];
+        opt.minimizeN(workers, runs, this, lower(), upper(), null, null, 
+                maxEvals, stopVal, popsize, limit == 0 ? Double.MAX_VALUE : limit, xs);
+        return xs;
+    }
+    
     public double[][] minimizeMO(int runs, Optimizer opt, int maxEvals, double stopVal, int popsize, double limit) {
         double[][] xs = new double[runs][];
-        opt.minimizeN(runs, this, lower(), upper(), null, null, 
+        opt.minimizeN(0, runs, this, lower(), upper(), null, null, 
                 maxEvals, stopVal, popsize, limit == 0 ? Double.MAX_VALUE : limit, xs);
         return xs;
     }

@@ -77,10 +77,28 @@ public class RVT  {
         return kepler().period(mu());
     }
 
+    double[] deltaV(RVT other) { // returns dv, dv1, dv2
+        Vector3D dPos = other.r().subtract(r());
+        double duration = other.t() - t();
+        Vector3D vOut = dPos.scalarMultiply(1.0 / duration);
+        double dv1 = vOut.subtract(v()).getNorm();
+        double dv2 = other.v().subtract(vOut).getNorm();
+       return new double[] {dv1 + dv2, dv1, dv2};
+    }
+    
+    public void applyDV(Vector3D dv) {
+        if (dv.getNorm() > 0)
+            setV(v().add(dv));
+    }
+
     public void propagate_kepler(double dt) {
         Kepler orb = new Kepler(this);
         orb.propagate_kepler(dt, mu());
+        double t = t() + dt;
+        double m = m();
         rvt = new RVT(orb, mu()).rvt;
+        setT(t);
+        setM(m);
     }
 
     public void propagate_lagrangian(double dt) {
